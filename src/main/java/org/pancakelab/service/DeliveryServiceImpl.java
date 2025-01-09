@@ -36,9 +36,9 @@ public class DeliveryServiceImpl implements DeliveryService, Runnable {
     }
 
     private void deliverOrder(UUID orderId) {
-        OrderDetails orderDetails = orders.remove(orderId);
+        OrderDetails orderDetails = orders.get(orderId);
         if (orderDetails != null) {
-            logger.info("Delivering order: " + orderDetails);
+            orderDetails.processDelivery(orders, logger);
         } else {
             logger.warning("Order not found: " + orderId);
         }

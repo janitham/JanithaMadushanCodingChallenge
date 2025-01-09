@@ -20,28 +20,28 @@ public class DeliveryServiceTest {
     private final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
 
     @Test
-    public void When_order_is_dispatched_Then_it_should_be_removed_from_the_database() {
+    public void whenOrderIsDispatched_thenItShouldBeRemovedFromTheDatabase() {
         // Given
-        final UUID orderId = UUID.randomUUID();
-        final Logger mockLogger = mock(Logger.class);
-        final var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, mockLogger);
-        orders.put(orderId, new OrderDetails());
-        deliveryQueue.add(orderId);
+        var order = new OrderDetails();
+        var mockLogger = mock(Logger.class);
+        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, mockLogger);
+        orders.put(order.getOrderId(), order);
+        deliveryQueue.add(order.getOrderId());
 
         // When
         new Thread(deliveryService).start();
 
         // Then
         Awaitility.await().until(orders::isEmpty);
-        verify(mockLogger).info("Delivering order: 1");
+        verify(mockLogger).info("Delivering order: " + order.getOrderId());
     }
 
     @Test
-    public void When_trying_to_deliver_an_order_that_does_not_exist_then_a_warning_should_be_logged() {
+    public void whenTryingToDeliverAnOrderThatDoesNotExist_thenWarningShouldBeLogged() {
         // Given
-        final UUID orderId = UUID.randomUUID();
-        final Logger mockLogger = mock(Logger.class);
-        final var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, mockLogger);
+        var orderId = UUID.randomUUID();
+        var mockLogger = mock(Logger.class);
+        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, mockLogger);
         deliveryQueue.add(orderId);
 
         // When
