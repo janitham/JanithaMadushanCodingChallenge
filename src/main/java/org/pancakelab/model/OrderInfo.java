@@ -2,7 +2,7 @@ package org.pancakelab.model;
 
 public class OrderInfo {
     private final OrderDetails orderDetails;
-    private final ORDER_STATUS status;
+    private ORDER_STATUS status;
 
     public OrderInfo(OrderDetails orderDetails, ORDER_STATUS status) {
         this.orderDetails = orderDetails;
@@ -15,5 +15,9 @@ public class OrderInfo {
 
     public ORDER_STATUS getStatus() {
         return status;
+    }
+
+    public void setStatus(ORDER_STATUS status) {
+        this.status = status;
     }
 }
