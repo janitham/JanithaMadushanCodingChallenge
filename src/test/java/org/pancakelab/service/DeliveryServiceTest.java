@@ -2,7 +2,9 @@ package org.pancakelab.service;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
+import org.pancakelab.model.DeliveryInfo;
 import org.pancakelab.model.OrderDetails;
+import org.pancakelab.model.Pancake;
 
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
@@ -22,7 +24,7 @@ public class DeliveryServiceTest {
     @Test
     public void whenOrderIsDispatched_thenItShouldBeRemovedFromTheDatabase() {
         // Given
-        var order = new OrderDetails();
+        var order = new OrderDetails.Builder().addPancake(mock(Pancake.class)).withDeliveryInfo(mock(DeliveryInfo.class)).build();
         var mockLogger = mock(Logger.class);
         var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, mockLogger);
         orders.put(order.getOrderId(), order);

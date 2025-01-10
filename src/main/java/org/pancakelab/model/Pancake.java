@@ -1,9 +1,24 @@
 package org.pancakelab.model;
 
+import java.util.Objects;
+
 public class Pancake {
     private final CHOCOLATE chocolate;
     private final boolean hazelNuts;
     private final boolean whippedCream;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pancake pancake = (Pancake) o;
+        return hazelNuts == pancake.hazelNuts && whippedCream == pancake.whippedCream && chocolate == pancake.chocolate;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(chocolate, hazelNuts, whippedCream);
+    }
 
     private Pancake(Builder builder) {
         this.chocolate = builder.chocolate;

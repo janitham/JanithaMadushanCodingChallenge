@@ -1,38 +1,30 @@
 package org.pancakelab.model;
 
-import org.pancakelab.model.pancakes.PancakeRecipe;
-
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 public class OrderDetails {
-    private DeliveryInfo deliveryInfo;
-    private List<Pancake> pancakes;
-    private UUID orderId = UUID.randomUUID();
-    private STATUS status = STATUS.PENDING;
+    private final DeliveryInfo deliveryInfo;
+    private final Map<Pancake, Integer> pancakes;
+    private final UUID orderId;
+
+    private OrderDetails(UUID orderId, DeliveryInfo deliveryInfo, Map<Pancake, Integer> pancakes) {
+        this.orderId = orderId;
+        this.deliveryInfo = deliveryInfo;
+        this.pancakes = Map.copyOf(pancakes);
+    }
 
     public UUID getOrderId() {
         return orderId;
     }
 
-    public boolean canBeDelivered() {
-        return status == STATUS.PENDING;
+    public DeliveryInfo getDeliveryInfo() {
+        return deliveryInfo;
     }
 
-    public void markAsDelivered() {
-        status = STATUS.DELIVERED;
-    }
-
-    public void processDelivery(ConcurrentMap<UUID, OrderDetails> orders, Logger logger) {
-        if (canBeDelivered()) {
-            markAsDelivered();
-            orders.remove(orderId);
-            logger.info("Delivering order: " + orderId);
-        } else {
-            logger.warning("Order cannot be delivered: " + orderId);
-        }
+    public Map<Pancake, Integer> getPancakes() {
+        return pancakes;
     }
 
     @Override
@@ -40,13 +32,45 @@ public class OrderDetails {
         return "OrderDetails{" +
                 "deliveryInfo=" + deliveryInfo +
                 ", pancakes=" + pancakes +
-                ", status=" + status +
                 '}';
     }
 
-    public enum STATUS {
-        PENDING,
-        COMPLETED,
-        DELIVERED,
+    public static class Builder {
+        private DeliveryInfo deliveryInfo;
+        private final Map<Pancake, Integer> pancakes = new HashMap<>();
+        private UUID orderId;
+
+        public Builder withOrderId(UUID orderId) {
+            this.orderId = orderId;
+            return this;
+        }
+
+        public Builder withDeliveryInfo(DeliveryInfo deliveryInfo) {
+            this.deliveryInfo = deliveryInfo;
+            return this;
+        }
+
+        public Builder addPancake(Pancake pancake, int quantity) {
+            this.pancakes.put(pancake, quantity);
+            return this;
+        }
+
+        public Builder addPancake(Pancake pancake) {
+            this.pancakes.merge(pancake, 1, Integer::sum);
+            return this;
+        }
+
+        public OrderDetails build() {
+            if (deliveryInfo == null) {
+                throw new IllegalArgumentException("DeliveryInfo is required");
+            }
+            if (pancakes.isEmpty()) {
+                throw new IllegalArgumentException("At least one pancake is required");
+            }
+            if (orderId == null) {
+                orderId = UUID.randomUUID();
+            }
+            return new OrderDetails(orderId, deliveryInfo, pancakes);
+        }
     }
 }
