@@ -4,72 +4,111 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.logging.Handler;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 public class DeliveryServiceTest {
 
     private final ConcurrentMap<UUID, OrderInfo> orders = new ConcurrentHashMap<>();
     private final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
 
+    private Logger setupLogger(ByteArrayOutputStream logOutputStream) {
+        Logger logger = Logger.getLogger(DeliveryServiceImpl.class.getName());
+        PrintStream logPrintStream = new PrintStream(logOutputStream);
+        Handler logHandler = new StreamHandler(logPrintStream, new SimpleFormatter());
+        logger.addHandler(logHandler);
+        return logger;
+    }
+
+    private void cleanupLogger(Logger logger, Handler logHandler) {
+        logger.removeHandler(logHandler);
+    }
+
     @Test
     public void whenOrderIsDispatched_thenItShouldBeRemovedFromTheDatabase() {
         // Given
         var order = new OrderDetails.Builder().addPancake(mock(Pancake.class)).withDeliveryInfo(mock(DeliveryInfo.class)).build();
-        var mockLogger = mock(Logger.class);
-        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, mockLogger);
+        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue);
         orders.put(order.getOrderId(), new OrderInfo(order, ORDER_STATUS.PENDING));
         deliveryQueue.add(order.getOrderId());
 
-        // When
-        new Thread(deliveryService).start();
+        ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
+        Logger logger = setupLogger(logOutputStream);
+        Handler logHandler = logger.getHandlers()[0];
 
-        // Then
-        Awaitility.await().until(orders::isEmpty);
-        verify(mockLogger).info("Delivering order: " + order.getOrderId());
+        try {
+            // When
+            new Thread(deliveryService).start();
+
+            // Then
+            Awaitility.await().until(orders::isEmpty);
+            logHandler.flush();
+            assertTrue(logOutputStream.toString().contains("Delivering order: " + order.getOrderId()));
+        } finally {
+            cleanupLogger(logger, logHandler);
+        }
     }
 
     @Test
     public void whenTryingToDeliverAnOrderThatDoesNotExist_thenWarningShouldBeLogged() {
         // Given
         var orderId = UUID.randomUUID();
-        var mockLogger = mock(Logger.class);
-        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, mockLogger);
+        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue);
         deliveryQueue.add(orderId);
 
-        // When
-        new Thread(deliveryService).start();
+        ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
+        Logger logger = setupLogger(logOutputStream);
+        Handler logHandler = logger.getHandlers()[0];
 
-        // Then
-        Awaitility.await().until(() -> {
-            verify(mockLogger).warning("Order not found: " + orderId);
-            return true;
-        });
+        try {
+            // When
+            new Thread(deliveryService).start();
+
+            // Then
+            Awaitility.await().until(() -> {
+                logHandler.flush();
+                return logOutputStream.toString().contains("Order not found: " + orderId);
+            });
+        } finally {
+            cleanupLogger(logger, logHandler);
+        }
     }
 
     @Test
     public void whenTryingToDeliverAnOrderWithInvalidStatus_thenWarningShouldBeLogged() {
         // Given
         var order = new OrderDetails.Builder().addPancake(mock(Pancake.class)).withDeliveryInfo(mock(DeliveryInfo.class)).build();
-        var mockLogger = mock(Logger.class);
-        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, mockLogger);
+        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue);
         orders.put(order.getOrderId(), new OrderInfo(order, ORDER_STATUS.DELIVERED));
         deliveryQueue.add(order.getOrderId());
 
-        // When
-        new Thread(deliveryService).start();
+        ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
+        Logger logger = setupLogger(logOutputStream);
+        Handler logHandler = logger.getHandlers()[0];
 
-        // Then
-        Awaitility.await().until(() -> {
-            verify(mockLogger).warning("Invalid Status: " + order.getOrderId());
-            return true;
-        });
+        try {
+            // When
+            new Thread(deliveryService).start();
+
+            // Then
+            Awaitility.await().until(() -> {
+                logHandler.flush();
+                return logOutputStream.toString().contains("Invalid Status: " + order.getOrderId());
+            });
+        } finally {
+            cleanupLogger(logger, logHandler);
+        }
     }
 }

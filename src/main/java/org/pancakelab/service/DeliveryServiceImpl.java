@@ -11,18 +11,16 @@ import java.util.logging.Logger;
 
 public class DeliveryServiceImpl implements DeliveryService, Runnable {
 
-    private final Logger logger;
+    private final Logger logger = Logger.getLogger(DeliveryServiceImpl.class.getName());
     private final ConcurrentMap<UUID, OrderInfo> orders;
     private final BlockingDeque<UUID> deliveryQueue;
 
     public DeliveryServiceImpl(
             final ConcurrentMap<UUID, OrderInfo> orders,
-            final BlockingDeque<UUID> deliveryQueue,
-            final Logger logger
+            final BlockingDeque<UUID> deliveryQueue
     ) {
         this.orders = orders;
         this.deliveryQueue = deliveryQueue;
-        this.logger = logger;
     }
 
     @Override

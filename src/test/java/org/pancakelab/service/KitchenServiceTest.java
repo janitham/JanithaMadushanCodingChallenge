@@ -23,7 +23,7 @@ public class KitchenServiceTest {
     }
 
     @Test
-    public void whenOrderIsProcessed_thenItShouldBeReadyForDelivery() {
+    public void WhenOrderIsProcessed_ThenItShouldBeReadyForDelivery() {
         // Given
         var order = new OrderDetails.Builder()
                 .addPancake(mock(Pancake.class))
@@ -38,8 +38,6 @@ public class KitchenServiceTest {
         Awaitility.await().until(() -> orders.get(order.getOrderId()).getStatus() == ORDER_STATUS.READY_FOR_DELIVERY);
         Awaitility.await().until(() -> deliveryQueue.contains(order.getOrderId()));
     }
-
-
 
     @AfterAll
     public static void tearDown() {
