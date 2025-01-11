@@ -2,6 +2,7 @@ package org.pancakelab.service;
 
 import org.pancakelab.model.ORDER_STATUS;
 import org.pancakelab.model.OrderDetails;
+import org.pancakelab.model.OrderInfo;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
@@ -10,11 +11,11 @@ import java.util.concurrent.Future;
 public class OrderServiceImpl implements OrderService {
 
     private final KitchenService kitchenService;
-    private final ConcurrentMap<UUID, OrderDetails> orders;
+    private final ConcurrentMap<UUID, OrderInfo> orders;
 
     public OrderServiceImpl(
             final KitchenService kitchenService,
-            final ConcurrentMap<UUID, OrderDetails> orders
+            final ConcurrentMap<UUID, OrderInfo> orders
     ) {
         this.kitchenService = kitchenService;
         this.orders = orders;
@@ -25,7 +26,7 @@ public class OrderServiceImpl implements OrderService {
         validateOrderDetails(orderDetails);
         UUID orderId = orderDetails.getOrderId();
         checkOrderExistence(orderId, true);
-        orders.put(orderId, orderDetails);
+        orders.put(orderId, new OrderInfo(orderDetails, ORDER_STATUS.PENDING));
         return orderId;
     }
 

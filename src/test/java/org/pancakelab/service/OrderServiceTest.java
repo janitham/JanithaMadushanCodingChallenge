@@ -2,9 +2,7 @@ package org.pancakelab.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pancakelab.model.DeliveryInfo;
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.Pancake;
+import org.pancakelab.model.*;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +15,7 @@ import static org.mockito.Mockito.verify;
 
 public class OrderServiceTest {
 
-    private ConcurrentMap<UUID, OrderDetails> orders;
+    private ConcurrentMap<UUID, OrderInfo> orders;
     private KitchenService kitchenService;
     private OrderService orderService;
 
@@ -56,7 +54,7 @@ public class OrderServiceTest {
                 .withDeliveryInfo(mock(DeliveryInfo.class))
                 .addPancake(mock(Pancake.class))
                 .build();
-        orders.put(orderDetails.getOrderId(), orderDetails);
+        orders.put(orderDetails.getOrderId(), new OrderInfo(orderDetails, ORDER_STATUS.PENDING));
         // When
         // Then
         assertThrows(IllegalArgumentException.class, () -> orderService.open(orderDetails));
@@ -85,7 +83,7 @@ public class OrderServiceTest {
                 .withDeliveryInfo(mock(DeliveryInfo.class))
                 .addPancake(mock(Pancake.class))
                 .build();
-        orders.put(orderDetails.getOrderId(), orderDetails);
+        orders.put(orderDetails.getOrderId(), new OrderInfo(orderDetails, ORDER_STATUS.PENDING));
         // When
         orderService.complete(orderDetails.getOrderId());
         // Then
