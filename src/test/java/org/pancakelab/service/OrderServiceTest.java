@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.pancakelab.service.OrderServiceImpl.*;
 
 public class OrderServiceTest {
 
@@ -27,7 +28,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void When_OrderServiceIsCreated_Then_NoExceptions() {
+    public void givenValidOrderDetails_whenOpenOrder_thenSuccessful() {
         // Given
         var orderDetails = new OrderDetails.Builder()
                 .withDeliveryInfo(mock(DeliveryInfo.class))
@@ -40,15 +41,19 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void When_OrderDetails_are_not_provided_Then_throw_Exception() {
+    public void givenNoOrderDetails_whenOpen_thenThrowException() {
         // Given
         // When
         // Then
-        assertThrows(IllegalArgumentException.class, () -> orderService.open(null));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> orderService.open(null),
+                ORDER_DETAILS_SHOULD_NOT_BE_NULL
+        );
     }
 
     @Test
-    public void When_order_is_created_with_exiting_then_throw_Exception() {
+    public void givenExistingOrder_whenOpen_thenThrowException() {
         // Given
         var orderDetails = new OrderDetails.Builder()
                 .withDeliveryInfo(mock(DeliveryInfo.class))
@@ -57,27 +62,36 @@ public class OrderServiceTest {
         orders.put(orderDetails.getOrderId(), new OrderInfo(orderDetails, ORDER_STATUS.PENDING));
         // When
         // Then
-        assertThrows(IllegalArgumentException.class, () -> orderService.open(orderDetails));
+        assertThrows(
+                IllegalArgumentException.class, () -> orderService.open(orderDetails),
+                ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID
+        );
     }
 
     @Test
-    public void When_completing_order_with_null_orderId_then_throw_Exception() {
+    public void givenNullOrderId_whenComplete_thenThrowException() {
         // Given
         // When
         // Then
-        assertThrows(IllegalArgumentException.class, () -> orderService.complete(null));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> orderService.complete(null), ORDER_DETAILS_SHOULD_NOT_BE_NULL
+        );
     }
 
     @Test
-    public void When_completing_order_with_non_existing_orderId_then_throw_Exception() {
+    public void givenNonExistingOrderId_whenComplete_thenThrowException() {
         // Given
         // When
         // Then
-        assertThrows(IllegalArgumentException.class, () -> orderService.complete(UUID.randomUUID()));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> orderService.complete(UUID.randomUUID()), ORDER_NOT_FOUND
+        );
     }
 
     @Test
-    public void When_completing_order_Then_it_should_be_completed() {
+    public void givenValidOrder_whenComplete_thenOrderShouldBeCompleted() {
         // Given
         var orderDetails = new OrderDetails.Builder()
                 .withDeliveryInfo(mock(DeliveryInfo.class))

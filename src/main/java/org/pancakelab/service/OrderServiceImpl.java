@@ -12,6 +12,10 @@ public class OrderServiceImpl implements OrderService {
 
     private final KitchenService kitchenService;
     private final ConcurrentMap<UUID, OrderInfo> orders;
+    public static String ORDER_DETAILS_SHOULD_NOT_BE_NULL = "Order details cannot be null";
+    public static String ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID = "Cannot open order with the same order ID";
+    public static String ORDER_NOT_FOUND = "Order not found";
+    public static String ORDER_CANNNOT_BE_PROCESSED_WITHOUT_ORDER_ID = "Order cannot be processed without order ID";
 
     public OrderServiceImpl(
             final KitchenService kitchenService,
@@ -46,21 +50,21 @@ public class OrderServiceImpl implements OrderService {
 
     private void validateOrderDetails(OrderDetails orderDetails) {
         if (orderDetails == null) {
-            throw new IllegalArgumentException("Order cannot be opened without details");
+            throw new IllegalArgumentException(ORDER_DETAILS_SHOULD_NOT_BE_NULL);
         }
     }
 
     private void validateOrderId(UUID orderId) {
         if (orderId == null) {
-            throw new IllegalArgumentException("Order cannot be processed without order ID");
+            throw new IllegalArgumentException(ORDER_CANNNOT_BE_PROCESSED_WITHOUT_ORDER_ID);
         }
     }
 
     private void checkOrderExistence(UUID orderId, boolean shouldNotExist) {
         if (shouldNotExist && orders.containsKey(orderId)) {
-            throw new IllegalArgumentException("Cannot open order with the same order ID");
+            throw new IllegalArgumentException(ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID);
         } else if (!shouldNotExist && !orders.containsKey(orderId)) {
-            throw new IllegalArgumentException("Order not found");
+            throw new IllegalArgumentException(ORDER_NOT_FOUND);
         }
     }
 }

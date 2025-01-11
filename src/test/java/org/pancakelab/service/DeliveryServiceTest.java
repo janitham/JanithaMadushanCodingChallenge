@@ -37,7 +37,7 @@ public class DeliveryServiceTest {
     }
 
     @Test
-    public void whenOrderIsDispatched_thenItShouldBeRemovedFromTheDatabase() {
+    public void givenOrderIsPending_whenDispatched_thenItShouldBeRemovedFromTheDatabase() {
         // Given
         var order = new OrderDetails.Builder().addPancake(mock(Pancake.class)).withDeliveryInfo(mock(DeliveryInfo.class)).build();
         var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue);
@@ -62,7 +62,7 @@ public class DeliveryServiceTest {
     }
 
     @Test
-    public void whenTryingToDeliverAnOrderThatDoesNotExist_thenWarningShouldBeLogged() {
+    public void givenOrderDoesNotExist_whenTryingToDeliver_thenWarningShouldBeLogged() {
         // Given
         var orderId = UUID.randomUUID();
         var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue);
@@ -87,7 +87,7 @@ public class DeliveryServiceTest {
     }
 
     @Test
-    public void whenTryingToDeliverAnOrderWithInvalidStatus_thenWarningShouldBeLogged() {
+    public void givenOrderWithInvalidStatus_whenTryingToDeliver_thenWarningShouldBeLogged() {
         // Given
         var order = new OrderDetails.Builder().addPancake(mock(Pancake.class)).withDeliveryInfo(mock(DeliveryInfo.class)).build();
         var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue);

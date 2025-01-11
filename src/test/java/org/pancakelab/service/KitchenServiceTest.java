@@ -23,7 +23,7 @@ public class KitchenServiceTest {
     }
 
     @Test
-    public void WhenOrderIsProcessed_ThenItShouldBeReadyForDelivery() {
+    public void givenOrderIsPending_whenProcessed_thenItShouldBeReadyForDelivery() {
         // Given
         var order = new OrderDetails.Builder()
                 .addPancake(mock(Pancake.class))

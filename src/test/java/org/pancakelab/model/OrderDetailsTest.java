@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 public class OrderDetailsTest {
 
     @Test
-    public void whenOrderDetailsIsCreatedWithoutDeliveryInfo_thenThrowException() {
+    public void givenNoDeliveryInfo_whenBuildingOrderDetails_thenThrowException() {
         // Given
         final var builder = new OrderDetails.Builder();
         // When & Then
@@ -17,7 +17,7 @@ public class OrderDetailsTest {
     }
 
     @Test
-    public void whenOrderDetailsIsCreatedWithoutPancakes_thenThrowException() {
+    public void givenNoPancakes_whenBuildingOrderDetails_thenThrowException() {
         // Given
         final var builder = new OrderDetails.Builder();
         builder.withDeliveryInfo(mock(DeliveryInfo.class));
@@ -26,7 +26,7 @@ public class OrderDetailsTest {
     }
 
     @Test
-    public void whenOrderDetailsIsCreatedWithValidParameters_thenPancakesAreNotModifiable() {
+    public void givenValidParameters_whenBuildingOrderDetails_thenPancakesAreNotModifiable() {
         // Given
         final var builder = new OrderDetails.Builder();
         final var deliveryInfo = mock(DeliveryInfo.class);
@@ -39,7 +39,7 @@ public class OrderDetailsTest {
     }
 
     @Test
-    public void whenAddingSimilarPancakes_thenCorrespondingCountShouldBeIncremented() {
+    public void givenSimilarPancakes_whenAddingToOrderDetails_thenCorrespondingCountShouldBeIncremented() {
         // Given
         final var builder = new OrderDetails.Builder();
         final var deliveryInfo = mock(DeliveryInfo.class);
