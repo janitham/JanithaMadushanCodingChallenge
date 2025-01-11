@@ -62,9 +62,9 @@ public class OrderServiceImpl implements OrderService {
 
     private void checkOrderExistence(UUID orderId, boolean shouldNotExist) {
         if (shouldNotExist && orders.containsKey(orderId)) {
-            throw new IllegalArgumentException(ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID);
+            throw new IllegalStateException(ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID);
         } else if (!shouldNotExist && !orders.containsKey(orderId)) {
-            throw new IllegalArgumentException(ORDER_NOT_FOUND);
+            throw new IllegalStateException(ORDER_NOT_FOUND);
         }
     }
 }

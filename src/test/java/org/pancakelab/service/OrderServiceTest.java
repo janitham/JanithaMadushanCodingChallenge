@@ -62,7 +62,7 @@ public class OrderServiceTest {
         // When
         // Then
         Exception exception = assertThrows(
-                IllegalArgumentException.class, () -> orderService.open(orderDetails)
+                IllegalStateException.class, () -> orderService.open(orderDetails)
         );
         assertEquals(ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID, exception.getMessage());
     }
@@ -85,7 +85,7 @@ public class OrderServiceTest {
         // When
         // Then
         Exception exception = assertThrows(
-                IllegalArgumentException.class,
+                IllegalStateException.class,
                 () -> orderService.complete(UUID.randomUUID())
         );
         assertEquals(ORDER_NOT_FOUND, exception.getMessage());
