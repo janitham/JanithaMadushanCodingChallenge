@@ -16,14 +16,18 @@ public class PreparationTask implements Callable<ORDER_STATUS> {
     private final Logger logger = Logger.getLogger(PreparationTask.class.getName());
     private final UUID orderId;
 
-    public PreparationTask(BlockingDeque<UUID> deliveryQueue, ConcurrentMap<UUID, OrderInfo> orders, UUID orderId) {
+    public PreparationTask(
+            final BlockingDeque<UUID> deliveryQueue,
+            final ConcurrentMap<UUID, OrderInfo> orders,
+            final UUID orderId
+    ) {
         this.deliveryQueue = deliveryQueue;
         this.orders = orders;
         this.orderId = orderId;
     }
 
     @Override
-    public ORDER_STATUS call() throws Exception {
+    public ORDER_STATUS call() {
         try {
             // To simulate workload
             Thread.sleep(1000);
