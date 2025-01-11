@@ -41,12 +41,12 @@ public class DeliveryServiceImpl implements DeliveryService, Runnable {
             if (orderInfo.getStatus() == ORDER_STATUS.PENDING) {
                 OrderDetails orderDetails = orderInfo.getOrderDetails();
                 orders.remove(orderId);
-                logger.info("Delivering order: " + orderDetails.getOrderId());
+                logger.info("Delivering order: %s".formatted(orderDetails.getOrderId()) );
             } else {
-                logger.warning("Invalid Status: " + orderId);
+                logger.warning("Invalid Status: %s".formatted(orderId));
             }
         } else {
-            logger.warning("Order not found: " + orderId);
+            logger.warning("Order not found: %s".formatted(orderId));
         }
     }
 }

@@ -5,23 +5,21 @@ import org.pancakelab.model.OrderInfo;
 
 import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.logging.Logger;
 
 public class KitchenServiceImpl implements KitchenService {
     private static KitchenServiceImpl instance;
     private final ExecutorService deliveryExecutor;
     private final BlockingDeque<UUID> deliveryQueue;
     private final ConcurrentMap<UUID, OrderInfo> orders;
-    private final Logger logger = Logger.getLogger(KitchenServiceImpl.class.getName());
 
     private KitchenServiceImpl(
-            final int numberOfChefsInTheKitchen,
             final BlockingDeque<UUID> deliveryQueue,
-            final ConcurrentMap<UUID, OrderInfo> orders
+            final ConcurrentMap<UUID, OrderInfo> orders,
+            final ExecutorService executorService
     ) {
-        this.deliveryExecutor = Executors.newFixedThreadPool(numberOfChefsInTheKitchen);
         this.deliveryQueue = deliveryQueue;
         this.orders = orders;
+        this.deliveryExecutor = executorService;
     }
 
     public static synchronized KitchenServiceImpl getInstance(
@@ -30,7 +28,19 @@ public class KitchenServiceImpl implements KitchenService {
             final ConcurrentMap<UUID, OrderInfo> orders
     ) {
         if (instance == null) {
-            instance = new KitchenServiceImpl(numberOfChefsInTheKitchen, deliveryQueue, orders);
+            var deliveryExecutor = Executors.newFixedThreadPool(numberOfChefsInTheKitchen);
+            instance = new KitchenServiceImpl(deliveryQueue, orders, deliveryExecutor);
+        }
+        return instance;
+    }
+
+    public static synchronized KitchenServiceImpl getInstance(
+            final BlockingDeque<UUID> deliveryQueue,
+            final ConcurrentMap<UUID, OrderInfo> orders,
+            final ExecutorService deliveryExecutor
+    ) {
+        if (instance == null) {
+            instance = new KitchenServiceImpl(deliveryQueue, orders, deliveryExecutor);
         }
         return instance;
     }

@@ -53,7 +53,7 @@ public class DeliveryServiceTest {
             // Then
             Awaitility.await().until(orders::isEmpty);
             logHandler.flush();
-            assertTrue(logOutputStream.toString().contains("Delivering order: " + order.getOrderId()));
+            assertTrue(logOutputStream.toString().contains("Delivering order: %s".formatted(order.getOrderId())));
         } finally {
             cleanupLogger(logger, logHandler);
         }
@@ -75,7 +75,7 @@ public class DeliveryServiceTest {
             // Then
             Awaitility.await().until(() -> {
                 logHandler.flush();
-                return logOutputStream.toString().contains("Order not found: " + orderId);
+                return logOutputStream.toString().contains("Order not found: %s".formatted(orderId));
             });
         } finally {
             cleanupLogger(logger, logHandler);
@@ -99,7 +99,7 @@ public class DeliveryServiceTest {
             // Then
             Awaitility.await().until(() -> {
                 logHandler.flush();
-                return logOutputStream.toString().contains("Invalid Status: " + order.getOrderId());
+                return logOutputStream.toString().contains("Invalid Status: %s".formatted(order.getOrderId()));
             });
         } finally {
             cleanupLogger(logger, logHandler);

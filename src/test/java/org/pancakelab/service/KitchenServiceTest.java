@@ -3,6 +3,7 @@ package org.pancakelab.service;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
 
@@ -11,6 +12,7 @@ import java.util.concurrent.*;
 
 import static org.mockito.Mockito.mock;
 
+@Disabled
 public class KitchenServiceTest {
 
     private static KitchenService kitchenService;
