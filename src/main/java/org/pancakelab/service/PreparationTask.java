@@ -33,15 +33,15 @@ public class PreparationTask implements Callable<ORDER_STATUS> {
             Thread.sleep(1000);
             final OrderInfo orderInfo = orders.get(orderId);
             if (orderInfo == null) {
-                logger.warning("Order not found: " + orderId);
+                logger.warning("Order not found: %s".formatted(orderId));
                 return ORDER_STATUS.NOT_FOUND;
             } else {
                 if (ORDER_STATUS.PENDING != orderInfo.getStatus()) {
-                    logger.warning("Invalid Status: " + orderId);
+                    logger.warning("Invalid Status: %s".formatted(orderId));
                     return ORDER_STATUS.INVALID;
                 }
                 orderInfo.setStatus(ORDER_STATUS.READY_FOR_DELIVERY);
-                logger.info("Order is ready for delivery: " + orderId);
+                logger.info("Order is ready for delivery: %s".formatted(orderId));
                 deliveryQueue.put(orderId);
                 return ORDER_STATUS.READY_FOR_DELIVERY;
             }

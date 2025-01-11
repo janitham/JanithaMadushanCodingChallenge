@@ -5,17 +5,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.pancakelab.model.DeliveryInfo;
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.OrderInfo;
-import org.pancakelab.model.Pancake;
+import org.pancakelab.model.*;
 import org.pancakelab.service.*;
 
 import java.util.UUID;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,14 +47,17 @@ public class PancakeOrderSuccessfulProcessingTest {
 
     @Test
     @Order(2)
-    public void whenOrderIsCompleted_thenOrderShouldBeProcessedByTheKitchenAndRemoved() {
+    public void whenOrderIsCompleted_thenOrderShouldBeProcessedByTheKitchenAndRemoved() throws ExecutionException, InterruptedException {
         // Given
         var orderId = orderDetails.getOrderId();
         // When
-        orderService.complete(orderId);
+        var future = orderService.complete(orderId);
         // Then
         Awaitility.await().until(() -> deliveryQueue.size() == 1);
         assertTrue(deliveryQueue.contains(orderId));
+        assertTrue(future.isDone());
+        assertEquals(ORDER_STATUS.READY_FOR_DELIVERY, orders.get(orderId).getStatus());
+        assertEquals(future.get(),ORDER_STATUS.READY_FOR_DELIVERY);
     }
 
     @Test
