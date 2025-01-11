@@ -30,10 +30,8 @@ public class KitchenServiceTest {
                 .withDeliveryInfo(mock(DeliveryInfo.class))
                 .build();
         orders.put(order.getOrderId(), new OrderInfo(order, ORDER_STATUS.PENDING));
-
         // When
         kitchenService.processOrder(order.getOrderId());
-
         // Then
         Awaitility.await().until(() -> orders.get(order.getOrderId()).getStatus() == ORDER_STATUS.READY_FOR_DELIVERY);
         Awaitility.await().until(() -> deliveryQueue.contains(order.getOrderId()));

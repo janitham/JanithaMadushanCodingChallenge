@@ -39,19 +39,17 @@ public class DeliveryServiceTest {
     @Test
     public void givenOrderIsPending_whenDispatched_thenItShouldBeRemovedFromTheDatabase() {
         // Given
-        var order = new OrderDetails.Builder().addPancake(mock(Pancake.class)).withDeliveryInfo(mock(DeliveryInfo.class)).build();
+        var order = new OrderDetails.Builder().addPancake(mock(Pancake.class))
+                .withDeliveryInfo(mock(DeliveryInfo.class)).build();
         var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue);
         orders.put(order.getOrderId(), new OrderInfo(order, ORDER_STATUS.PENDING));
         deliveryQueue.add(order.getOrderId());
-
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
         Logger logger = setupLogger(logOutputStream);
         Handler logHandler = logger.getHandlers()[0];
-
         try {
             // When
             new Thread(deliveryService).start();
-
             // Then
             Awaitility.await().until(orders::isEmpty);
             logHandler.flush();
@@ -67,11 +65,9 @@ public class DeliveryServiceTest {
         var orderId = UUID.randomUUID();
         var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue);
         deliveryQueue.add(orderId);
-
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
         Logger logger = setupLogger(logOutputStream);
         Handler logHandler = logger.getHandlers()[0];
-
         try {
             // When
             new Thread(deliveryService).start();
@@ -89,19 +85,17 @@ public class DeliveryServiceTest {
     @Test
     public void givenOrderWithInvalidStatus_whenTryingToDeliver_thenWarningShouldBeLogged() {
         // Given
-        var order = new OrderDetails.Builder().addPancake(mock(Pancake.class)).withDeliveryInfo(mock(DeliveryInfo.class)).build();
+        var order = new OrderDetails.Builder().addPancake(mock(Pancake.class))
+                .withDeliveryInfo(mock(DeliveryInfo.class)).build();
         var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue);
         orders.put(order.getOrderId(), new OrderInfo(order, ORDER_STATUS.DELIVERED));
         deliveryQueue.add(order.getOrderId());
-
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
         Logger logger = setupLogger(logOutputStream);
         Handler logHandler = logger.getHandlers()[0];
-
         try {
             // When
             new Thread(deliveryService).start();
-
             // Then
             Awaitility.await().until(() -> {
                 logHandler.flush();

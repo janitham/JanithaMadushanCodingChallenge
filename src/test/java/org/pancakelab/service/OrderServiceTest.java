@@ -8,8 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.pancakelab.service.OrderServiceImpl.*;
@@ -45,11 +44,11 @@ public class OrderServiceTest {
         // Given
         // When
         // Then
-        assertThrows(
+        Exception exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> orderService.open(null),
-                ORDER_DETAILS_SHOULD_NOT_BE_NULL
+                () -> orderService.open(null)
         );
+        assertEquals(ORDER_DETAILS_SHOULD_NOT_BE_NULL, exception.getMessage());
     }
 
     @Test
@@ -62,10 +61,10 @@ public class OrderServiceTest {
         orders.put(orderDetails.getOrderId(), new OrderInfo(orderDetails, ORDER_STATUS.PENDING));
         // When
         // Then
-        assertThrows(
-                IllegalArgumentException.class, () -> orderService.open(orderDetails),
-                ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID
+        Exception exception = assertThrows(
+                IllegalArgumentException.class, () -> orderService.open(orderDetails)
         );
+        assertEquals(ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID, exception.getMessage());
     }
 
     @Test
@@ -73,10 +72,11 @@ public class OrderServiceTest {
         // Given
         // When
         // Then
-        assertThrows(
+        Exception exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> orderService.complete(null), ORDER_DETAILS_SHOULD_NOT_BE_NULL
+                () -> orderService.complete(null)
         );
+        assertEquals(ORDER_CANNNOT_BE_PROCESSED_WITHOUT_ORDER_ID, exception.getMessage());
     }
 
     @Test
@@ -84,10 +84,11 @@ public class OrderServiceTest {
         // Given
         // When
         // Then
-        assertThrows(
+        Exception exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> orderService.complete(UUID.randomUUID()), ORDER_NOT_FOUND
+                () -> orderService.complete(UUID.randomUUID())
         );
+        assertEquals(ORDER_NOT_FOUND, exception.getMessage());
     }
 
     @Test
