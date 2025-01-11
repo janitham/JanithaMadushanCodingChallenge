@@ -28,8 +28,11 @@ public class KitchenServiceImpl implements KitchenService {
             final ConcurrentMap<UUID, OrderInfo> orders
     ) {
         if (instance == null) {
-            var deliveryExecutor = Executors.newFixedThreadPool(numberOfChefsInTheKitchen);
-            instance = new KitchenServiceImpl(deliveryQueue, orders, deliveryExecutor);
+            instance = new KitchenServiceImpl(
+                    deliveryQueue,
+                    orders,
+                    Executors.newFixedThreadPool(numberOfChefsInTheKitchen)
+            );
         }
         return instance;
     }
