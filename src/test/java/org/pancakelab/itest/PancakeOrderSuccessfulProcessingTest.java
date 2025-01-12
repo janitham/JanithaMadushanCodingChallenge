@@ -5,12 +5,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.pancakelab.model.DeliveryInfo;
-import org.pancakelab.model.ORDER_STATUS;
-import org.pancakelab.model.OrderInfo;
-import org.pancakelab.model.PancakeServiceException;
+import org.pancakelab.model.*;
 import org.pancakelab.service.*;
-import org.pancakelab.util.PancakeFactoryMenu;
 
 import java.util.Map;
 import java.util.UUID;
@@ -47,8 +43,8 @@ public class PancakeOrderSuccessfulProcessingTest {
     @Order(2)
     public void whenOrderIsUpdatedWithItemsInTheMenu_thenOrderShouldContainTheItems() {
         var pancakes = Map.of(
-                PancakeFactoryMenu.PANCAKE_TYPE.DARK_CHOCOLATE_PANCAKE, 1,
-                PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_PANCAKE, 2
+                PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1,
+                PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2
         );
         orderService.addPancakes(orderId, pancakes);
         assertEquals(pancakes, orderService.orderSummary(orderId));

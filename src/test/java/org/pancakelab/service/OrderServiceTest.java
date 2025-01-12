@@ -2,8 +2,10 @@ package org.pancakelab.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pancakelab.model.*;
-import org.pancakelab.util.PancakeFactoryMenu;
+import org.pancakelab.model.DeliveryInfo;
+import org.pancakelab.model.OrderInfo;
+import org.pancakelab.model.PancakeMenu;
+import org.pancakelab.model.PancakeServiceException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,19 +55,19 @@ public class OrderServiceTest {
     public void givenValidOrder_then_pancakesCanBeIncludedFromTheMenu() throws PancakeServiceException {
         var orderId = orderService.createOrder(new DeliveryInfo("1", "2"));
         var pancakes1 = Map.of(
-                PancakeFactoryMenu.PANCAKE_TYPE.DARK_CHOCOLATE_PANCAKE, 1,
-                PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_PANCAKE, 2
+                PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1,
+                PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2
         );
         var pancakes2 = Map.of(
-                PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_PANCAKE, 1,
-                PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_HAZELNUTS_PANCAKE, 4
+                PancakeMenu.MILK_CHOCOLATE_PANCAKE, 1,
+                PancakeMenu.MILK_CHOCOLATE_HAZELNUTS_PANCAKE, 4
         );
         orderService.addPancakes(orderId, pancakes1);
         orderService.addPancakes(orderId, pancakes2);
-        final Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> summary = orderService.orderSummary(orderId);
-        assertEquals(1, summary.get(PancakeFactoryMenu.PANCAKE_TYPE.DARK_CHOCOLATE_PANCAKE));
-        assertEquals(3, summary.get(PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_PANCAKE));
-        assertEquals(4, summary.get(PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_HAZELNUTS_PANCAKE));
+        final Map<PancakeMenu, Integer> summary = orderService.orderSummary(orderId);
+        assertEquals(1, summary.get(PancakeMenu.DARK_CHOCOLATE_PANCAKE));
+        assertEquals(3, summary.get(PancakeMenu.MILK_CHOCOLATE_PANCAKE));
+        assertEquals(4, summary.get(PancakeMenu.MILK_CHOCOLATE_HAZELNUTS_PANCAKE));
     }
 
     @Test
@@ -89,7 +91,7 @@ public class OrderServiceTest {
     @Test
     public void givenValidOrderId_then_completingOrderShouldReturnFutureObject() throws PancakeServiceException {
         var orderId = orderService.createOrder(new DeliveryInfo("1", "2"));
-        var pancakes1 = Map.of(PancakeFactoryMenu.PANCAKE_TYPE.DARK_CHOCOLATE_PANCAKE, 1);
+        var pancakes1 = Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1);
         orderService.addPancakes(orderId, pancakes1);
         when(kitchenService.processOrder(orderId)).thenReturn(mock(FutureTask.class));
         var future = orderService.complete(orderId);
@@ -102,7 +104,7 @@ public class OrderServiceTest {
     @Test
     public void givenValidOrderId_then_cancel_shouldRemoveOrder() throws PancakeServiceException {
         var orderId = orderService.createOrder(new DeliveryInfo("1", "2"));
-        var pancakes1 = Map.of(PancakeFactoryMenu.PANCAKE_TYPE.DARK_CHOCOLATE_PANCAKE, 1);
+        var pancakes1 = Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1);
         orderService.addPancakes(orderId, pancakes1);
         orderService.cancel(orderId);
         assertFalse(orders.containsKey(orderId));

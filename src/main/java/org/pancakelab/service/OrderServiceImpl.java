@@ -1,7 +1,6 @@
 package org.pancakelab.service;
 
 import org.pancakelab.model.*;
-import org.pancakelab.util.PancakeFactoryMenu;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,7 @@ public class OrderServiceImpl implements OrderService {
     private final KitchenService kitchenService;
     private final ConcurrentMap<UUID, OrderInfo> orders;
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer>> orderItems = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Map<PancakeMenu, Integer>> orderItems = new ConcurrentHashMap<>();
 
     public OrderServiceImpl(final KitchenService kitchenService, final ConcurrentMap<UUID, OrderInfo> orders) {
         this.kitchenService = kitchenService;
@@ -38,21 +37,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void addPancakes(final UUID orderId, final Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> pancakes) {
+    public void addPancakes(final UUID orderId, final Map<PancakeMenu, Integer> pancakes) {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
         }
-        orderItems.merge(orderId, pancakes, (oldPancakes, newPancakes) -> {
+        orderItems.merge(orderId, new HashMap<>(pancakes), (oldPancakes, newPancakes) -> {
             newPancakes.forEach((type, count) -> oldPancakes.merge(type, count, Integer::sum));
             return oldPancakes;
         });
     }
 
     @Override
-    public Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> orderSummary(final UUID orderId) {
+    public Map<PancakeMenu, Integer> orderSummary(final UUID orderId) {
         validateOrderId(orderId);
-        final Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> items = orderItems.get(orderId);
+        final Map<PancakeMenu, Integer> items = orderItems.get(orderId);
         if (items == null) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
         }

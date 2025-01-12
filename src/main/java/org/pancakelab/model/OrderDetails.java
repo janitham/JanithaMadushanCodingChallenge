@@ -1,7 +1,5 @@
 package org.pancakelab.model;
 
-import org.pancakelab.util.PancakeFactoryMenu;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -41,7 +39,7 @@ public class OrderDetails {
         private DeliveryInfo deliveryInfo;
         private final Map<Pancake, Integer> pancakes = new HashMap<>();
         private UUID orderId;
-        private Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> pancakeItems;
+        private Map<PancakeMenu, Integer> pancakeItems;
 
         public Builder withOrderId(UUID orderId) {
             this.orderId = orderId;
@@ -76,7 +74,7 @@ public class OrderDetails {
             return new OrderDetails(orderId, deliveryInfo, pancakes);
         }
 
-        public Builder withPanCakes(Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> pancakeTypeIntegerMap) {
+        public Builder withPanCakes(Map<PancakeMenu, Integer> pancakeTypeIntegerMap) {
             this.pancakeItems = new HashMap<>(pancakeTypeIntegerMap);
             return this;
         }
