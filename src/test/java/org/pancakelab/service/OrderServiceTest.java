@@ -3,7 +3,7 @@ package org.pancakelab.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.DeliveryInfo;
-import org.pancakelab.model.OrderInfo;
+import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.PancakeMenu;
 import org.pancakelab.model.PancakeServiceException;
 
@@ -21,7 +21,7 @@ import static org.pancakelab.service.OrderServiceImpl.ORDER_NOT_FOUND;
 
 public class OrderServiceTest {
 
-    private ConcurrentMap<UUID, OrderInfo> orders;
+    private ConcurrentMap<UUID, OrderDetails> orders;
     private KitchenService kitchenService;
     private OrderService orderService;
 

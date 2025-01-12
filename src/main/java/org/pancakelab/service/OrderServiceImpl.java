@@ -17,11 +17,11 @@ public class OrderServiceImpl implements OrderService {
     public static final String DUPLICATE_ORDERS_CANNOT_BE_PLACED = "Cannot create an order for the same delivery location";
 
     private final KitchenService kitchenService;
-    private final ConcurrentMap<UUID, OrderInfo> orders;
+    private final ConcurrentMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Map<PancakeMenu, Integer>> orderItems = new ConcurrentHashMap<>();
 
-    public OrderServiceImpl(final KitchenService kitchenService, final ConcurrentMap<UUID, OrderInfo> orders) {
+    public OrderServiceImpl(final KitchenService kitchenService, final ConcurrentMap<UUID, OrderDetails> orders) {
         this.kitchenService = kitchenService;
         this.orders = orders;
     }
@@ -70,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
                 .withOrderId(orderId)
                 .withPanCakes(orderItems.get(orderId))
                 .build();
-        orders.put(orderId, new OrderInfo(orderDetails, ORDER_STATUS.PENDING));
+        orders.put(orderId, orderDetails);
         cleanUpOrder(orderId, deliveryInfo);
         return kitchenService.processOrder(orderId);
     }
