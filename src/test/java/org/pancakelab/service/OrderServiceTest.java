@@ -27,6 +27,29 @@ public class OrderServiceTest {
     }
 
     @Test
+    public void givenDeliveryInformation_then_orderShouldBePlaced() throws PancakeServiceException {
+        // Given
+        var deliveryInformation = new DeliveryInfo("1", "2");
+        // When
+        final UUID orderId = orderService.createOrder(deliveryInformation);
+        // Then
+        assertNotNull(orderId);
+    }
+
+    @Test
+    public void givenAlreadyGivenInformation_then_serviceShouldThrowException() throws PancakeServiceException {
+        // Given
+        var deliveryInformation = new DeliveryInfo("1", "2");
+        orderService.createOrder(deliveryInformation);
+        // When
+        // Then
+        Exception exception = assertThrows(
+                PancakeServiceException.class,
+                () -> orderService.createOrder(deliveryInformation)
+        );
+    }
+
+    @Test
     public void givenValidOrderDetails_whenOpenOrder_thenSuccessful() {
         // Given
         var orderDetails = new OrderDetails.Builder()

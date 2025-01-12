@@ -1,21 +1,24 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.ORDER_STATUS;
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.OrderInfo;
+import org.pancakelab.model.*;
 
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 
 public class OrderServiceImpl implements OrderService {
 
-    private final KitchenService kitchenService;
-    private final ConcurrentMap<UUID, OrderInfo> orders;
     public static String ORDER_DETAILS_SHOULD_NOT_BE_NULL = "Order details cannot be null";
     public static String ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID = "Cannot open order with the same order ID";
     public static String ORDER_NOT_FOUND = "Order not found";
     public static String ORDER_CANNNOT_BE_PROCESSED_WITHOUT_ORDER_ID = "Order cannot be processed without order ID";
+    public static String DUPLICATE_ORDERS_CANNOT_BE_PLACED = "Can not create an order for the same delivery location";
+
+    private final KitchenService kitchenService;
+    private final ConcurrentMap<UUID, OrderInfo> orders;
+
+    private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
 
     public OrderServiceImpl(
             final KitchenService kitchenService,
@@ -46,6 +49,16 @@ public class OrderServiceImpl implements OrderService {
         validateOrderId(orderId);
         checkOrderExistence(orderId, false);
         return kitchenService.processOrder(orderId);
+    }
+
+    @Override
+    public UUID createOrder(final DeliveryInfo deliveryInformation) throws PancakeServiceException {
+        // validate if the delivery information is correct
+        var orderId = UUID.randomUUID();
+        if (orderStorage.putIfAbsent(deliveryInformation, orderId) != null) {
+            throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);
+        }
+        return orderId;
     }
 
     private void validateOrderDetails(OrderDetails orderDetails) {
