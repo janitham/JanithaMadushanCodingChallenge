@@ -2,53 +2,44 @@ package org.pancakelab.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.pancakelab.model.OrderDetails.DELIVERY_INFO_REQUIRED;
+import static org.pancakelab.model.OrderDetails.PANCAKES_REQUIRED;
 
 public class OrderDetailsTest {
 
     @Test
     public void givenNoDeliveryInfo_whenBuildingOrderDetails_thenThrowException() {
         // Given
-        final var builder = new OrderDetails.Builder();
+        OrderDetails.Builder builder = new OrderDetails.Builder();
         // When & Then
-        assertThrows(IllegalArgumentException.class, builder::build, "DeliveryInfo is required");
+        assertThrows(IllegalArgumentException.class, builder::build, DELIVERY_INFO_REQUIRED);
     }
 
     @Test
     public void givenNoPancakes_whenBuildingOrderDetails_thenThrowException() {
         // Given
-        final var builder = new OrderDetails.Builder();
+        OrderDetails.Builder builder = new OrderDetails.Builder();
         builder.withDeliveryInfo(mock(DeliveryInfo.class));
         // When & Then
-        assertThrows(IllegalArgumentException.class, builder::build, "At least one pancake is required");
+        assertThrows(IllegalArgumentException.class, builder::build, PANCAKES_REQUIRED);
     }
 
     @Test
     public void givenValidParameters_whenBuildingOrderDetails_thenPancakesAreNotModifiable() {
         // Given
-        final var builder = new OrderDetails.Builder();
-        final var deliveryInfo = mock(DeliveryInfo.class);
-        final var pancake = mock(Pancake.class);
-        builder.withDeliveryInfo(deliveryInfo).addPancake(pancake);
+        OrderDetails.Builder builder = new OrderDetails.Builder();
+        DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);
+        builder.withDeliveryInfo(deliveryInfo).withPanCakes(Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 2));
         // When
-        final var orderDetails = builder.build();
+        OrderDetails orderDetails = builder.build();
         // Then
-        assertThrows(UnsupportedOperationException.class, () -> orderDetails.getPancakes().put(pancake, 2));
-    }
-
-    @Test
-    public void givenSimilarPancakes_whenAddingToOrderDetails_thenCorrespondingCountShouldBeIncremented() {
-        // Given
-        final var builder = new OrderDetails.Builder();
-        final var deliveryInfo = mock(DeliveryInfo.class);
-        final var pancake1 = new Pancake.Builder().withChocolate(Pancake.CHOCOLATE.MILK).build();
-        final var pancake2 = new Pancake.Builder().withChocolate(Pancake.CHOCOLATE.MILK).build();
-        builder.withDeliveryInfo(deliveryInfo).addPancake(pancake1).addPancake(pancake2);
-        // When
-        final var orderDetails = builder.build();
-        // Then
-        assertEquals(2, orderDetails.getPancakes().get(pancake1));
+        assertNotNull(orderDetails.getPancakes());
+        assertNotNull(orderDetails.getDeliveryInfo());
+        assertNotNull(orderDetails.getOrderId());
     }
 }

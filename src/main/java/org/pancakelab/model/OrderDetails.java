@@ -5,14 +5,17 @@ import java.util.Map;
 import java.util.UUID;
 
 public class OrderDetails {
+    public static final String DELIVERY_INFO_REQUIRED = "DeliveryInfo is required";
+    public static final String PANCAKES_REQUIRED = "Order can not be completed without pancakes";
+
     private final DeliveryInfo deliveryInfo;
-    private final Map<Pancake, Integer> pancakes;
+    private final Map<PancakeMenu, Integer> pancakeItems;
     private final UUID orderId;
 
-    private OrderDetails(UUID orderId, DeliveryInfo deliveryInfo, Map<Pancake, Integer> pancakes) {
+    private OrderDetails(final UUID orderId, final DeliveryInfo deliveryInfo, final Map<PancakeMenu, Integer> pancakes) {
         this.orderId = orderId;
         this.deliveryInfo = deliveryInfo;
-        this.pancakes = Map.copyOf(pancakes);
+        this.pancakeItems = Map.copyOf(pancakes);
     }
 
     public UUID getOrderId() {
@@ -23,50 +26,53 @@ public class OrderDetails {
         return deliveryInfo;
     }
 
-    public Map<Pancake, Integer> getPancakes() {
-        return pancakes;
+    public Map<PancakeMenu, Integer> getPancakes() {
+        return pancakeItems;
     }
 
     @Override
     public String toString() {
         return "OrderDetails{" +
                 "deliveryInfo=" + deliveryInfo +
-                ", pancakes=" + pancakes +
+                ", pancakes=" + pancakeItems +
                 '}';
     }
 
     public static class Builder {
         private DeliveryInfo deliveryInfo;
-        private final Map<Pancake, Integer> pancakes = new HashMap<>();
         private UUID orderId;
         private Map<PancakeMenu, Integer> pancakeItems;
 
-        public Builder withOrderId(UUID orderId) {
+        public Builder withOrderId(final UUID orderId) {
             this.orderId = orderId;
             return this;
         }
 
-        public Builder withDeliveryInfo(DeliveryInfo deliveryInfo) {
+        public Builder withDeliveryInfo(final DeliveryInfo deliveryInfo) {
             this.deliveryInfo = deliveryInfo;
             return this;
         }
 
+        public Builder withPanCakes(final Map<PancakeMenu, Integer> pancakeTypeIntegerMap) {
+            this.pancakeItems = new HashMap<>(pancakeTypeIntegerMap);
+            return this;
+        }
+
         public OrderDetails build() {
+            validateFields();
+            return new OrderDetails(orderId, deliveryInfo, pancakeItems);
+        }
+
+        private void validateFields() {
             if (deliveryInfo == null) {
-                throw new IllegalArgumentException("DeliveryInfo is required");
+                throw new IllegalArgumentException(DELIVERY_INFO_REQUIRED);
             }
             if (orderId == null) {
                 orderId = UUID.randomUUID();
             }
-            if(pancakeItems == null){
-                throw new IllegalArgumentException("Order can not be completed without pancakes");
+            if (pancakeItems == null || pancakeItems.isEmpty()) {
+                throw new IllegalArgumentException(PANCAKES_REQUIRED);
             }
-            return new OrderDetails(orderId, deliveryInfo, pancakes);
-        }
-
-        public Builder withPanCakes(Map<PancakeMenu, Integer> pancakeTypeIntegerMap) {
-            this.pancakeItems = new HashMap<>(pancakeTypeIntegerMap);
-            return this;
         }
     }
 }
