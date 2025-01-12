@@ -3,7 +3,10 @@ package org.pancakelab.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
+import org.pancakelab.util.PancakeFactoryMenu;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -47,6 +50,56 @@ public class OrderServiceTest {
                 PancakeServiceException.class,
                 () -> orderService.createOrder(deliveryInformation)
         );
+    }
+
+    @Test
+    public void givenValidOrder_then_pancakesCanBeIncludedFromTheMenu() throws PancakeServiceException {
+        // Given
+        var orderId = orderService.createOrder(new DeliveryInfo("1", "2"));
+        var pancakes1 = new HashMap<PancakeFactoryMenu.PANCAKE_TYPE, Integer>() {
+            {
+                put(PancakeFactoryMenu.PANCAKE_TYPE.DARK_CHOCOLATE_PANCAKE, 1);
+                put(PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_PANCAKE, 2);
+            }
+        };
+        var pancakes2 = new HashMap<PancakeFactoryMenu.PANCAKE_TYPE, Integer>() {
+            {
+                put(PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_PANCAKE, 1);
+                put(PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_HAZELNUTS_PANCAKE, 4);
+            }
+        };
+        // When
+        orderService.addPancakes(orderId, pancakes1);
+        orderService.addPancakes(orderId, pancakes2);
+        Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> summary = orderService.orderSummary(orderId);
+        // Then
+        assertEquals(summary.get(PancakeFactoryMenu.PANCAKE_TYPE.DARK_CHOCOLATE_PANCAKE), 1);
+        assertEquals(summary.get(PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_PANCAKE), 3);
+        assertEquals(summary.get(PancakeFactoryMenu.PANCAKE_TYPE.MILK_CHOCOLATE_HAZELNUTS_PANCAKE), 4);
+    }
+
+    @Test
+    public void givenInvalidOrderId_then_addingItemsShouldThrowException() {
+        // Given
+        // When
+        // Then
+        Exception exception = assertThrows(
+                IllegalStateException.class,
+                () -> orderService.addPancakes(UUID.randomUUID(), new HashMap<>())
+        );
+        assertEquals(ORDER_NOT_FOUND, exception.getMessage());
+    }
+
+    @Test
+    public void givenNullOrderId_then_addingItemsShouldThrowException() {
+        // Given
+        // When
+        // Then
+        Exception exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> orderService.addPancakes(null, new HashMap<>())
+        );
+        assertEquals(ORDER_CANNNOT_BE_PROCESSED_WITHOUT_ORDER_ID, exception.getMessage());
     }
 
     @Test

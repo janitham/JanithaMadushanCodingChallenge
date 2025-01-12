@@ -1,7 +1,10 @@
 package org.pancakelab.service;
 
 import org.pancakelab.model.*;
+import org.pancakelab.util.PancakeFactoryMenu;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -19,6 +22,7 @@ public class OrderServiceImpl implements OrderService {
     private final ConcurrentMap<UUID, OrderInfo> orders;
 
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer>> orderItems = new ConcurrentHashMap<>();
 
     public OrderServiceImpl(
             final KitchenService kitchenService,
@@ -59,6 +63,30 @@ public class OrderServiceImpl implements OrderService {
             throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);
         }
         return orderId;
+    }
+
+    @Override
+    public void addPancakes(UUID orderId, Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> pancakes) {
+        validateOrderId(orderId);
+        if(!orderStorage.containsValue(orderId)){
+            throw new IllegalStateException(ORDER_NOT_FOUND);
+        }
+        orderItems.merge(orderId, pancakes, (oldPancakes, newPancakes) -> {
+            newPancakes.forEach((type, count) ->
+                    oldPancakes.merge(type, count, Integer::sum)
+            );
+            return oldPancakes;
+        });
+    }
+
+    @Override
+    public Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> orderSummary(UUID orderId) {
+        validateOrderId(orderId);
+        final Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> items = orderItems.get(orderId);
+        if (items == null) {
+            throw new IllegalStateException(ORDER_NOT_FOUND);
+        }
+        return new HashMap<>(items);
     }
 
     private void validateOrderDetails(OrderDetails orderDetails) {
