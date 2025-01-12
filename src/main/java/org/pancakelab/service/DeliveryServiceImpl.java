@@ -1,8 +1,6 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.ORDER_STATUS;
 import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.OrderInfo;
 
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
@@ -12,11 +10,11 @@ import java.util.logging.Logger;
 public class DeliveryServiceImpl implements DeliveryService, Runnable {
 
     private final Logger logger = Logger.getLogger(DeliveryServiceImpl.class.getName());
-    private final ConcurrentMap<UUID, OrderInfo> orders;
+    private final ConcurrentMap<UUID, OrderDetails> orders;
     private final BlockingDeque<UUID> deliveryQueue;
 
     public DeliveryServiceImpl(
-            final ConcurrentMap<UUID, OrderInfo> orders,
+            final ConcurrentMap<UUID, OrderDetails> orders,
             final BlockingDeque<UUID> deliveryQueue
     ) {
         this.orders = orders;
@@ -35,16 +33,11 @@ public class DeliveryServiceImpl implements DeliveryService, Runnable {
         }
     }
 
-    private void deliverOrder(UUID orderId) {
-        final OrderInfo orderInfo = orders.get(orderId);
-        if (orderInfo != null) {
-            if (orderInfo.getStatus() == ORDER_STATUS.PENDING) {
-                OrderDetails orderDetails = orderInfo.getOrderDetails();
-                orders.remove(orderId);
-                logger.info("Delivering order: %s".formatted(orderDetails.getOrderId()) );
-            } else {
-                logger.warning("Invalid Status: %s".formatted(orderId));
-            }
+    private void deliverOrder(final UUID orderId) {
+        final OrderDetails orderDetails = orders.get(orderId);
+        if (orderDetails != null) {
+            orders.remove(orderId);
+            logger.info("Delivering order: %s".formatted(orderDetails.getOrderId()));
         } else {
             logger.warning("Order not found: %s".formatted(orderId));
         }
