@@ -26,6 +26,14 @@ public class Pancake {
         this.whippedCream = builder.whippedCream;
     }
 
+    public boolean isHazelNuts() {
+        return hazelNuts;
+    }
+
+    public boolean isWhippedCream() {
+        return whippedCream;
+    }
+
     public static class Builder {
         private CHOCOLATE chocolate;
         private boolean hazelNuts;

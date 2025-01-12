@@ -43,7 +43,7 @@ public class PancakeOrderSuccessfulProcessingTest {
     @Order(2)
     public void whenOrderIsUpdatedWithItemsInTheMenu_thenOrderShouldContainTheItems() {
         var pancakes = Map.of(
-                PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1,
+                PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
                 PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2
         );
         orderService.addPancakes(orderId, pancakes);

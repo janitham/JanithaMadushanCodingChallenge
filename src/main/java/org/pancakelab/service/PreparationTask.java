@@ -2,12 +2,14 @@ package org.pancakelab.service;
 
 import org.pancakelab.model.ORDER_STATUS;
 import org.pancakelab.model.OrderDetails;
+import org.pancakelab.util.PancakeUtils;
 
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 public class PreparationTask implements Callable<ORDER_STATUS> {
 
@@ -29,7 +31,6 @@ public class PreparationTask implements Callable<ORDER_STATUS> {
     @Override
     public ORDER_STATUS call() {
         try {
-            prepareOrder();
             return processOrder();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -37,16 +38,19 @@ public class PreparationTask implements Callable<ORDER_STATUS> {
         }
     }
 
-    private void prepareOrder() throws InterruptedException {
-        Thread.sleep(1000);
+    private void prepareOrder(OrderDetails orderDetails) {
+        orderDetails.getPancakes().forEach(
+                (pancake, quantity) -> IntStream.range(0, quantity)
+                        .forEach(i -> PancakeUtils.preparePancake(pancake)));
     }
 
     private ORDER_STATUS processOrder() throws InterruptedException {
-        final OrderDetails orderInfo = orders.get(orderId);
-        if (orderInfo == null) {
+        final OrderDetails orderDetails = orders.get(orderId);
+        if (orderDetails == null) {
             logger.warning("Order not found: %s".formatted(orderId));
             return ORDER_STATUS.NOT_FOUND;
         } else {
+            prepareOrder(orderDetails);
             logger.info("Order is ready for delivery: %s".formatted(orderId));
             deliveryQueue.put(orderId);
             return ORDER_STATUS.READY_FOR_DELIVERY;
