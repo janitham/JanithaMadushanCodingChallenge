@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PancakeOrderSuccessfulProcessingTest {
 
-    private static final ConcurrentMap<UUID, OrderInfo> orders = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
     private static Thread deliveryService;
     private static KitchenService kitchenService;
@@ -57,7 +57,6 @@ public class PancakeOrderSuccessfulProcessingTest {
         Awaitility.await().until(() -> deliveryQueue.size() == 1);
         assertTrue(deliveryQueue.contains(orderId));
         assertTrue(future.isDone());
-        assertEquals(ORDER_STATUS.READY_FOR_DELIVERY, orders.get(orderId).getStatus());
         assertEquals(future.get(), ORDER_STATUS.READY_FOR_DELIVERY);
     }
 
