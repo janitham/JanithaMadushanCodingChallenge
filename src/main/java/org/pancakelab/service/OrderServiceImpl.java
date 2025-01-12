@@ -33,25 +33,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public UUID open(OrderDetails orderDetails) {
-        validateOrderDetails(orderDetails);
-        UUID orderId = orderDetails.getOrderId();
-        checkOrderExistence(orderId, true);
-        orders.put(orderId, new OrderInfo(orderDetails, ORDER_STATUS.PENDING));
-        return orderId;
-    }
-
-    @Override
     public void cancel(UUID orderId) {
         validateOrderId(orderId);
-        checkOrderExistence(orderId, false);
-        orders.remove(orderId);
+        if (!orderStorage.containsValue(orderId)) {
+            throw new IllegalStateException(ORDER_NOT_FOUND);
+        }
+        var deliveryInfo = orderStorage.entrySet().stream().filter(entry -> entry.getValue().equals(orderId)).findFirst().get().getKey();
+        orderStorage.remove(deliveryInfo);
+        orderItems.remove(orderId);
     }
 
     @Override
     public Future<ORDER_STATUS> complete(UUID orderId) {
         validateOrderId(orderId);
-        checkOrderExistence(orderId, false);
+        if (!orderStorage.containsValue(orderId)) {
+            throw new IllegalStateException(ORDER_NOT_FOUND);
+        }
+        var deliveryInfo = orderStorage.entrySet().stream().filter(entry -> entry.getValue().equals(orderId)).findFirst().get().getKey();
+        var orderDetails = new OrderDetails.Builder().withDeliveryInfo(deliveryInfo).withOrderId(orderId).withPanCakes(orderItems.get(orderId)).build();
+        orders.put(orderId, new OrderInfo(orderDetails, ORDER_STATUS.PENDING));
+        // clean up
+        orderStorage.remove(deliveryInfo);
+        orderItems.remove(orderId);
         return kitchenService.processOrder(orderId);
     }
 
@@ -68,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void addPancakes(UUID orderId, Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> pancakes) {
         validateOrderId(orderId);
-        if(!orderStorage.containsValue(orderId)){
+        if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
         }
         orderItems.merge(orderId, pancakes, (oldPancakes, newPancakes) -> {

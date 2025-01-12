@@ -1,5 +1,7 @@
 package org.pancakelab.model;
 
+import org.pancakelab.util.PancakeFactoryMenu;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,6 +41,7 @@ public class OrderDetails {
         private DeliveryInfo deliveryInfo;
         private final Map<Pancake, Integer> pancakes = new HashMap<>();
         private UUID orderId;
+        private Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> pancakeItems;
 
         public Builder withOrderId(UUID orderId) {
             this.orderId = orderId;
@@ -64,13 +67,18 @@ public class OrderDetails {
             if (deliveryInfo == null) {
                 throw new IllegalArgumentException("DeliveryInfo is required");
             }
-            if (pancakes.isEmpty()) {
-                throw new IllegalArgumentException("At least one pancake is required");
-            }
             if (orderId == null) {
                 orderId = UUID.randomUUID();
             }
+            if(pancakeItems == null){
+                throw new IllegalArgumentException("Order can not be completed without pancakes");
+            }
             return new OrderDetails(orderId, deliveryInfo, pancakes);
+        }
+
+        public Builder withPanCakes(Map<PancakeFactoryMenu.PANCAKE_TYPE, Integer> pancakeTypeIntegerMap) {
+            this.pancakeItems = new HashMap<>(pancakeTypeIntegerMap);
+            return this;
         }
     }
 }

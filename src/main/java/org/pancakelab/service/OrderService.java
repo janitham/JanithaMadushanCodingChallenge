@@ -12,8 +12,6 @@ import java.util.concurrent.Future;
 
 public interface OrderService {
 
-    UUID open(OrderDetails orderDetails);
-
     void cancel(UUID orderId);
 
     Future<ORDER_STATUS> complete(UUID orderId);

@@ -10,11 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.FutureTask;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.pancakelab.service.OrderServiceImpl.*;
+import static org.mockito.Mockito.*;
+import static org.pancakelab.service.OrderServiceImpl.ORDER_CANNNOT_BE_PROCESSED_WITHOUT_ORDER_ID;
+import static org.pancakelab.service.OrderServiceImpl.ORDER_NOT_FOUND;
 
 public class OrderServiceTest {
 
@@ -103,44 +104,39 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenValidOrderDetails_whenOpenOrder_thenSuccessful() {
+    public void givenValidOrderId_then_completingOrderShouldReturnFuture() throws PancakeServiceException {
         // Given
-        var orderDetails = new OrderDetails.Builder()
-                .withDeliveryInfo(mock(DeliveryInfo.class))
-                .addPancake(mock(Pancake.class))
-                .build();
+        var orderId = orderService.createOrder(new DeliveryInfo("1", "2"));
+        var pancakes1 = new HashMap<PancakeFactoryMenu.PANCAKE_TYPE, Integer>() {
+            {
+                put(PancakeFactoryMenu.PANCAKE_TYPE.DARK_CHOCOLATE_PANCAKE, 1);
+            }
+        };
+        orderService.addPancakes(orderId, pancakes1);
+        //verify(kitchenService).processOrder(orderId);
+        when(kitchenService.processOrder(orderId)).thenReturn(mock(FutureTask.class));
         // When
-        var uuid = orderService.open(orderDetails);
+        var future = orderService.complete(orderId);
+        // When
         // Then
-        assertNotNull(uuid);
+        assertNotNull(future);
+        assertNotNull(orders.get(orderId));
     }
 
     @Test
-    public void givenNoOrderDetails_whenOpen_thenThrowException() {
+    public void givenValidOrderId_then_cancel_shouldRemoveOrder() throws PancakeServiceException {
         // Given
+        var orderId = orderService.createOrder(new DeliveryInfo("1", "2"));
+        var pancakes1 = new HashMap<PancakeFactoryMenu.PANCAKE_TYPE, Integer>() {
+            {
+                put(PancakeFactoryMenu.PANCAKE_TYPE.DARK_CHOCOLATE_PANCAKE, 1);
+            }
+        };
+        orderService.addPancakes(orderId, pancakes1);
         // When
+        orderService.cancel(orderId);
         // Then
-        Exception exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> orderService.open(null)
-        );
-        assertEquals(ORDER_DETAILS_SHOULD_NOT_BE_NULL, exception.getMessage());
-    }
-
-    @Test
-    public void givenExistingOrder_whenOpen_thenThrowException() {
-        // Given
-        var orderDetails = new OrderDetails.Builder()
-                .withDeliveryInfo(mock(DeliveryInfo.class))
-                .addPancake(mock(Pancake.class))
-                .build();
-        orders.put(orderDetails.getOrderId(), new OrderInfo(orderDetails, ORDER_STATUS.PENDING));
-        // When
-        // Then
-        Exception exception = assertThrows(
-                IllegalStateException.class, () -> orderService.open(orderDetails)
-        );
-        assertEquals(ORDER_CANNOT_BE_OPENED_WITH_THE_SAME_ORDER_ID, exception.getMessage());
+        assertFalse(orders.containsKey(orderId));
     }
 
     @Test
