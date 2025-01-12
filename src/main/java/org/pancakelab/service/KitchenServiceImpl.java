@@ -1,6 +1,7 @@
 package org.pancakelab.service;
 
 import org.pancakelab.model.ORDER_STATUS;
+import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderInfo;
 
 import java.util.UUID;
@@ -10,11 +11,11 @@ public class KitchenServiceImpl implements KitchenService {
     private static KitchenServiceImpl instance;
     private final ExecutorService deliveryExecutor;
     private final BlockingDeque<UUID> deliveryQueue;
-    private final ConcurrentMap<UUID, OrderInfo> orders;
+    private final ConcurrentMap<UUID, OrderDetails> orders;
 
     private KitchenServiceImpl(
             final BlockingDeque<UUID> deliveryQueue,
-            final ConcurrentMap<UUID, OrderInfo> orders,
+            final ConcurrentMap<UUID, OrderDetails> orders,
             final ExecutorService executorService
     ) {
         this.deliveryQueue = deliveryQueue;
@@ -25,7 +26,7 @@ public class KitchenServiceImpl implements KitchenService {
     public static synchronized KitchenServiceImpl getInstance(
             final int numberOfChefsInTheKitchen,
             final BlockingDeque<UUID> deliveryQueue,
-            final ConcurrentMap<UUID, OrderInfo> orders
+            final ConcurrentMap<UUID, OrderDetails> orders
     ) {
         if (instance == null) {
             instance = new KitchenServiceImpl(
@@ -39,7 +40,7 @@ public class KitchenServiceImpl implements KitchenService {
 
     public static synchronized KitchenServiceImpl getInstance(
             final BlockingDeque<UUID> deliveryQueue,
-            final ConcurrentMap<UUID, OrderInfo> orders,
+            final ConcurrentMap<UUID, OrderDetails> orders,
             final ExecutorService deliveryExecutor
     ) {
         if (instance == null) {

@@ -7,16 +7,18 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-@Disabled
 public class KitchenServiceTest {
 
     private static KitchenService kitchenService;
-    private static final ConcurrentMap<UUID, OrderInfo> orders = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
 
     @BeforeAll
@@ -25,18 +27,19 @@ public class KitchenServiceTest {
     }
 
     @Test
-    public void givenOrderIsPending_whenProcessed_thenItShouldBeReadyForDelivery() {
+    public void givenOrderIsPending_whenProcessed_thenItShouldBeReadyForDelivery() throws ExecutionException, InterruptedException {
         // Given
         var order = new OrderDetails.Builder()
-                .addPancake(mock(Pancake.class))
+                .withPanCakes(Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 2))
                 .withDeliveryInfo(mock(DeliveryInfo.class))
                 .build();
-        orders.put(order.getOrderId(), new OrderInfo(order, ORDER_STATUS.PENDING));
+        orders.put(order.getOrderId(), order);
         // When
-        kitchenService.processOrder(order.getOrderId());
+        var future = kitchenService.processOrder(order.getOrderId());
         // Then
-        Awaitility.await().until(() -> orders.get(order.getOrderId()).getStatus() == ORDER_STATUS.READY_FOR_DELIVERY);
-        Awaitility.await().until(() -> deliveryQueue.contains(order.getOrderId()));
+        Awaitility.await().until(future::isDone);
+        assertEquals(future.get(), ORDER_STATUS.READY_FOR_DELIVERY);
+        assertTrue(deliveryQueue.contains(order.getOrderId()));
     }
 
     @AfterAll

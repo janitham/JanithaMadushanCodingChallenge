@@ -51,16 +51,6 @@ public class OrderDetails {
             return this;
         }
 
-        public Builder addPancake(Pancake pancake, int quantity) {
-            this.pancakes.put(pancake, quantity);
-            return this;
-        }
-
-        public Builder addPancake(Pancake pancake) {
-            this.pancakes.merge(pancake, 1, Integer::sum);
-            return this;
-        }
-
         public OrderDetails build() {
             if (deliveryInfo == null) {
                 throw new IllegalArgumentException("DeliveryInfo is required");
