@@ -20,12 +20,12 @@ public class AuthenticatedOrderService implements OrderService {
         this.authenticationService = authenticationService;
     }
 
-    private void authorizeOrderAccess(UUID orderId, User user) throws AuthenticationFailureException {
+    private void authorizeOrderAccess(User user, UUID orderId) throws AuthorizationFailureException {
         if (orderUserMap.get(orderId) == null) {
-            throw new AuthenticationFailureException("Order not found");
+            throw new AuthorizationFailureException("Order not found");
         }
         if (!orderUserMap.get(orderId).equals(user)) {
-            throw new AuthenticationFailureException("User not authorized to access order");
+            throw new AuthorizationFailureException("User not authorized to access order");
         }
     }
 
@@ -42,9 +42,9 @@ public class AuthenticatedOrderService implements OrderService {
     }
 
     @Override
-    public UUID createOrder(DeliveryInfo deliveryInformation, User user) throws PancakeServiceException {
+    public UUID createOrder(User user, DeliveryInfo deliveryInformation) throws PancakeServiceException {
         authenticateUser(user);
-        var orderId = orderService.createOrder(deliveryInformation, user);
+        var orderId = orderService.createOrder(user, deliveryInformation);
         // null pointer exception here
         assignOrderToUser(orderId, user);
         return orderId;
@@ -53,28 +53,28 @@ public class AuthenticatedOrderService implements OrderService {
     @Override
     public void addPancakes(UUID orderId, Map<PancakeMenu, Integer> pancakes, User user) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeOrderAccess(orderId, user);
+        authorizeOrderAccess(user, orderId);
         orderService.addPancakes(orderId, pancakes, user);
     }
 
     @Override
     public Map<PancakeMenu, Integer> orderSummary(UUID orderId, User user) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeOrderAccess(orderId, user);
+        authorizeOrderAccess(user, orderId);
         return orderService.orderSummary(orderId, user);
     }
 
     @Override
     public OrderStatus status(UUID orderId, User user) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeOrderAccess(orderId, user);
+        authorizeOrderAccess(user, orderId);
         return orderService.status(orderId, user);
     }
 
     @Override
     public void complete(UUID orderId, User user) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeOrderAccess(orderId, user);
+        authorizeOrderAccess(user, orderId);
         orderService.complete(orderId, user);
         unAssignOrderFromUser(orderId);
     }
@@ -82,7 +82,7 @@ public class AuthenticatedOrderService implements OrderService {
     @Override
     public void cancel(UUID orderId, User user) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeOrderAccess(orderId, user);
+        authorizeOrderAccess(user, orderId);
         orderService.cancel(orderId, user);
         unAssignOrderFromUser(orderId);
     }

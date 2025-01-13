@@ -1,6 +1,6 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.ORDER_STATUS;
+import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.util.PancakeUtils;
 
@@ -17,13 +17,13 @@ public class PreparationTask implements Runnable {
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final Logger logger = Logger.getLogger(PreparationTask.class.getName());
     private final UUID orderId;
-    private final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus;
+    private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
 
     public PreparationTask(
             final BlockingDeque<UUID> deliveryQueue,
             final ConcurrentMap<UUID, OrderDetails> orders,
             final UUID orderId,
-            final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
     ) {
         this.deliveryQueue = deliveryQueue;
         this.orders = orders;
@@ -37,7 +37,7 @@ public class PreparationTask implements Runnable {
             processOrder();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            orderStatus.put(orderId, ORDER_STATUS.ERROR);
+            orderStatus.put(orderId, OrderStatus.ERROR);
         }
     }
 
@@ -51,12 +51,12 @@ public class PreparationTask implements Runnable {
         final OrderDetails orderDetails = orders.get(orderId);
         if (orderDetails == null) {
             logger.warning("Order not found: %s".formatted(orderId));
-            orderStatus.put(orderId, ORDER_STATUS.ERROR);
+            orderStatus.put(orderId, OrderStatus.ERROR);
         } else {
             prepareOrder(orderDetails);
             logger.info("Order is ready for delivery: %s".formatted(orderId));
             deliveryQueue.put(orderId);
-            orderStatus.put(orderId, ORDER_STATUS.READY_FOR_DELIVERY);
+            orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
         }
     }
 }

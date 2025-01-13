@@ -21,29 +21,31 @@ public class AuthenticatedOrderServiceTest {
     private User testUser;
     private DeliveryInfo deliveryInfo;
     private final UUID testOrderId = UUID.randomUUID();
-    private final Map<PancakeMenu, Integer> testPancakes = new HashMap<>() {{
-        put(PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1);
-        put(PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2);
-    }};
+    private final Map<PancakeMenu, Integer> testPancakes = new HashMap<>() {
+        {
+            put(PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1);
+            put(PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2);
+        }
+    };
 
     @BeforeEach
     public void setUp() {
-        orderService = Mockito.mock(OrderService.class);
-        authenticationService = Mockito.mock(AuthenticationService.class);
-        authenticatedOrderService = new AuthenticatedOrderService(orderService, authenticationService);
         testUser = new User("testUser", "password".toCharArray());
+        authenticationService = Mockito.mock(AuthenticationService.class);
+        orderService = Mockito.mock(OrderService.class);
+        authenticatedOrderService = new AuthenticatedOrderService(orderService, authenticationService);
         deliveryInfo = new DeliveryInfo("1", "2");
     }
 
     @Test
     public void shouldAuthenticateUserWhenCreatingOrder() throws PancakeServiceException {
         // Given
-        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         // When
-        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // Then
         verify(authenticationService).authenticate(testUser);
-        verify(orderService).createOrder(deliveryInfo, testUser);
+        verify(orderService).createOrder(testUser, deliveryInfo);
     }
 
     @Test
@@ -52,17 +54,19 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
-        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.createOrder(deliveryInfo, testUser));
+        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.createOrder(testUser, deliveryInfo));
     }
 
     @Test
     public void shouldAuthenticateUserWhenAddingPancakes() throws PancakeServiceException {
         // Given
-        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
-        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
-        // Then
         authenticatedOrderService.addPancakes(testOrderId, testPancakes, testUser);
+        // Then
+        verify(authenticationService, times(2)).authenticate(testUser);
+        verify(orderService).addPancakes(testOrderId, testPancakes, testUser);
     }
 
     @Test
@@ -77,12 +81,13 @@ public class AuthenticatedOrderServiceTest {
     @Test
     public void shouldAuthenticateUserWhenGettingOrderSummary() throws PancakeServiceException {
         // Given
-        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
-        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
         when(orderService.orderSummary(testOrderId, testUser)).thenReturn(testPancakes);
         var summary = authenticatedOrderService.orderSummary(testOrderId, testUser);
         // Then
+        verify(authenticationService, times(2)).authenticate(testUser);
         assertNotNull(summary);
     }
 
@@ -98,11 +103,12 @@ public class AuthenticatedOrderServiceTest {
     @Test
     public void shouldAuthenticateUserWhenGettingOrderStatus() throws PancakeServiceException {
         // Given
-        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
-        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
         authenticatedOrderService.status(testOrderId, testUser);
         // Then
+        verify(authenticationService, times(2)).authenticate(testUser);
         verify(orderService).status(testOrderId, testUser);
     }
 
@@ -118,11 +124,12 @@ public class AuthenticatedOrderServiceTest {
     @Test
     public void shouldAuthenticateUserWhenCompletingOrder() throws PancakeServiceException {
         // Given
-        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
-        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
         authenticatedOrderService.complete(testOrderId, testUser);
         // Then
+        verify(authenticationService, times(2)).authenticate(testUser);
         verify(orderService).complete(testOrderId, testUser);
     }
 
@@ -138,11 +145,12 @@ public class AuthenticatedOrderServiceTest {
     @Test
     public void shouldAuthenticateUserWhenCancellingOrder() throws PancakeServiceException {
         // Given
-        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
-        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
         authenticatedOrderService.cancel(testOrderId, testUser);
         // Then
+        verify(authenticationService, times(2)).authenticate(testUser);
         verify(orderService).cancel(testOrderId, testUser);
     }
 
@@ -153,5 +161,65 @@ public class AuthenticatedOrderServiceTest {
         // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.cancel(testOrderId, testUser));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUserNotAuthorizedForAddPancakes() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        // When
+        // Then
+        assertThrows(AuthorizationFailureException.class,
+                () -> authenticatedOrderService.addPancakes(testOrderId, testPancakes, unauthorizedUser));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUserNotAuthorizedForOrderSummary() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        // When
+        // Then
+        assertThrows(AuthorizationFailureException.class,
+                () -> authenticatedOrderService.orderSummary(testOrderId, unauthorizedUser));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUserNotAuthorizedForOrderStatus() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        // When
+        // Then
+        assertThrows(AuthorizationFailureException.class,
+                () -> authenticatedOrderService.status(testOrderId, unauthorizedUser));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUserNotAuthorizedForCompleteOrder() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        // When
+        // Then
+        assertThrows(AuthorizationFailureException.class,
+                () -> authenticatedOrderService.complete(testOrderId, unauthorizedUser));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUserNotAuthorizedForCancelOrder() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(testUser, deliveryInfo);
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        // When
+        // Then
+        assertThrows(AuthorizationFailureException.class,
+                () -> authenticatedOrderService.cancel(testOrderId, unauthorizedUser));
     }
 }

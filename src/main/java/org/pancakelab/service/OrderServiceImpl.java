@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 
 public class OrderServiceImpl implements OrderService {
 
@@ -20,27 +19,31 @@ public class OrderServiceImpl implements OrderService {
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Map<PancakeMenu, Integer>> orderItems = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus;
+    private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
 
-    public OrderServiceImpl(final KitchenService kitchenService, final ConcurrentMap<UUID, OrderDetails> orders, ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus) {
+    public OrderServiceImpl(
+            final KitchenService kitchenService,
+            final ConcurrentMap<UUID, OrderDetails> orders,
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
+    ) {
         this.kitchenService = kitchenService;
         this.orders = orders;
         this.orderStatus = orderStatus;
     }
 
     @Override
-    public UUID createOrder(final DeliveryInfo deliveryInformation) throws PancakeServiceException {
+    public UUID createOrder(User user, final DeliveryInfo deliveryInformation) throws PancakeServiceException {
         validateDeliveryInfo(deliveryInformation);
         var orderId = UUID.randomUUID();
         if (orderStorage.putIfAbsent(deliveryInformation, orderId) != null) {
             throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);
         }
-        orderStatus.put(orderId, ORDER_STATUS.CREATED);
+        orderStatus.put(orderId, OrderStatus.CREATED);
         return orderId;
     }
 
     @Override
-    public void addPancakes(final UUID orderId, final Map<PancakeMenu, Integer> pancakes) {
+    public void addPancakes(final UUID orderId, final Map<PancakeMenu, Integer> pancakes, User user) {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
@@ -52,7 +55,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Map<PancakeMenu, Integer> orderSummary(final UUID orderId) {
+    public Map<PancakeMenu, Integer> orderSummary(final UUID orderId, User user) {
         validateOrderId(orderId);
         final Map<PancakeMenu, Integer> items = orderItems.get(orderId);
         if (items == null) {
@@ -62,12 +65,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public ORDER_STATUS status(UUID orderId) {
+    public OrderStatus status(UUID orderId, User user) {
         return orderStatus.get(orderId);
     }
 
     @Override
-    public void complete(final UUID orderId) {
+    public void complete(final UUID orderId, User user) {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
@@ -84,14 +87,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void cancel(final UUID orderId) {
+    public void cancel(final UUID orderId, User user) {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
         }
         var deliveryInfo = getDeliveryInfoByOrderId(orderId);
         cleanUpOrder(orderId, deliveryInfo);
-        orderStatus.put(orderId, ORDER_STATUS.CANCELLED);
+        orderStatus.put(orderId, OrderStatus.CANCELLED);
     }
 
     private void validateOrderId(final UUID orderId) {

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface OrderService {
-    UUID createOrder(DeliveryInfo deliveryInformation, User user) throws PancakeServiceException;
+    UUID createOrder(User user, DeliveryInfo deliveryInformation) throws PancakeServiceException;
 
     void addPancakes(UUID orderId, Map<PancakeMenu, Integer> pancakes, User user) throws PancakeServiceException;
 

@@ -5,7 +5,7 @@ import org.pancakelab.model.User;
 
 import java.util.HashSet;
 
-class AuthenticationServiceImpl implements AuthenticationService {
+public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final HashSet<User> authenticatedUsers;
 
