@@ -63,10 +63,10 @@ public class AuthenticatedOrderServiceTest {
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
-        authenticatedOrderService.addPancakes(testOrderId, testPancakes, testUser);
+        authenticatedOrderService.addPancakes(testUser, testOrderId, testPancakes);
         // Then
         verify(authenticationService, times(2)).authenticate(testUser);
-        verify(orderService).addPancakes(testOrderId, testPancakes, testUser);
+        verify(orderService).addPancakes(testUser, testOrderId, testPancakes);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
-        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.addPancakes(testOrderId, testPancakes, testUser));
+        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.addPancakes(testUser, testOrderId, testPancakes));
     }
 
     @Test
@@ -84,8 +84,8 @@ public class AuthenticatedOrderServiceTest {
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
-        when(orderService.orderSummary(testOrderId, testUser)).thenReturn(testPancakes);
-        var summary = authenticatedOrderService.orderSummary(testOrderId, testUser);
+        when(orderService.orderSummary(testUser, testOrderId)).thenReturn(testPancakes);
+        var summary = authenticatedOrderService.orderSummary(testUser, testOrderId);
         // Then
         verify(authenticationService, times(2)).authenticate(testUser);
         assertNotNull(summary);
@@ -97,7 +97,7 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
-        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.orderSummary(testOrderId, testUser));
+        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.orderSummary(testUser, testOrderId));
     }
 
     @Test
@@ -106,10 +106,10 @@ public class AuthenticatedOrderServiceTest {
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
-        authenticatedOrderService.status(testOrderId, testUser);
+        authenticatedOrderService.status(testUser, testOrderId);
         // Then
         verify(authenticationService, times(2)).authenticate(testUser);
-        verify(orderService).status(testOrderId, testUser);
+        verify(orderService).status(testUser, testOrderId);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
-        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.status(testOrderId, testUser));
+        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.status(testUser, testOrderId));
     }
 
     @Test
@@ -127,10 +127,10 @@ public class AuthenticatedOrderServiceTest {
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
-        authenticatedOrderService.complete(testOrderId, testUser);
+        authenticatedOrderService.complete(testUser, testOrderId);
         // Then
         verify(authenticationService, times(2)).authenticate(testUser);
-        verify(orderService).complete(testOrderId, testUser);
+        verify(orderService).complete(testUser, testOrderId);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
-        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.complete(testOrderId, testUser));
+        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.complete(testUser, testOrderId));
     }
 
     @Test
@@ -148,10 +148,10 @@ public class AuthenticatedOrderServiceTest {
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authenticatedOrderService.createOrder(testUser, deliveryInfo);
         // When
-        authenticatedOrderService.cancel(testOrderId, testUser);
+        authenticatedOrderService.cancel(testUser, testOrderId);
         // Then
         verify(authenticationService, times(2)).authenticate(testUser);
-        verify(orderService).cancel(testOrderId, testUser);
+        verify(orderService).cancel(testUser, testOrderId);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
-        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.cancel(testOrderId, testUser));
+        assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.cancel(testUser, testOrderId));
     }
 
     @Test
@@ -172,7 +172,7 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authenticatedOrderService.addPancakes(testOrderId, testPancakes, unauthorizedUser));
+                () -> authenticatedOrderService.addPancakes(unauthorizedUser, testOrderId, testPancakes));
     }
 
     @Test
@@ -184,7 +184,7 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authenticatedOrderService.orderSummary(testOrderId, unauthorizedUser));
+                () -> authenticatedOrderService.orderSummary(unauthorizedUser, testOrderId));
     }
 
     @Test
@@ -196,7 +196,7 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authenticatedOrderService.status(testOrderId, unauthorizedUser));
+                () -> authenticatedOrderService.status(unauthorizedUser, testOrderId));
     }
 
     @Test
@@ -208,7 +208,7 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authenticatedOrderService.complete(testOrderId, unauthorizedUser));
+                () -> authenticatedOrderService.complete(unauthorizedUser, testOrderId));
     }
 
     @Test
@@ -220,6 +220,6 @@ public class AuthenticatedOrderServiceTest {
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authenticatedOrderService.cancel(testOrderId, unauthorizedUser));
+                () -> authenticatedOrderService.cancel(unauthorizedUser, testOrderId));
     }
 }

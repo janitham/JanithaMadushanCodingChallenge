@@ -7,6 +7,7 @@ import org.awaitility.Awaitility;
 import org.pancakelab.model.*;
 import org.pancakelab.service.*;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -42,17 +43,17 @@ public class PancakeServiceSteps {
 
     @When("the disciple adds {int} pancake of type {string}")
     public void the_disciple_adds_pancakes_of_type(Integer count, String type) throws PancakeServiceException {
-        orderService.addPancakes(orderId, Map.of(PancakeMenu.valueOf(type.toUpperCase()), count), authenticatedUser);
+        orderService.addPancakes(authenticatedUser, orderId, Map.of(PancakeMenu.valueOf(type.toUpperCase()), count));
     }
 
     @When("the disciple completes the order")
     public void the_disciple_completes_the_order() throws PancakeServiceException {
-        orderService.complete(orderId, authenticatedUser);
+        orderService.complete(authenticatedUser, orderId);
     }
 
     @When("the disciple cancels the order")
     public void the_disciple_cancels_the_order() throws PancakeServiceException {
-        orderService.cancel(orderId, authenticatedUser);
+        orderService.cancel(authenticatedUser, orderId);
     }
 
     @When("delivery partner is available for the delivery")
@@ -69,7 +70,7 @@ public class PancakeServiceSteps {
 
     @Then("the order should be removed from the database")
     public void the_order_should_be_removed_from_the_database() {
-        assertThrows(AuthorizationFailureException.class, () -> orderService.orderSummary(orderId, authenticatedUser));
+        assertThrows(AuthorizationFailureException.class, () -> orderService.orderSummary(authenticatedUser, orderId));
     }
 
     // Security

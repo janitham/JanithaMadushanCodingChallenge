@@ -43,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void addPancakes(final UUID orderId, final Map<PancakeMenu, Integer> pancakes, User user) {
+    public void addPancakes(User user, final UUID orderId, final Map<PancakeMenu, Integer> pancakes) {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
@@ -55,7 +55,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Map<PancakeMenu, Integer> orderSummary(final UUID orderId, User user) {
+    public Map<PancakeMenu, Integer> orderSummary(User user, final UUID orderId) {
         validateOrderId(orderId);
         final Map<PancakeMenu, Integer> items = orderItems.get(orderId);
         if (items == null) {
@@ -65,12 +65,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderStatus status(UUID orderId, User user) {
+    public OrderStatus status(User user, UUID orderId) {
         return orderStatus.get(orderId);
     }
 
     @Override
-    public void complete(final UUID orderId, User user) {
+    public void complete(User user, final UUID orderId) {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
@@ -87,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void cancel(final UUID orderId, User user) {
+    public void cancel(User user, final UUID orderId) {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);

@@ -8,13 +8,13 @@ import java.util.UUID;
 public interface OrderService {
     UUID createOrder(User user, DeliveryInfo deliveryInformation) throws PancakeServiceException;
 
-    void addPancakes(UUID orderId, Map<PancakeMenu, Integer> pancakes, User user) throws PancakeServiceException;
+    void addPancakes(User user, UUID orderId, Map<PancakeMenu, Integer> pancakes) throws PancakeServiceException;
 
-    void complete(UUID orderId, User user) throws PancakeServiceException;
+    void complete(User user,UUID orderId) throws PancakeServiceException;
 
-    void cancel(UUID orderId, User user) throws PancakeServiceException;
+    void cancel(User user,UUID orderId) throws PancakeServiceException;
 
-    Map<PancakeMenu, Integer> orderSummary(UUID orderId, User user) throws PancakeServiceException;
+    Map<PancakeMenu, Integer> orderSummary(User user,UUID orderId) throws PancakeServiceException;
 
-    OrderStatus status(UUID orderId, User user) throws PancakeServiceException;
+    OrderStatus status(User user,UUID orderId) throws PancakeServiceException;
 }

@@ -53,14 +53,14 @@ public class PancakeOrderSuccessfulProcessingTest {
                 PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
                 PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2
         );
-        orderService.addPancakes(orderId, pancakes, authorizedUser);
-        assertEquals(pancakes, orderService.orderSummary(orderId, authorizedUser));
+        orderService.addPancakes(authorizedUser, orderId, pancakes);
+        assertEquals(pancakes, orderService.orderSummary(authorizedUser, orderId));
     }
 
     @Test
     @Order(3)
     public void whenOrderIsCompleted_thenOrderShouldBeProcessedByTheKitchenAndRemoved() throws PancakeServiceException {
-        orderService.complete(orderId, authorizedUser);
+        orderService.complete(authorizedUser, orderId);
         Awaitility.await().until(() -> deliveryQueue.size() == 1);
         assertTrue(deliveryQueue.contains(orderId));
         assertEquals(orderStatus.get(orderId), OrderStatus.READY_FOR_DELIVERY);

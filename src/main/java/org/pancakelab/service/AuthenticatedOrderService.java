@@ -51,39 +51,39 @@ public class AuthenticatedOrderService implements OrderService {
     }
 
     @Override
-    public void addPancakes(UUID orderId, Map<PancakeMenu, Integer> pancakes, User user) throws PancakeServiceException {
+    public void addPancakes(User user, UUID orderId, Map<PancakeMenu, Integer> pancakes) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        orderService.addPancakes(orderId, pancakes, user);
+        orderService.addPancakes(user, orderId, pancakes);
     }
 
     @Override
-    public Map<PancakeMenu, Integer> orderSummary(UUID orderId, User user) throws PancakeServiceException {
+    public Map<PancakeMenu, Integer> orderSummary(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        return orderService.orderSummary(orderId, user);
+        return orderService.orderSummary(user, orderId);
     }
 
     @Override
-    public OrderStatus status(UUID orderId, User user) throws PancakeServiceException {
+    public OrderStatus status(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        return orderService.status(orderId, user);
+        return orderService.status(user, orderId);
     }
 
     @Override
-    public void complete(UUID orderId, User user) throws PancakeServiceException {
+    public void complete(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        orderService.complete(orderId, user);
+        orderService.complete(user, orderId);
         unAssignOrderFromUser(orderId);
     }
 
     @Override
-    public void cancel(UUID orderId, User user) throws PancakeServiceException {
+    public void cancel(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        orderService.cancel(orderId, user);
+        orderService.cancel(user, orderId);
         unAssignOrderFromUser(orderId);
     }
 }
