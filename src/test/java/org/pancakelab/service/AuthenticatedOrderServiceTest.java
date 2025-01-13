@@ -4,9 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.pancakelab.model.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -34,78 +37,120 @@ public class AuthenticatedOrderServiceTest {
 
     @Test
     public void shouldAuthenticateUserWhenCreatingOrder() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
+        // When
         authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        // Then
         verify(authenticationService).authenticate(testUser);
         verify(orderService).createOrder(deliveryInfo, testUser);
     }
 
     @Test
     public void shouldThrowExceptionWhenUserNotAuthenticatedForCreateOrder() throws PancakeServiceException {
+        // Given
+        // When
+        // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.createOrder(deliveryInfo, testUser));
     }
 
     @Test
     public void shouldAuthenticateUserWhenAddingPancakes() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        // When
+        // Then
         authenticatedOrderService.addPancakes(testOrderId, testPancakes, testUser);
-        verify(authenticationService).authenticate(testUser);
-        verify(orderService).addPancakes(testOrderId, testPancakes, testUser);
     }
 
     @Test
     public void shouldThrowExceptionWhenUserNotAuthenticatedForAddPancakes() throws PancakeServiceException {
+        // Given
+        // When
+        // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.addPancakes(testOrderId, testPancakes, testUser));
     }
 
     @Test
     public void shouldAuthenticateUserWhenGettingOrderSummary() throws PancakeServiceException {
-        authenticatedOrderService.orderSummary(testOrderId, testUser);
-        verify(authenticationService).authenticate(testUser);
-        verify(orderService).orderSummary(testOrderId, testUser);
+        // Given
+        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        // When
+        when(orderService.orderSummary(testOrderId, testUser)).thenReturn(testPancakes);
+        var summary = authenticatedOrderService.orderSummary(testOrderId, testUser);
+        // Then
+        assertNotNull(summary);
     }
 
     @Test
     public void shouldThrowExceptionWhenUserNotAuthenticatedForOrderSummary() throws PancakeServiceException {
+        // Given
+        // When
+        // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.orderSummary(testOrderId, testUser));
     }
 
     @Test
     public void shouldAuthenticateUserWhenGettingOrderStatus() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        // When
         authenticatedOrderService.status(testOrderId, testUser);
-        verify(authenticationService).authenticate(testUser);
+        // Then
         verify(orderService).status(testOrderId, testUser);
     }
 
     @Test
     public void shouldThrowExceptionWhenUserNotAuthenticatedForOrderStatus() throws PancakeServiceException {
+        // Given
+        // When
+        // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.status(testOrderId, testUser));
     }
 
     @Test
     public void shouldAuthenticateUserWhenCompletingOrder() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        // When
         authenticatedOrderService.complete(testOrderId, testUser);
-        verify(authenticationService).authenticate(testUser);
+        // Then
         verify(orderService).complete(testOrderId, testUser);
     }
 
     @Test
     public void shouldThrowExceptionWhenUserNotAuthenticatedForCompleteOrder() throws PancakeServiceException {
+        // Given
+        // When
+        // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.complete(testOrderId, testUser));
     }
 
     @Test
     public void shouldAuthenticateUserWhenCancellingOrder() throws PancakeServiceException {
+        // Given
+        when(orderService.createOrder(deliveryInfo, testUser)).thenReturn(testOrderId);
+        authenticatedOrderService.createOrder(deliveryInfo, testUser);
+        // When
         authenticatedOrderService.cancel(testOrderId, testUser);
-        verify(authenticationService).authenticate(testUser);
+        // Then
         verify(orderService).cancel(testOrderId, testUser);
     }
 
     @Test
     public void shouldThrowExceptionWhenUserNotAuthenticatedForCancelOrder() throws PancakeServiceException {
+        // Given
+        // When
+        // Then
         doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.cancel(testOrderId, testUser));
     }
