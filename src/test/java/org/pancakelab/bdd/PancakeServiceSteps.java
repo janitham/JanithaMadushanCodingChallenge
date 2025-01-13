@@ -19,7 +19,7 @@ public class PancakeServiceSteps {
     private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
     private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
-    private static final User authenticatedUser = new User("validUser", "validPassword".toCharArray());
+    private static User authenticatedUser = new User("validUser", "validPassword".toCharArray());
     private static final Thread deliveryService
             = new Thread(new DeliveryServiceImpl(orders, deliveryQueue, orderStatus));
     private static final KitchenService kitchenService
@@ -30,6 +30,7 @@ public class PancakeServiceSteps {
             new AuthenticationServiceImpl(
                     new HashSet<>() {{
                         add(authenticatedUser);
+                        add(new User("user", "password".toCharArray()));
                     }}
             )
     );
@@ -79,9 +80,26 @@ public class PancakeServiceSteps {
         orderId = UUID.randomUUID();
     }
 
+    @Given("a username as {string} and a password as {string}")
+    public void a_username_as_and_a_password_as(String username, String password) {
+        authenticatedUser = new User(username, password.toCharArray());
+    }
+
     @When("the orderId is added to the delivery queue")
     public void the_order_id_is_added_to_the_delivery_queue() throws InterruptedException {
         deliveryQueue.put(orderId);
+    }
+
+    @When("a disciple creates an order with building {string} and room number {string} and login fails")
+    public void a_disciple_creates_an_order_with_building_and_room_number_and_login_fails(String buildingNo, String roomNumber) {
+        assertThrows(AuthenticationFailureException.class,
+                () -> orderService.createOrder(authenticatedUser, new DeliveryInfo(buildingNo, String.valueOf(roomNumber))));
+    }
+
+    @When("the disciple adds {int} pancake of type {string} and attempt fails")
+    public void the_disciple_adds_pancake_of_type_and_attempt_fails(Integer count, String type) {
+        assertThrows(AuthorizationFailureException.class,
+                () -> orderService.addPancakes(authenticatedUser, orderId, Map.of(PancakeMenu.valueOf(type.toUpperCase()), count)));
     }
 
     @Then("the system should reject the orderId")
