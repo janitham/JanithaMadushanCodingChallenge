@@ -14,7 +14,7 @@ public class PreparationTaskTest {
     private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
     private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
-
+    private static final User user = new User("user", "password".toCharArray());
     @Test
     public void givenOrderNotFoundInTheDatabase_whenProcessed_thenWarningShouldBeLogged() {
         // Given
@@ -32,6 +32,7 @@ public class PreparationTaskTest {
         OrderDetails order = new OrderDetails.Builder()
                 .withPanCakes(Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 2))
                 .withDeliveryInfo(mock(DeliveryInfo.class))
+                .withUser(user)
                 .build();
         orders.put(order.getOrderId(), order);
         // When

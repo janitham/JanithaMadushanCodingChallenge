@@ -16,7 +16,7 @@ public class User {
 
     @Override
     public String toString() {
-        return Integer.toHexString(hashCode());
+        return username;
     }
 
     @Override

@@ -11,11 +11,18 @@ public class OrderDetails {
     private final DeliveryInfo deliveryInfo;
     private final Map<PancakeMenu, Integer> pancakeItems;
     private final UUID orderId;
+    private final User user;
 
-    private OrderDetails(final UUID orderId, final DeliveryInfo deliveryInfo, final Map<PancakeMenu, Integer> pancakes) {
+    private OrderDetails(
+            final UUID orderId,
+            final DeliveryInfo deliveryInfo,
+            final Map<PancakeMenu, Integer> pancakes,
+            final User user
+    ) {
         this.orderId = orderId;
         this.deliveryInfo = deliveryInfo;
         this.pancakeItems = Map.copyOf(pancakes);
+        this.user = user;
     }
 
     public UUID getOrderId() {
@@ -30,10 +37,15 @@ public class OrderDetails {
         return pancakeItems;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public String toString() {
         return "OrderDetails{" +
                 "deliveryInfo=" + deliveryInfo +
+                ", user=" + user +
                 ", pancakes=" + pancakeItems +
                 '}';
     }
@@ -42,9 +54,15 @@ public class OrderDetails {
         private DeliveryInfo deliveryInfo;
         private UUID orderId;
         private Map<PancakeMenu, Integer> pancakeItems;
+        private User user;
 
         public Builder withOrderId(final UUID orderId) {
             this.orderId = orderId;
+            return this;
+        }
+
+        public Builder withUser(final User user) {
+            this.user = user;
             return this;
         }
 
@@ -60,7 +78,7 @@ public class OrderDetails {
 
         public OrderDetails build() {
             validateFields();
-            return new OrderDetails(orderId, deliveryInfo, pancakeItems);
+            return new OrderDetails(orderId, deliveryInfo, pancakeItems, user);
         }
 
         private void validateFields() {

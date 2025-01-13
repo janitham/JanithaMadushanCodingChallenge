@@ -54,6 +54,7 @@ public class PreparationTask implements Runnable {
             orderStatus.put(orderId, OrderStatus.ERROR);
         } else {
             prepareOrder(orderDetails);
+            PancakeUtils.notifyUser(orderDetails.getUser(), OrderStatus.READY_FOR_DELIVERY);
             logger.info("Order is ready for delivery: %s".formatted(orderId));
             deliveryQueue.put(orderId);
             orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);

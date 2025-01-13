@@ -2,10 +2,7 @@ package org.pancakelab.service;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
-import org.pancakelab.model.DeliveryInfo;
-import org.pancakelab.model.OrderStatus;
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.PancakeMenu;
+import org.pancakelab.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -29,6 +26,7 @@ public class DeliveryServiceTest {
     private final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
     private final ConcurrentMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
+    private final User user = new User("user", "password".toCharArray());
 
     private Logger setupLogger(ByteArrayOutputStream logOutputStream) {
         Logger logger = Logger.getLogger(DeliveryServiceImpl.class.getName());
@@ -50,6 +48,7 @@ public class DeliveryServiceTest {
                                 PancakeMenu.DARK_CHOCOLATE_PANCAKE, 2
                         )
                 )
+                .withUser(user)
                 .withDeliveryInfo(mock(DeliveryInfo.class)).build();
         var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, orderStatus);
         orders.put(order.getOrderId(), order);

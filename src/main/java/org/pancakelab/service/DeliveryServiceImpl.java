@@ -2,6 +2,7 @@ package org.pancakelab.service;
 
 import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.OrderDetails;
+import org.pancakelab.util.PancakeUtils;
 
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
@@ -43,6 +44,7 @@ public class DeliveryServiceImpl implements DeliveryService, Runnable {
             orders.remove(orderId);
             logger.info("Delivering order: %s".formatted(orderDetails.getOrderId()));
             orderStatus.put(orderId, OrderStatus.DELIVERED);
+            PancakeUtils.notifyUser(orderDetails.getUser(), OrderStatus.DELIVERED);
         } else {
             orderStatus.put(orderId, OrderStatus.ERROR);
             logger.warning("Order not found: %s".formatted(orderId));

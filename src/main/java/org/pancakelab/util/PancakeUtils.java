@@ -1,7 +1,9 @@
 package org.pancakelab.util;
 
+import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.Pancake;
 import org.pancakelab.model.PancakeMenu;
+import org.pancakelab.model.User;
 
 import java.util.logging.Logger;
 
@@ -33,5 +35,12 @@ public class PancakeUtils {
             logger.info("Adding hazelnuts...");
         }
         logger.info("%s is ready!".formatted(pancake.toString()));
+    }
+
+    public static void notifyUser(User user, OrderStatus orderStatus){
+        if(user == null || orderStatus == null){
+            throw new IllegalArgumentException("User and OrderStatus cannot be null");
+        }
+        logger.info("Notifying %s that the order is %s".formatted(user, orderStatus));
     }
 }

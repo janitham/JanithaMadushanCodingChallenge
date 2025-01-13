@@ -22,6 +22,7 @@ public class OrderServiceTest {
     private KitchenService kitchenService;
     private OrderService orderService;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
+    private User user;
 
     @BeforeEach
     public void setUp() {
@@ -29,6 +30,7 @@ public class OrderServiceTest {
         kitchenService = mock(KitchenService.class);
         orderStatus = new ConcurrentHashMap<>();
         orderService = new OrderServiceImpl(kitchenService, orders, orderStatus);
+        user = new User("user", "password".toCharArray());
     }
 
     @Test
@@ -36,10 +38,10 @@ public class OrderServiceTest {
         // Given
         var deliveryInformation = new DeliveryInfo("1", "2");
         // When
-        final UUID orderId = orderService.createOrder(deliveryInformation);
+        final UUID orderId = orderService.createOrder(user, deliveryInformation);
         // Then
         assertNotNull(orderId);
-        assertEquals(orderService.status(orderId), ORDER_STATUS.CREATED);
+        assertEquals(orderService.status(user, orderId), OrderStatus.CREATED);
     }
 
     @Test
@@ -48,11 +50,11 @@ public class OrderServiceTest {
         // Given
         var deliveryInformation = new DeliveryInfo("1", "2");
         // When
-        orderService.createOrder(deliveryInformation);
+        orderService.createOrder(user, deliveryInformation);
         // Then
         Exception exception = assertThrows(
                 PancakeServiceException.class,
-                () -> orderService.createOrder(deliveryInformation)
+                () -> orderService.createOrder(user, deliveryInformation)
         );
         assertEquals(OrderServiceImpl.DUPLICATE_ORDERS_CANNOT_BE_PLACED, exception.getMessage());
     }
@@ -60,7 +62,7 @@ public class OrderServiceTest {
     @Test
     public void givenValidOrder_then_pancakesCanBeIncludedFromTheMenu() throws PancakeServiceException {
         // Given
-        var orderId = orderService.createOrder(new DeliveryInfo("1", "2"));
+        var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes1 = Map.of(
                 PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1,
                 PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2
@@ -69,10 +71,10 @@ public class OrderServiceTest {
                 PancakeMenu.MILK_CHOCOLATE_PANCAKE, 1,
                 PancakeMenu.MILK_CHOCOLATE_HAZELNUTS_PANCAKE, 4
         );
-        orderService.addPancakes(orderId, pancakes1);
-        orderService.addPancakes(orderId, pancakes2);
+        orderService.addPancakes(user, orderId, pancakes1);
+        orderService.addPancakes(user, orderId, pancakes2);
         // When
-        final Map<PancakeMenu, Integer> summary = orderService.orderSummary(orderId);
+        final Map<PancakeMenu, Integer> summary = orderService.orderSummary(user, orderId);
         // Then
         assertEquals(1, summary.get(PancakeMenu.DARK_CHOCOLATE_PANCAKE));
         assertEquals(3, summary.get(PancakeMenu.MILK_CHOCOLATE_PANCAKE));
@@ -86,7 +88,7 @@ public class OrderServiceTest {
         // Then
         Exception exception = assertThrows(
                 PancakeServiceException.class,
-                () -> orderService.addPancakes(null, UUID.randomUUID(), new HashMap<>())
+                () -> orderService.addPancakes(user, UUID.randomUUID(), new HashMap<>())
         );
         assertEquals(ORDER_NOT_FOUND, exception.getMessage());
     }
@@ -98,7 +100,7 @@ public class OrderServiceTest {
         // Then
         Exception exception = assertThrows(
                 PancakeServiceException.class,
-                () -> orderService.addPancakes(null, null, new HashMap<>())
+                () -> orderService.addPancakes(user, null, new HashMap<>())
         );
         assertEquals(ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID, exception.getMessage());
     }
@@ -106,29 +108,29 @@ public class OrderServiceTest {
     @Test
     public void givenValidOrderId_then_completingOrderShouldReturnFutureObject() throws PancakeServiceException {
         // Given
-        var orderId = orderService.createOrder(new DeliveryInfo("1", "2"));
+        var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes1 = Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1);
-        orderService.addPancakes(orderId, pancakes1);
+        orderService.addPancakes(user, orderId, pancakes1);
         // When
-        orderService.complete(orderId);
+        orderService.complete(user, orderId);
         // Then
         assertNotNull(orders.get(orderId));
-        assertThrows(IllegalStateException.class, () -> orderService.orderSummary(orderId));
+        assertThrows(PancakeServiceException.class, () -> orderService.orderSummary(null, orderId));
         verify(kitchenService).processOrder(orderId);
     }
 
     @Test
     public void givenValidOrderId_then_cancel_shouldRemoveOrder() throws PancakeServiceException {
         // Given
-        var orderId = orderService.createOrder(new DeliveryInfo("1", "2"));
+        var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes1 = Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1);
-        orderService.addPancakes(orderId, pancakes1);
+        orderService.addPancakes(user, orderId, pancakes1);
         // When
-        orderService.cancel(orderId);
+        orderService.cancel(user, orderId);
         // Then
         assertFalse(orders.containsKey(orderId));
-        assertThrows(IllegalStateException.class, () -> orderService.orderSummary(orderId));
-        assertEquals(ORDER_STATUS.CANCELLED, orderStatus.get(orderId));
+        assertThrows(PancakeServiceException.class, () -> orderService.orderSummary(null, orderId));
+        assertEquals(OrderStatus.CANCELLED, orderStatus.get(orderId));
     }
 
     @Test
@@ -138,7 +140,7 @@ public class OrderServiceTest {
         // Then
         Exception exception = assertThrows(
                 PancakeServiceException.class,
-                () -> orderService.complete(null, null)
+                () -> orderService.complete(user, null)
         );
         assertEquals(ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID, exception.getMessage());
     }
@@ -150,7 +152,7 @@ public class OrderServiceTest {
         // Then
         Exception exception = assertThrows(
                 PancakeServiceException.class,
-                () -> orderService.complete(null, UUID.randomUUID())
+                () -> orderService.complete(user, UUID.randomUUID())
         );
         assertEquals(ORDER_NOT_FOUND, exception.getMessage());
     }
@@ -158,7 +160,7 @@ public class OrderServiceTest {
     @Test
     public void givenMoreThan10Pancakes_whenAddPancakes_thenThrowException() throws PancakeServiceException {
         // Given
-        var orderId = orderService.createOrder(null, new DeliveryInfo("1", "2"));
+        var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes = Map.of(
                 PancakeMenu.DARK_CHOCOLATE_PANCAKE, 10
         );
@@ -167,8 +169,8 @@ public class OrderServiceTest {
         Exception exception = assertThrows(
                 PancakeServiceException.class,
                 () -> {
-                    orderService.addPancakes(null, orderId, pancakes);
-                    orderService.addPancakes(null, orderId, pancakes);
+                    orderService.addPancakes(user, orderId, pancakes);
+                    orderService.addPancakes(user, orderId, pancakes);
                 }
         );
         assertEquals(OrderServiceImpl.MAXIMUM_PANCAKES_EXCEEDED, exception.getMessage());

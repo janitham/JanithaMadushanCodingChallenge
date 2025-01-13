@@ -1,6 +1,7 @@
 package org.pancakelab.service;
 
 import org.pancakelab.model.*;
+import org.pancakelab.util.PancakeUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,7 @@ public class OrderServiceImpl implements OrderService {
             throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);
         }
         orderStatus.put(orderId, OrderStatus.CREATED);
+        PancakeUtils.notifyUser(user, OrderStatus.CREATED);
         return orderId;
     }
 
@@ -86,11 +88,13 @@ public class OrderServiceImpl implements OrderService {
         var orderDetails = new OrderDetails.Builder()
                 .withDeliveryInfo(deliveryInfo)
                 .withOrderId(orderId)
+                .withUser(user)
                 .withPanCakes(orderItems.get(orderId))
                 .build();
         orders.put(orderId, orderDetails);
         cleanUpOrder(orderId, deliveryInfo);
         kitchenService.processOrder(orderId);
+        PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
     }
 
     @Override
@@ -102,6 +106,7 @@ public class OrderServiceImpl implements OrderService {
         var deliveryInfo = getDeliveryInfoByOrderId(orderId);
         cleanUpOrder(orderId, deliveryInfo);
         orderStatus.put(orderId, OrderStatus.CANCELLED);
+        PancakeUtils.notifyUser(user, OrderStatus.CANCELLED);
     }
 
     private void validateOrderId(final UUID orderId) throws PancakeServiceException {
