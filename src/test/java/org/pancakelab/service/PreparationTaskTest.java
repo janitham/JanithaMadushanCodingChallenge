@@ -22,7 +22,7 @@ public class PreparationTaskTest {
         // When
         new PreparationTask(deliveryQueue, orders, orderId, orderStatus).run();
         // Then
-        assertSame(ORDER_STATUS.NOT_FOUND, status);
+        assertSame(OrderStatus.ERROR, orderStatus.get(orderId));
         assertFalse(deliveryQueue.contains(orderId));
     }
 
