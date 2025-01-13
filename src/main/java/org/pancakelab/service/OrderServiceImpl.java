@@ -20,10 +20,12 @@ public class OrderServiceImpl implements OrderService {
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Map<PancakeMenu, Integer>> orderItems = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus;
 
-    public OrderServiceImpl(final KitchenService kitchenService, final ConcurrentMap<UUID, OrderDetails> orders) {
+    public OrderServiceImpl(final KitchenService kitchenService, final ConcurrentMap<UUID, OrderDetails> orders, ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus) {
         this.kitchenService = kitchenService;
         this.orders = orders;
+        this.orderStatus = orderStatus;
     }
 
     @Override
@@ -33,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
         if (orderStorage.putIfAbsent(deliveryInformation, orderId) != null) {
             throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);
         }
+        orderStatus.put(orderId, ORDER_STATUS.CREATED);
         return orderId;
     }
 
@@ -59,7 +62,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Future<ORDER_STATUS> complete(final UUID orderId) {
+    public ORDER_STATUS status(UUID orderId) {
+        return orderStatus.get(orderId);
+    }
+
+    @Override
+    public void complete(final UUID orderId) {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
@@ -72,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         orders.put(orderId, orderDetails);
         cleanUpOrder(orderId, deliveryInfo);
-        return kitchenService.processOrder(orderId);
+        kitchenService.processOrder(orderId);
     }
 
     @Override
@@ -83,6 +91,7 @@ public class OrderServiceImpl implements OrderService {
         }
         var deliveryInfo = getDeliveryInfoByOrderId(orderId);
         cleanUpOrder(orderId, deliveryInfo);
+        orderStatus.put(orderId, ORDER_STATUS.CANCELLED);
     }
 
     private void validateOrderId(final UUID orderId) {

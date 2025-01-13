@@ -6,35 +6,38 @@ import org.pancakelab.util.PancakeUtils;
 
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
-public class PreparationTask implements Callable<ORDER_STATUS> {
+public class PreparationTask implements Runnable {
 
     private final BlockingDeque<UUID> deliveryQueue;
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final Logger logger = Logger.getLogger(PreparationTask.class.getName());
     private final UUID orderId;
+    private final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus;
 
     public PreparationTask(
             final BlockingDeque<UUID> deliveryQueue,
             final ConcurrentMap<UUID, OrderDetails> orders,
-            final UUID orderId
+            final UUID orderId,
+            final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus
     ) {
         this.deliveryQueue = deliveryQueue;
         this.orders = orders;
         this.orderId = orderId;
+        this.orderStatus = orderStatus;
     }
 
     @Override
-    public ORDER_STATUS call() {
+    public void run() {
         try {
-            return processOrder();
+            processOrder();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return ORDER_STATUS.ERROR;
+            orderStatus.put(orderId, ORDER_STATUS.ERROR);
         }
     }
 
@@ -44,16 +47,16 @@ public class PreparationTask implements Callable<ORDER_STATUS> {
                         .forEach(i -> PancakeUtils.preparePancake(pancake)));
     }
 
-    private ORDER_STATUS processOrder() throws InterruptedException {
+    private void processOrder() throws InterruptedException {
         final OrderDetails orderDetails = orders.get(orderId);
         if (orderDetails == null) {
             logger.warning("Order not found: %s".formatted(orderId));
-            return ORDER_STATUS.NOT_FOUND;
+            orderStatus.put(orderId, ORDER_STATUS.ERROR);
         } else {
             prepareOrder(orderDetails);
             logger.info("Order is ready for delivery: %s".formatted(orderId));
             deliveryQueue.put(orderId);
-            return ORDER_STATUS.READY_FOR_DELIVERY;
+            orderStatus.put(orderId, ORDER_STATUS.READY_FOR_DELIVERY);
         }
     }
 }

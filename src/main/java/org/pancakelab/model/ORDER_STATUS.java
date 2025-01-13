@@ -1,8 +1,9 @@
 package org.pancakelab.model;
 
 public enum ORDER_STATUS {
-    PENDING,
+    CREATED,
+    READY_FOR_DELIVERY,
     DELIVERED,
     CANCELLED,
-    READY_FOR_DELIVERY, NOT_FOUND, INVALID, ERROR,
+    ERROR
 }

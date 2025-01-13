@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -21,10 +20,11 @@ public class KitchenServiceTest {
     private static KitchenService kitchenService;
     private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
+    private static final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus = new ConcurrentHashMap<>();
 
     @BeforeAll
     public static void init() {
-        kitchenService = KitchenServiceImpl.getInstance(5, deliveryQueue, orders);
+        kitchenService = KitchenServiceImpl.getInstance(5, deliveryQueue, orders, orderStatus);
     }
 
     @Test
@@ -36,10 +36,9 @@ public class KitchenServiceTest {
                 .build();
         orders.put(order.getOrderId(), order);
         // When
-        var future = kitchenService.processOrder(order.getOrderId());
+        kitchenService.processOrder(order.getOrderId());
         // Then
-        Awaitility.await().until(future::isDone);
-        assertEquals(future.get(), ORDER_STATUS.READY_FOR_DELIVERY);
+        Awaitility.await().until(() -> orderStatus.get(order.getOrderId()) == ORDER_STATUS.READY_FOR_DELIVERY);
         assertTrue(deliveryQueue.contains(order.getOrderId()));
     }
 

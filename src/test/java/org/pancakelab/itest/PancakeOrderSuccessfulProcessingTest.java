@@ -23,13 +23,15 @@ public class PancakeOrderSuccessfulProcessingTest {
     private static OrderService orderService;
     private static UUID orderId;
     private static DeliveryInfo deliveryInfo;
+    private static ConcurrentHashMap<UUID,ORDER_STATUS> orderStatus;
 
     @BeforeAll
     public static void init() {
         deliveryInfo = new DeliveryInfo("1", "2");
-        deliveryService = new Thread(new DeliveryServiceImpl(orders, deliveryQueue));
-        kitchenService = KitchenServiceImpl.getInstance(2, deliveryQueue, orders);
-        orderService = new OrderServiceImpl(kitchenService, orders);
+        orderStatus = new ConcurrentHashMap<>();
+        deliveryService = new Thread(new DeliveryServiceImpl(orders, deliveryQueue, orderStatus));
+        kitchenService = KitchenServiceImpl.getInstance(2, deliveryQueue, orders, orderStatus);
+        orderService = new OrderServiceImpl(kitchenService, orders, orderStatus);
     }
 
     @Test
@@ -53,11 +55,10 @@ public class PancakeOrderSuccessfulProcessingTest {
     @Test
     @Order(3)
     public void whenOrderIsCompleted_thenOrderShouldBeProcessedByTheKitchenAndRemoved() throws ExecutionException, InterruptedException {
-        var future = orderService.complete(orderId);
+        orderService.complete(orderId);
         Awaitility.await().until(() -> deliveryQueue.size() == 1);
         assertTrue(deliveryQueue.contains(orderId));
-        assertTrue(future.isDone());
-        assertEquals(future.get(), ORDER_STATUS.READY_FOR_DELIVERY);
+        assertEquals(orderStatus.get(orderId), ORDER_STATUS.READY_FOR_DELIVERY);
     }
 
     @Test
