@@ -20,7 +20,7 @@ public class KitchenServiceTest {
     private static KitchenService kitchenService;
     private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
-    private static final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
 
     @BeforeAll
     public static void init() {
@@ -38,7 +38,7 @@ public class KitchenServiceTest {
         // When
         kitchenService.processOrder(order.getOrderId());
         // Then
-        Awaitility.await().until(() -> orderStatus.get(order.getOrderId()) == ORDER_STATUS.READY_FOR_DELIVERY);
+        Awaitility.await().until(() -> orderStatus.get(order.getOrderId()) == OrderStatus.READY_FOR_DELIVERY);
         assertTrue(deliveryQueue.contains(order.getOrderId()));
     }
 

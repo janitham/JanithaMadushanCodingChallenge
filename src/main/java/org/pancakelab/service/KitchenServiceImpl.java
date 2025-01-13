@@ -1,6 +1,6 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.ORDER_STATUS;
+import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.OrderDetails;
 
 import java.util.UUID;
@@ -11,13 +11,13 @@ public class KitchenServiceImpl implements KitchenService {
     private final ExecutorService deliveryExecutor;
     private final BlockingDeque<UUID> deliveryQueue;
     private final ConcurrentMap<UUID, OrderDetails> orders;
-    private final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus;
+    private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
 
     private KitchenServiceImpl(
             final BlockingDeque<UUID> deliveryQueue,
             final ConcurrentMap<UUID, OrderDetails> orders,
             final ExecutorService executorService,
-            final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
     ) {
         this.deliveryQueue = deliveryQueue;
         this.orders = orders;
@@ -29,7 +29,7 @@ public class KitchenServiceImpl implements KitchenService {
             final int numberOfChefsInTheKitchen,
             final BlockingDeque<UUID> deliveryQueue,
             final ConcurrentMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
     ) {
         if (instance == null) {
             instance = new KitchenServiceImpl(
@@ -46,7 +46,7 @@ public class KitchenServiceImpl implements KitchenService {
             final BlockingDeque<UUID> deliveryQueue,
             final ConcurrentMap<UUID, OrderDetails> orders,
             final ExecutorService deliveryExecutor,
-            final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
     ) {
         if (instance == null) {
             instance = new KitchenServiceImpl(deliveryQueue, orders, deliveryExecutor, orderStatus);

@@ -3,7 +3,7 @@ package org.pancakelab.service;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.DeliveryInfo;
-import org.pancakelab.model.ORDER_STATUS;
+import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.PancakeMenu;
 
@@ -28,7 +28,7 @@ public class DeliveryServiceTest {
 
     private final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
-    private final ConcurrentMap<UUID, ORDER_STATUS> orderStatus = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
 
     private Logger setupLogger(ByteArrayOutputStream logOutputStream) {
         Logger logger = Logger.getLogger(DeliveryServiceImpl.class.getName());
@@ -62,7 +62,7 @@ public class DeliveryServiceTest {
             new Thread(deliveryService).start();
             // Then
             Awaitility.await().until(orders::isEmpty);
-            assertEquals(orderStatus.get(order.getOrderId()), ORDER_STATUS.DELIVERED);
+            assertEquals(orderStatus.get(order.getOrderId()), OrderStatus.DELIVERED);
             logHandler.flush();
             assertTrue(logOutputStream.toString().contains("Delivering order: %s".formatted(order.getOrderId())));
         } finally {
@@ -87,6 +87,7 @@ public class DeliveryServiceTest {
                 logHandler.flush();
                 return logOutputStream.toString().contains("Order not found: %s".formatted(orderId));
             });
+            assertEquals(orderStatus.get(orderId), OrderStatus.ERROR);
         } finally {
             cleanupLogger(logger, logHandler);
         }

@@ -8,9 +8,13 @@ import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
 import org.pancakelab.service.*;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,42 +27,43 @@ public class PancakeOrderSuccessfulProcessingTest {
     private static OrderService orderService;
     private static UUID orderId;
     private static DeliveryInfo deliveryInfo;
-    private static ConcurrentHashMap<UUID,ORDER_STATUS> orderStatus;
+    private static ConcurrentHashMap<UUID, OrderStatus> orderStatus;
+    private static final User authorizedUser = new User("testUser", "password".toCharArray());
 
     @BeforeAll
     public static void init() {
-        deliveryInfo = new DeliveryInfo("1", "2");
-        orderStatus = new ConcurrentHashMap<>();
-        deliveryService = new Thread(new DeliveryServiceImpl(orders, deliveryQueue, orderStatus));
-        kitchenService = KitchenServiceImpl.getInstance(2, deliveryQueue, orders, orderStatus);
-        orderService = new OrderServiceImpl(kitchenService, orders, orderStatus);
+        initializeDeliveryInfo();
+        initializeOrderStatus();
+        initializeDeliveryService();
+        initializeKitchenService();
+        initializeOrderService();
     }
 
     @Test
     @Order(1)
     public void whenValidPancakeOrderIsPlaced_thenOrderShouldBePlaced() throws PancakeServiceException {
-        orderId = orderService.createOrder(deliveryInfo);
+        orderId = orderService.createOrder(authorizedUser, deliveryInfo);
         assertNotNull(orderId);
     }
 
     @Test
     @Order(2)
-    public void whenOrderIsUpdatedWithItemsInTheMenu_thenOrderShouldContainTheItems() {
+    public void whenOrderIsUpdatedWithItemsInTheMenu_thenOrderShouldContainTheItems() throws PancakeServiceException {
         var pancakes = Map.of(
                 PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
                 PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2
         );
-        orderService.addPancakes(orderId, pancakes);
-        assertEquals(pancakes, orderService.orderSummary(orderId));
+        orderService.addPancakes(orderId, pancakes, authorizedUser);
+        assertEquals(pancakes, orderService.orderSummary(orderId, authorizedUser));
     }
 
     @Test
     @Order(3)
-    public void whenOrderIsCompleted_thenOrderShouldBeProcessedByTheKitchenAndRemoved() throws ExecutionException, InterruptedException {
-        orderService.complete(orderId);
+    public void whenOrderIsCompleted_thenOrderShouldBeProcessedByTheKitchenAndRemoved() throws PancakeServiceException {
+        orderService.complete(orderId, authorizedUser);
         Awaitility.await().until(() -> deliveryQueue.size() == 1);
         assertTrue(deliveryQueue.contains(orderId));
-        assertEquals(orderStatus.get(orderId), ORDER_STATUS.READY_FOR_DELIVERY);
+        assertEquals(orderStatus.get(orderId), OrderStatus.READY_FOR_DELIVERY);
     }
 
     @Test
@@ -77,5 +82,31 @@ public class PancakeOrderSuccessfulProcessingTest {
             Thread.currentThread().interrupt();
         }
         kitchenService.shutdown();
+    }
+
+    private static void initializeDeliveryInfo() {
+        deliveryInfo = new DeliveryInfo("1", "2");
+    }
+
+    private static void initializeOrderStatus() {
+        orderStatus = new ConcurrentHashMap<>();
+    }
+
+    private static void initializeDeliveryService() {
+        deliveryService = new Thread(new DeliveryServiceImpl(orders, deliveryQueue, orderStatus));
+    }
+
+    private static void initializeKitchenService() {
+        kitchenService = KitchenServiceImpl.getInstance(2, deliveryQueue, orders, orderStatus);
+    }
+
+    private static void initializeOrderService() {
+        AuthenticationService authenticationService = new AuthenticationServiceImpl(new HashSet<>() {
+            {
+                add(authorizedUser);
+            }
+        });
+        orderService = new AuthenticatedOrderService(
+                new OrderServiceImpl(kitchenService, orders, orderStatus), authenticationService);
     }
 }

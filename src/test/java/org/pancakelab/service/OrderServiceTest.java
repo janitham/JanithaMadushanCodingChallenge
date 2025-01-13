@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.FutureTask;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -21,7 +20,7 @@ public class OrderServiceTest {
     private ConcurrentMap<UUID, OrderDetails> orders;
     private KitchenService kitchenService;
     private OrderService orderService;
-    private ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus;
+    private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
 
     @BeforeEach
     public void setUp() {

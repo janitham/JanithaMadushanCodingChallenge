@@ -1,6 +1,6 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.ORDER_STATUS;
+import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.OrderDetails;
 
 import java.util.UUID;
@@ -13,12 +13,12 @@ public class DeliveryServiceImpl implements DeliveryService, Runnable {
     private final Logger logger = Logger.getLogger(DeliveryServiceImpl.class.getName());
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final BlockingDeque<UUID> deliveryQueue;
-    private final ConcurrentMap<UUID, ORDER_STATUS> orderStatus;
+    private final ConcurrentMap<UUID, OrderStatus> orderStatus;
 
     public DeliveryServiceImpl(
             final ConcurrentMap<UUID, OrderDetails> orders,
             final BlockingDeque<UUID> deliveryQueue,
-            final ConcurrentMap<UUID, ORDER_STATUS> orderStatus
+            final ConcurrentMap<UUID, OrderStatus> orderStatus
     ) {
         this.orders = orders;
         this.deliveryQueue = deliveryQueue;
@@ -42,8 +42,9 @@ public class DeliveryServiceImpl implements DeliveryService, Runnable {
         if (orderDetails != null) {
             orders.remove(orderId);
             logger.info("Delivering order: %s".formatted(orderDetails.getOrderId()));
-            orderStatus.put(orderId, ORDER_STATUS.DELIVERED);
+            orderStatus.put(orderId, OrderStatus.DELIVERED);
         } else {
+            orderStatus.put(orderId, OrderStatus.ERROR);
             logger.warning("Order not found: %s".formatted(orderId));
         }
     }

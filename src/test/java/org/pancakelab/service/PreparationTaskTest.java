@@ -13,12 +13,12 @@ import static org.mockito.Mockito.mock;
 public class PreparationTaskTest {
     private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
-    private static final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
 
     @Test
     public void givenOrderNotFoundInTheDatabase_whenProcessed_thenWarningShouldBeLogged() {
         // Given
-        UUID orderId = UUID.randomUUID();
+        final UUID orderId = UUID.randomUUID();
         // When
         new PreparationTask(deliveryQueue, orders, orderId, orderStatus).run();
         // Then
@@ -37,7 +37,7 @@ public class PreparationTaskTest {
         // When
         new PreparationTask(deliveryQueue, orders, order.getOrderId(), orderStatus).run();
         // Then
-        assertSame(ORDER_STATUS.READY_FOR_DELIVERY, orderStatus.get(order.getOrderId()));
+        assertSame(OrderStatus.READY_FOR_DELIVERY, orderStatus.get(order.getOrderId()));
         assertTrue(deliveryQueue.contains(order.getOrderId()));
     }
 }

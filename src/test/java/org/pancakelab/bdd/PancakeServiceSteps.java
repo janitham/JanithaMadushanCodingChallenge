@@ -17,7 +17,7 @@ public class PancakeServiceSteps {
 
     private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
-    private static final ConcurrentHashMap<UUID, ORDER_STATUS> orderStatus = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
     private static final Thread deliveryService = new Thread(new DeliveryServiceImpl(orders, deliveryQueue, orderStatus));
     private static final KitchenService kitchenService = KitchenServiceImpl.getInstance(1, deliveryQueue, orders, orderStatus);
     private static final OrderService orderService = new OrderServiceImpl(kitchenService, orders, orderStatus);
