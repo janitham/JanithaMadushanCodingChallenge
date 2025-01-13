@@ -14,6 +14,8 @@ public class OrderServiceImpl implements OrderService {
     public static final String ORDER_NOT_FOUND = "Order not found";
     public static final String ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID = "Order id cannot be null";
     public static final String DUPLICATE_ORDERS_CANNOT_BE_PLACED = "Cannot create an order for the same delivery location";
+    public static final Integer MAXIMUM_PANCAKES = 10;
+    public static final String MAXIMUM_PANCAKES_EXCEEDED = "The maximum number of pancakes that can be ordered is %d".formatted(MAXIMUM_PANCAKES);
 
     private final KitchenService kitchenService;
     private final ConcurrentMap<UUID, OrderDetails> orders;
@@ -43,10 +45,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void addPancakes(User user, final UUID orderId, final Map<PancakeMenu, Integer> pancakes) {
+    public void addPancakes(User user, final UUID orderId, final Map<PancakeMenu, Integer> pancakes) throws PancakeServiceException {
         validateOrderId(orderId);
+        var currentTotal = orderItems.values().stream().mapToInt(item -> item.values().stream().mapToInt(Integer::intValue).sum()).sum();
+        var incomingTotal = pancakes.values().stream().mapToInt(Integer::intValue).sum();
+        if (currentTotal + incomingTotal > MAXIMUM_PANCAKES) {
+            throw new PancakeServiceException(MAXIMUM_PANCAKES_EXCEEDED);
+        }
         if (!orderStorage.containsValue(orderId)) {
-            throw new IllegalStateException(ORDER_NOT_FOUND);
+            throw new PancakeServiceException(ORDER_NOT_FOUND);
         }
         orderItems.merge(orderId, new HashMap<>(pancakes), (oldPancakes, newPancakes) -> {
             newPancakes.forEach((type, count) -> oldPancakes.merge(type, count, Integer::sum));
@@ -55,11 +62,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Map<PancakeMenu, Integer> orderSummary(User user, final UUID orderId) {
+    public Map<PancakeMenu, Integer> orderSummary(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
         final Map<PancakeMenu, Integer> items = orderItems.get(orderId);
         if (items == null) {
-            throw new IllegalStateException(ORDER_NOT_FOUND);
+            throw new PancakeServiceException(ORDER_NOT_FOUND);
         }
         return new HashMap<>(items);
     }
@@ -70,10 +77,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void complete(User user, final UUID orderId) {
+    public void complete(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
-            throw new IllegalStateException(ORDER_NOT_FOUND);
+            throw new PancakeServiceException(ORDER_NOT_FOUND);
         }
         var deliveryInfo = getDeliveryInfoByOrderId(orderId);
         var orderDetails = new OrderDetails.Builder()
@@ -87,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void cancel(User user, final UUID orderId) {
+    public void cancel(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
@@ -97,15 +104,15 @@ public class OrderServiceImpl implements OrderService {
         orderStatus.put(orderId, OrderStatus.CANCELLED);
     }
 
-    private void validateOrderId(final UUID orderId) {
+    private void validateOrderId(final UUID orderId) throws PancakeServiceException {
         if (orderId == null) {
-            throw new IllegalArgumentException(ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID);
+            throw new PancakeServiceException(ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID);
         }
     }
 
-    private void validateDeliveryInfo(final DeliveryInfo deliveryInfo) {
+    private void validateDeliveryInfo(final DeliveryInfo deliveryInfo) throws PancakeServiceException {
         if (deliveryInfo == null) {
-            throw new IllegalArgumentException(ORDER_DETAILS_SHOULD_NOT_BE_NULL);
+            throw new PancakeServiceException(ORDER_DETAILS_SHOULD_NOT_BE_NULL);
         }
     }
 

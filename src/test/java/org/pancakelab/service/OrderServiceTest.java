@@ -11,7 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.pancakelab.service.OrderServiceImpl.ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID;
 import static org.pancakelab.service.OrderServiceImpl.ORDER_NOT_FOUND;
 
@@ -84,8 +85,8 @@ public class OrderServiceTest {
         // When
         // Then
         Exception exception = assertThrows(
-                IllegalStateException.class,
-                () -> orderService.addPancakes(UUID.randomUUID(), new HashMap<>())
+                PancakeServiceException.class,
+                () -> orderService.addPancakes(null, UUID.randomUUID(), new HashMap<>())
         );
         assertEquals(ORDER_NOT_FOUND, exception.getMessage());
     }
@@ -96,8 +97,8 @@ public class OrderServiceTest {
         // When
         // Then
         Exception exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> orderService.addPancakes(null, new HashMap<>())
+                PancakeServiceException.class,
+                () -> orderService.addPancakes(null, null, new HashMap<>())
         );
         assertEquals(ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID, exception.getMessage());
     }
@@ -136,8 +137,8 @@ public class OrderServiceTest {
         // When
         // Then
         Exception exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> orderService.complete(null)
+                PancakeServiceException.class,
+                () -> orderService.complete(null, null)
         );
         assertEquals(ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID, exception.getMessage());
     }
@@ -148,9 +149,28 @@ public class OrderServiceTest {
         // When
         // Then
         Exception exception = assertThrows(
-                IllegalStateException.class,
-                () -> orderService.complete(UUID.randomUUID())
+                PancakeServiceException.class,
+                () -> orderService.complete(null, UUID.randomUUID())
         );
         assertEquals(ORDER_NOT_FOUND, exception.getMessage());
+    }
+
+    @Test
+    public void givenMoreThan10Pancakes_whenAddPancakes_thenThrowException() throws PancakeServiceException {
+        // Given
+        var orderId = orderService.createOrder(null, new DeliveryInfo("1", "2"));
+        var pancakes = Map.of(
+                PancakeMenu.DARK_CHOCOLATE_PANCAKE, 10
+        );
+        // When
+        // Then
+        Exception exception = assertThrows(
+                PancakeServiceException.class,
+                () -> {
+                    orderService.addPancakes(null, orderId, pancakes);
+                    orderService.addPancakes(null, orderId, pancakes);
+                }
+        );
+        assertEquals(OrderServiceImpl.MAXIMUM_PANCAKES_EXCEEDED, exception.getMessage());
     }
 }

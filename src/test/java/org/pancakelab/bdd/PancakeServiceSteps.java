@@ -102,6 +102,12 @@ public class PancakeServiceSteps {
                 () -> orderService.addPancakes(authenticatedUser, orderId, Map.of(PancakeMenu.valueOf(type.toUpperCase()), count)));
     }
 
+    @When("the disciple adds {int} pancake of type {string} and system complains large order")
+    public void the_disciple_adds_pancake_of_type_and_system_complains_large_order(Integer count, String type) {
+        assertThrows(PancakeServiceException.class,
+                () -> orderService.addPancakes(authenticatedUser, orderId, Map.of(PancakeMenu.valueOf(type.toUpperCase()), count)));
+    }
+
     @Then("the system should reject the orderId")
     public void the_system_should_reject_the_order_id() {
         Awaitility.await().until(() -> orderStatus.get(orderId) == OrderStatus.ERROR);
