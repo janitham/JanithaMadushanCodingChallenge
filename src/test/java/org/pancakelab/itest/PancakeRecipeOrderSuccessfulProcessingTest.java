@@ -9,9 +9,7 @@ import org.pancakelab.model.*;
 import org.pancakelab.service.*;
 import org.pancakelab.util.DeliveryInformationValidator;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +23,14 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
     private static UUID orderId;
     private static DeliveryInfo deliveryInfo;
     private static ConcurrentHashMap<UUID, OrderStatus> orderStatus;
-    private static final User authorizedUser = new User("testUser", "password".toCharArray());
+    private static final Map<String, List<Character>> privileges = new HashMap<>() {
+        {
+            put("order", List.of('C', 'R', 'U', 'D'));
+            put("kitchen", List.of('C', 'R', 'U', 'D'));
+            put("delivery", List.of('C', 'R', 'U', 'D'));
+        }
+    };
+    private static final User authorizedUser = new User("testUser", "password".toCharArray(), privileges);
 
     @BeforeAll
     public static void init() {

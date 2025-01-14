@@ -1,9 +1,6 @@
 package org.pancakelab.util;
 
-import org.pancakelab.model.OrderStatus;
-import org.pancakelab.model.PancakeRecipe;
-import org.pancakelab.model.Pancakes;
-import org.pancakelab.model.User;
+import org.pancakelab.model.*;
 
 import java.util.logging.Logger;
 
@@ -41,5 +38,11 @@ public class PancakeUtils {
             throw new IllegalArgumentException("User and OrderStatus cannot be null");
         }
         logger.info("Notifying %s that the order is %s".formatted(user, orderStatus));
+    }
+
+    public static void authorizeUser(User user, String service,  Character privilege) throws PancakeServiceException {
+        if (!user.getPrivileges().get(service).contains(privilege)) {
+            throw new PancakeServiceException("User does not have enough permission to perform this operation");
+        }
     }
 }

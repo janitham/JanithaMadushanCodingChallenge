@@ -6,7 +6,9 @@ import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.PancakeServiceException;
 import org.pancakelab.model.User;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,10 +24,17 @@ public class AuthorizedKitchenServiceTest {
 
     @BeforeEach
     public void setUp() {
+        final Map<String, List<Character>> privileges = new HashMap<>() {
+            {
+                put("order", List.of('C', 'R', 'U', 'D'));
+                put("kitchen", List.of('C', 'R', 'U', 'D'));
+                put("delivery", List.of('C', 'R', 'U', 'D'));
+            }
+        };
         kitchenService = mock(KitchenService.class);
         authenticationService = mock(AuthenticationService.class);
         authorizedKitchenService = new AuthorizedKitchenService(kitchenService, authenticationService);
-        user = new User("testUser", "password".toCharArray());
+        user = new User("testUser", "password".toCharArray(), privileges);
         orderId = UUID.randomUUID();
     }
 

@@ -7,6 +7,7 @@ import org.pancakelab.model.*;
 import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,13 +27,21 @@ public class OrderServiceTest {
     private User user;
     private DeliveryInformationValidator deliveryInformationValidator;
 
+    private final Map<String, List<Character>> privileges = new HashMap<>() {
+        {
+            put("order", List.of('C', 'R', 'U', 'D'));
+            put("kitchen", List.of('C', 'R', 'U', 'D'));
+            put("delivery", List.of('C', 'R', 'U', 'D'));
+        }
+    };
+
     @BeforeEach
     public void setUp() {
         orders = new ConcurrentHashMap<>();
         orderStatus = new ConcurrentHashMap<>();
         deliveryInformationValidator = mock(DeliveryInformationValidator.class);
         orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator);
-        user = new User("user", "password".toCharArray());
+        user = new User("user", "password".toCharArray(), privileges);
     }
 
     @Test
@@ -129,7 +138,7 @@ public class OrderServiceTest {
         // When
         orderService.cancel(user, orderId);
         // Then
-        Awaitility.await().until(()->!orders.containsKey(orderId));
+        Awaitility.await().until(() -> !orders.containsKey(orderId));
         assertEquals(OrderStatus.CANCELLED, orderStatus.get(orderId));
     }
 
@@ -179,7 +188,7 @@ public class OrderServiceTest {
     @Test
     public void givenValidOrder_then_creatingAnotherOrderShouldThrowAnException() {
         // Given
-        var user = new User("user2", "password2".toCharArray());
+        var user = new User("user2", "password2".toCharArray(), privileges);
         var orderId = UUID.randomUUID();
         orderStatus.put(orderId, OrderStatus.CREATED);
         orders.put(

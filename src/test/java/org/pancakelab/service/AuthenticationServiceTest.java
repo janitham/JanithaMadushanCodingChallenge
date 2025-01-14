@@ -6,7 +6,10 @@ import org.pancakelab.model.AuthenticationFailureException;
 import org.pancakelab.model.PancakeServiceException;
 import org.pancakelab.model.User;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.pancakelab.service.AuthenticationServiceImpl.INVALID_USER;
@@ -16,17 +19,25 @@ public class AuthenticationServiceTest {
 
     private static AuthenticationService authService;
 
+    private static final Map<String, List<Character>> privileges = new HashMap<>() {
+        {
+            put("order", List.of('C', 'R', 'U', 'D'));
+            put("kitchen", List.of('C', 'R', 'U', 'D'));
+            put("delivery", List.of('C', 'R', 'U', 'D'));
+        }
+    };
+
     @BeforeAll
     public static void setUp() {
         HashSet<User> predefinedUsers = new HashSet<>();
-        predefinedUsers.add(new User("validUser", "validPassword".toCharArray()));
+        predefinedUsers.add(new User("validUser", "validPassword".toCharArray(), privileges));
         authService = new AuthenticationServiceImpl(predefinedUsers);
     }
 
     @Test
     public void givenValidUser_whenAuthenticate_thenNoExceptionThrown() {
         // Given
-        User validUser = new User("validUser", "validPassword".toCharArray());
+        User validUser = new User("validUser", "validPassword".toCharArray(), privileges);
         // When
         // Then
         assertDoesNotThrow(() -> authService.authenticate(validUser));
@@ -35,7 +46,7 @@ public class AuthenticationServiceTest {
     @Test
     public void givenInvalidUser_whenAuthenticate_thenExceptionThrown() {
         // Given
-        User invalidUser = new User("invalidUser", "invalidPassword".toCharArray());
+        User invalidUser = new User("invalidUser", "invalidPassword".toCharArray(), privileges);
         // When
         // Then
         PancakeServiceException exception = assertThrows(

@@ -8,29 +8,33 @@ import org.pancakelab.model.*;
 import org.pancakelab.service.*;
 import org.pancakelab.util.DeliveryInformationValidator;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PancakeServiceSteps {
 
+    private static final Map<String, List<Character>> privileges = new HashMap<>() {
+        {
+            put("order", List.of('C', 'R', 'U', 'D'));
+            put("kitchen", List.of('C', 'R', 'U', 'D'));
+            put("delivery", List.of('C', 'R', 'U', 'D'));
+        }
+    };
     private static final HashMap<String, User> systemUsers = new HashMap<>() {
         {
-            put("user1", new User("user", "password".toCharArray()));
-            put("user2", new User("user2", "password2".toCharArray()));
-            put("user3", new User("user3", "password3".toCharArray()));
-            put("user4", new User("user4", "password4".toCharArray()));
-            put("user5", new User("user5", "password5".toCharArray()));
-            put("user6", new User("user5", "password6".toCharArray()));
+            put("user1", new User("user", "password".toCharArray(), privileges));
+            put("user2", new User("user2", "password2".toCharArray(), privileges));
+            put("user3", new User("user3", "password3".toCharArray(), privileges));
+            put("user4", new User("user4", "password4".toCharArray(), privileges));
+            put("user5", new User("user5", "password5".toCharArray(), privileges));
+            put("user6", new User("user5", "password6".toCharArray(), privileges));
         }
     };
     private static final ConcurrentHashMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
-    private static User authenticatedUser = new User("validUser", "validPassword".toCharArray());
+    private static User authenticatedUser = new User("validUser", "validPassword".toCharArray(), privileges);
     private static UUID orderId;
 
 
@@ -137,7 +141,7 @@ public class PancakeServiceSteps {
 
     @Given("a username as {string} and a password as {string}")
     public void a_username_as_and_a_password_as(String username, String password) {
-        authenticatedUser = new User(username, password.toCharArray());
+        authenticatedUser = new User(username, password.toCharArray(), privileges);
     }
 
     @When("a disciple creates an order with building {string} and room number {string} and login fails")

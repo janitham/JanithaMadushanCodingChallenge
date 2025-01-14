@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.pancakelab.util.PancakeUtils.authorizeUser;
+
 public class AuthorizedOrderService implements OrderService {
 
     public static String USER_DOES_NOT_HAVE_AUTHORITY_TO_ACCESS_ORDER = "User not authorized to access order";
@@ -47,6 +49,7 @@ public class AuthorizedOrderService implements OrderService {
     @Override
     public UUID createOrder(User user, DeliveryInfo deliveryInformation) throws PancakeServiceException {
         authenticateUser(user);
+        authorizeUser(user, "order", 'C');
         var orderId = orderService.createOrder(user, deliveryInformation);
         assignOrderToUser(orderId, user);
         return orderId;
@@ -56,6 +59,7 @@ public class AuthorizedOrderService implements OrderService {
     public void addPancakes(User user, UUID orderId, Map<Pancakes, Integer> pancakes) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
+        authorizeUser(user, "order", 'C');
         orderService.addPancakes(user, orderId, pancakes);
     }
 
@@ -63,6 +67,7 @@ public class AuthorizedOrderService implements OrderService {
     public Map<Pancakes, Integer> orderSummary(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
+        authorizeUser(user, "order", 'R');
         return orderService.orderSummary(user, orderId);
     }
 
@@ -70,6 +75,7 @@ public class AuthorizedOrderService implements OrderService {
     public OrderStatus status(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
+        authorizeUser(user, "order", 'R');
         return orderService.status(user, orderId);
     }
 
@@ -77,6 +83,7 @@ public class AuthorizedOrderService implements OrderService {
     public void complete(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
+        authorizeUser(user, "order", 'C');
         orderService.complete(user, orderId);
         unAssignOrderFromUser(orderId);
     }
@@ -85,6 +92,7 @@ public class AuthorizedOrderService implements OrderService {
     public void cancel(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
+        authorizeUser(user, "order", 'U');
         orderService.cancel(user, orderId);
         unAssignOrderFromUser(orderId);
     }

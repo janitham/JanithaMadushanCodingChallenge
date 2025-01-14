@@ -1,12 +1,21 @@
 package org.pancakelab.model;
 
+import java.util.List;
+import java.util.Map;
+
 public class User {
     private final String username;
     private final char[] password;
+    private final Map<String, List<Character>> privileges;
 
-    public User(String username, char[] password) {
+    public User(String username, char[] password, Map<String, List<Character>> privileges) {
         this.username = username;
         this.password = password;
+        this.privileges = privileges;
+    }
+
+    public Map<String, List<Character>> getPrivileges() {
+        return Map.copyOf(this.privileges);
     }
 
     @Override

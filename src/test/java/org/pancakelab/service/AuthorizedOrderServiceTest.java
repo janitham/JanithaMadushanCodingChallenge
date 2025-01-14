@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.pancakelab.model.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,10 +29,17 @@ public class AuthorizedOrderServiceTest {
             put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
         }
     };
+    private final Map<String, List<Character>> privileges = new HashMap<>() {
+        {
+            put("order", List.of('C', 'R', 'U', 'D'));
+            put("kitchen", List.of('C', 'R', 'U', 'D'));
+            put("delivery", List.of('C', 'R', 'U', 'D'));
+        }
+    };
 
     @BeforeEach
     public void setUp() {
-        testUser = new User("testUser", "password".toCharArray());
+        testUser = new User("testUser", "password".toCharArray(), privileges);
         authenticationService = Mockito.mock(AuthenticationService.class);
         orderService = Mockito.mock(OrderService.class);
         authorizedOrderService = new AuthorizedOrderService(orderService, authenticationService);
@@ -169,7 +177,7 @@ public class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
@@ -181,7 +189,7 @@ public class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
@@ -193,7 +201,7 @@ public class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
@@ -205,7 +213,7 @@ public class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
@@ -217,7 +225,7 @@ public class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray());
+        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
