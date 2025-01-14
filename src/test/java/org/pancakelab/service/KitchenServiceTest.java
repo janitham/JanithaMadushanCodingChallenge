@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
+import org.pancakelab.model.PancakeServiceException;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +30,7 @@ public class KitchenServiceTest {
     }
 
     @Test
-    public void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeInProgress() {
+    public void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeInProgress() throws PancakeServiceException {
         // Given
         UUID orderId = UUID.randomUUID();
         OrderDetails orderDetails = mock(OrderDetails.class);
@@ -37,13 +38,13 @@ public class KitchenServiceTest {
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
         // When
-        kitchenService.acceptOrder(orderId);
+        kitchenService.acceptOrder(null, orderId);
         // Then
         Awaitility.await().until(()->OrderStatus.IN_PROGRESS.equals(orderStatus.get(orderId)));
     }
 
     @Test
-    public void givenValidOrder_whenNotifyOrderCompletion_thenOrderStatusShouldBeReadyForDeliveryAndAddedToQueue() {
+    public void givenValidOrder_whenNotifyOrderCompletion_thenOrderStatusShouldBeReadyForDeliveryAndAddedToQueue() throws PancakeServiceException {
         // Given
         UUID orderId = UUID.randomUUID();
         OrderDetails orderDetails = mock(OrderDetails.class);
@@ -51,13 +52,13 @@ public class KitchenServiceTest {
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.IN_PROGRESS);
         // When
-        kitchenService.notifyOrderCompletion(orderId);
+        kitchenService.notifyOrderCompletion(null, orderId);
         // Then
         Awaitility.await().until(()->OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId)));
     }
 
     @Test
-    public void givenOrders_whenViewOrders_thenShouldReturnAllOrders() {
+    public void givenOrders_whenViewOrders_thenShouldReturnAllOrders() throws PancakeServiceException {
         // Given
         UUID orderId1 = UUID.randomUUID();
         UUID orderId2 = UUID.randomUUID();
@@ -68,7 +69,7 @@ public class KitchenServiceTest {
         orders.put(orderId1, orderDetails1);
         orders.put(orderId2, orderDetails2);
         // When
-        List<OrderDetails> allOrders = kitchenService.viewOrders();
+        List<OrderDetails> allOrders = kitchenService.viewOrders(null);
         // Then
         assertEquals(2, allOrders.size());
         assertTrue(allOrders.contains(orderDetails1));

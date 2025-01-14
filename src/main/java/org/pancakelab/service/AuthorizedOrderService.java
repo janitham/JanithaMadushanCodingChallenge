@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AuthenticatedOrderService implements OrderService {
+public class AuthorizedOrderService implements OrderService {
 
     public static String USER_DOES_NOT_HAVE_AUTHORITY_TO_ACCESS_ORDER = "User not authorized to access order";
     public static String ORDER_NOT_FOUND = "Order not found";
@@ -15,7 +15,7 @@ public class AuthenticatedOrderService implements OrderService {
     private final AuthenticationService authenticationService;
     private final ConcurrentHashMap<UUID, User> orderUserMap = new ConcurrentHashMap<>();
 
-    public AuthenticatedOrderService(
+    public AuthorizedOrderService(
             final OrderService orderService,
             final AuthenticationService authenticationService
     ) {

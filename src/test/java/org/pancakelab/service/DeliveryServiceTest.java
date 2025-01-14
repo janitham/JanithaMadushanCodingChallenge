@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
+import org.pancakelab.model.PancakeServiceException;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +29,7 @@ public class DeliveryServiceTest {
     }
 
     @Test
-    public void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeOutForDelivery() {
+    public void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeOutForDelivery() throws PancakeServiceException {
         // Given
         UUID orderId = UUID.randomUUID();
         OrderDetails orderDetails = mock(OrderDetails.class);
@@ -36,13 +37,13 @@ public class DeliveryServiceTest {
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
         // When
-        deliveryService.acceptOrder(orderId);
+        deliveryService.acceptOrder(null, orderId);
         // Then
         Awaitility.await().until(()->OrderStatus.OUT_FOR_DELIVERY.equals(orderStatus.get(orderId)));
     }
 
     @Test
-    public void givenValidOrder_whenSendForTheDelivery_thenOrderStatusShouldBeDelivered() {
+    public void givenValidOrder_whenSendForTheDelivery_thenOrderStatusShouldBeDelivered() throws PancakeServiceException {
         // Given
         UUID orderId = UUID.randomUUID();
         OrderDetails orderDetails = mock(OrderDetails.class);
@@ -50,14 +51,14 @@ public class DeliveryServiceTest {
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
         // When
-        deliveryService.sendForTheDelivery(orderId);
+        deliveryService.sendForTheDelivery(null,orderId);
         // Then
         Awaitility.await().until(()->OrderStatus.DELIVERED.equals(orderStatus.get(orderId)));
         assertFalse(orders.containsKey(orderId));
     }
 
     @Test
-    public void givenValidOrder_whenViewCompletedOrders_thenShouldReturnCompletedOrders() {
+    public void givenValidOrder_whenViewCompletedOrders_thenShouldReturnCompletedOrders() throws PancakeServiceException {
         // Given
         UUID orderId1 = UUID.randomUUID();
         UUID orderId2 = UUID.randomUUID();
@@ -70,7 +71,7 @@ public class DeliveryServiceTest {
         orderStatus.put(orderId1, OrderStatus.READY_FOR_DELIVERY);
         orderStatus.put(orderId2, OrderStatus.DELIVERED);
         // When
-        List<OrderDetails> completedOrders = deliveryService.viewCompletedOrders();
+        List<OrderDetails> completedOrders = deliveryService.viewCompletedOrders(null);
         // Then
         assertEquals(1, completedOrders.size());
         assertTrue(completedOrders.contains(orderDetails1));

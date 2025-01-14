@@ -2,6 +2,7 @@ package org.pancakelab.service;
 
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
+import org.pancakelab.model.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,12 +23,12 @@ public class KitchenServiceImpl implements KitchenService {
     }
 
     @Override
-    public List<OrderDetails> viewOrders() {
+    public List<OrderDetails> viewOrders(User user) {
         return List.copyOf(orders.values());
     }
 
     @Override
-    public void acceptOrder(UUID orderId) {
+    public void acceptOrder(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null) {
@@ -39,7 +40,7 @@ public class KitchenServiceImpl implements KitchenService {
     }
 
     @Override
-    public void notifyOrderCompletion(UUID orderId) {
+    public void notifyOrderCompletion(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null) {

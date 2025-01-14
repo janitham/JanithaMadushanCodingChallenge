@@ -23,7 +23,9 @@ public class PancakeServiceSteps {
             put("user1", new User("user", "password".toCharArray()));
             put("user2", new User("user2", "password2".toCharArray()));
             put("user3", new User("user3", "password3".toCharArray()));
-            put("user4", new User("user3", "password3".toCharArray()));
+            put("user4", new User("user4", "password4".toCharArray()));
+            put("user5", new User("user5", "password5".toCharArray()));
+            put("user6", new User("user5", "password6".toCharArray()));
         }
     };
     private static final ConcurrentHashMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
@@ -31,18 +33,27 @@ public class PancakeServiceSteps {
     private static User authenticatedUser = new User("validUser", "validPassword".toCharArray());
     private static UUID orderId;
 
-    private static final KitchenServiceImpl kitchenService = new KitchenServiceImpl(orders, orderStatus);
-    private static final DeliveryService deliveryService = new DeliveryServiceImpl(orders, orderStatus);
-    private static final OrderService orderService = new AuthenticatedOrderService(
+
+    private static final AuthenticationService authenticationService = new AuthenticationServiceImpl(
+            new HashSet<>() {
+                {
+                    add(authenticatedUser);
+                    addAll(systemUsers.values());
+                }
+            }
+    );
+    private static final KitchenService kitchenService = new AuthorizedKitchenService(
+            new KitchenServiceImpl(orders, orderStatus),
+            authenticationService
+    );
+    private static final DeliveryService deliveryService = new AuthorizedDeliveryService(
+            new DeliveryServiceImpl(orders, orderStatus),
+            authenticationService
+    );
+
+    private static final OrderService orderService = new AuthorizedOrderService(
             new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator()),
-            new AuthenticationServiceImpl(
-                    new HashSet<>() {
-                        {
-                            add(authenticatedUser);
-                            addAll(systemUsers.values());
-                        }
-                    }
-            )
+            authenticationService
     );
 
     @Given("a disciple {string} creates an order with building {string} and room number {string}")
@@ -77,8 +88,8 @@ public class PancakeServiceSteps {
     }
 
     @When("the chef {string} accepts the order")
-    public void the_chef_accepts_the_order(String chef) {
-        kitchenService.acceptOrder(orderId);
+    public void the_chef_accepts_the_order(String user) throws PancakeServiceException {
+        kitchenService.acceptOrder(systemUsers.get(user), orderId);
     }
 
     @Given("a disciple {string} has a created order")
@@ -92,17 +103,18 @@ public class PancakeServiceSteps {
     }
 
     @When("the chef {string} completes the order")
-    public void the_chef_completes_the_order(String string) {
-        kitchenService.notifyOrderCompletion(orderId);
+    public void the_chef_completes_the_order(String user) throws PancakeServiceException {
+        kitchenService.notifyOrderCompletion(systemUsers.get(user), orderId);
     }
 
     @Given("a disciple {string} has an order ready for delivery")
     public void a_disciple_has_an_order_ready_for_delivery(String user) {
         addOrderToTheSystem(user, OrderStatus.READY_FOR_DELIVERY);
     }
+
     @When("the rider {string} accepts the order")
-    public void the_rider_accepts_the_order(String string) {
-        deliveryService.acceptOrder(orderId);
+    public void the_rider_accepts_the_order(String user) throws PancakeServiceException {
+        deliveryService.acceptOrder(systemUsers.get(user), orderId);
     }
 
 
@@ -110,9 +122,10 @@ public class PancakeServiceSteps {
     public void a_disciple_has_an_order_out_for_delivery(String user) {
         addOrderToTheSystem(user, OrderStatus.OUT_FOR_DELIVERY);
     }
+
     @When("the rider {string} completes the order")
-    public void the_rider_completes_the_order(String string) {
-        deliveryService.sendForTheDelivery(orderId);
+    public void the_rider_completes_the_order(String user) throws PancakeServiceException {
+        deliveryService.sendForTheDelivery(systemUsers.get(user), orderId);
     }
 
     // Security

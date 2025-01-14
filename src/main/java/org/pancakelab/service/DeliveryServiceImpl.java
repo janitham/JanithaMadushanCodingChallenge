@@ -2,6 +2,7 @@ package org.pancakelab.service;
 
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
+import org.pancakelab.model.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,14 +23,14 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public List<OrderDetails> viewCompletedOrders() {
+    public List<OrderDetails> viewCompletedOrders(User user) {
         return orders.values().stream()
                 .filter(order -> orderStatus.get(order.getOrderId()) == OrderStatus.READY_FOR_DELIVERY)
                 .toList();
     }
 
     @Override
-    public void acceptOrder(UUID orderId) {
+    public void acceptOrder(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null && orderStatus.get(orderId) == OrderStatus.READY_FOR_DELIVERY) {
@@ -39,7 +40,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public void sendForTheDelivery(UUID orderId) {
+    public void sendForTheDelivery(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null && orderStatus.get(orderId) == OrderStatus.OUT_FOR_DELIVERY) {
