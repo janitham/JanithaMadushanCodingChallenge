@@ -12,6 +12,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+import static org.pancakelab.service.AuthenticationServiceImpl.USER_IS_NOT_AUTHENTICATED;
 
 public class AuthenticatedOrderServiceTest {
 
@@ -53,7 +54,7 @@ public class AuthenticatedOrderServiceTest {
         // Given
         // When
         // Then
-        doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
+        doThrow(new AuthenticationFailureException(USER_IS_NOT_AUTHENTICATED)).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.createOrder(testUser, deliveryInfo));
     }
 
@@ -74,7 +75,7 @@ public class AuthenticatedOrderServiceTest {
         // Given
         // When
         // Then
-        doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
+        doThrow(new AuthenticationFailureException(USER_IS_NOT_AUTHENTICATED)).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.addPancakes(testUser, testOrderId, testPancakes));
     }
 
@@ -96,7 +97,7 @@ public class AuthenticatedOrderServiceTest {
         // Given
         // When
         // Then
-        doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
+        doThrow(new AuthenticationFailureException(USER_IS_NOT_AUTHENTICATED)).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.orderSummary(testUser, testOrderId));
     }
 
@@ -117,7 +118,7 @@ public class AuthenticatedOrderServiceTest {
         // Given
         // When
         // Then
-        doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
+        doThrow(new AuthenticationFailureException(USER_IS_NOT_AUTHENTICATED)).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.status(testUser, testOrderId));
     }
 
@@ -138,7 +139,7 @@ public class AuthenticatedOrderServiceTest {
         // Given
         // When
         // Then
-        doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
+        doThrow(new AuthenticationFailureException(USER_IS_NOT_AUTHENTICATED)).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.complete(testUser, testOrderId));
     }
 
@@ -159,7 +160,7 @@ public class AuthenticatedOrderServiceTest {
         // Given
         // When
         // Then
-        doThrow(new AuthenticationFailureException("User not authenticated")).when(authenticationService).authenticate(testUser);
+        doThrow(new AuthenticationFailureException(USER_IS_NOT_AUTHENTICATED)).when(authenticationService).authenticate(testUser);
         assertThrows(AuthenticationFailureException.class, () -> authenticatedOrderService.cancel(testUser, testOrderId));
     }
 

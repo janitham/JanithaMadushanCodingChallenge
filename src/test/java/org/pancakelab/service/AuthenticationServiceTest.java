@@ -2,12 +2,15 @@ package org.pancakelab.service;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.pancakelab.model.AuthenticationFailureException;
 import org.pancakelab.model.PancakeServiceException;
 import org.pancakelab.model.User;
 
 import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.pancakelab.service.AuthenticationServiceImpl.INVALID_USER;
+import static org.pancakelab.service.AuthenticationServiceImpl.USER_IS_NOT_AUTHENTICATED;
 
 public class AuthenticationServiceTest {
 
@@ -36,8 +39,8 @@ public class AuthenticationServiceTest {
         // When
         // Then
         PancakeServiceException exception = assertThrows(
-                PancakeServiceException.class, () -> authService.authenticate(invalidUser));
-        assertEquals("User not authenticated", exception.getMessage());
+                AuthenticationFailureException.class, () -> authService.authenticate(invalidUser));
+        assertEquals(USER_IS_NOT_AUTHENTICATED, exception.getMessage());
     }
 
     @Test
@@ -47,6 +50,6 @@ public class AuthenticationServiceTest {
         // Then
         PancakeServiceException exception = assertThrows(
                 PancakeServiceException.class, () -> authService.authenticate(null));
-        assertEquals("Invalid user", exception.getMessage());
+        assertEquals(INVALID_USER, exception.getMessage());
     }
 }

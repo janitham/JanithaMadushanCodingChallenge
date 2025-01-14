@@ -126,12 +126,6 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private void validateDeliveryInfo(final DeliveryInfo deliveryInfo) throws PancakeServiceException {
-        if (deliveryInfo == null) {
-            throw new PancakeServiceException(ORDER_DETAILS_SHOULD_NOT_BE_NULL);
-        }
-    }
-
     private DeliveryInfo getDeliveryInfoByOrderId(final UUID orderId) {
         return orderStorage.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(orderId))

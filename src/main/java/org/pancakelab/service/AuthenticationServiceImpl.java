@@ -7,6 +7,9 @@ import java.util.HashSet;
 
 public class AuthenticationServiceImpl implements AuthenticationService {
 
+    public static String USER_IS_NOT_AUTHENTICATED = "User not authenticated";
+    public static String INVALID_USER = "Invalid user";
+
     private final HashSet<User> authenticatedUsers;
 
     public AuthenticationServiceImpl(HashSet<User> authenticatedUsers) {
@@ -16,10 +19,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void authenticate(User user) throws AuthenticationFailureException {
         if (user == null) {
-            throw new AuthenticationFailureException("Invalid user");
+            throw new AuthenticationFailureException(INVALID_USER);
         }
         if (!authenticatedUsers.contains(user)) {
-            throw new AuthenticationFailureException("User not authenticated");
+            throw new AuthenticationFailureException(USER_IS_NOT_AUTHENTICATED);
         }
     }
 }

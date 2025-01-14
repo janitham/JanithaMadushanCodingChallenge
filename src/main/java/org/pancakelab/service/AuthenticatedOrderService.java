@@ -8,6 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AuthenticatedOrderService implements OrderService {
 
+    public static String USER_DOES_NOT_HAVE_AUTHORITY_TO_ACCESS_ORDER = "User not authorized to access order";
+    public static String ORDER_NOT_FOUND = "Order not found";
+
     private final OrderService orderService;
     private final AuthenticationService authenticationService;
     private final ConcurrentHashMap<UUID, User> orderUserMap = new ConcurrentHashMap<>();
@@ -22,10 +25,10 @@ public class AuthenticatedOrderService implements OrderService {
 
     private void authorizeOrderAccess(User user, UUID orderId) throws AuthorizationFailureException {
         if (orderUserMap.get(orderId) == null) {
-            throw new AuthorizationFailureException("Order not found");
+            throw new AuthorizationFailureException(ORDER_NOT_FOUND);
         }
         if (!orderUserMap.get(orderId).equals(user)) {
-            throw new AuthorizationFailureException("User not authorized to access order");
+            throw new AuthorizationFailureException(USER_DOES_NOT_HAVE_AUTHORITY_TO_ACCESS_ORDER);
         }
     }
 
