@@ -15,10 +15,8 @@ public class DeliveryService {
         this.deliveryPartnerPool = Executors.newFixedThreadPool(numberOfDeliveryPartners);
     }
 
-    public void registerDeliveryPartners(List<DeliveryTask> deliveryPartners) {
-        for (Runnable deliveryPartner : deliveryPartners) {
-            deliveryPartnerPool.submit((Runnable) deliveryPartner);
-        }
+    public void submitDeliveryTask(DeliveryTask deliveryTask){
+        deliveryPartnerPool.submit(deliveryTask);
     }
 
     public void shutdown() {

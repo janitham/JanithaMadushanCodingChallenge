@@ -29,7 +29,7 @@ public class DeliveryServiceTest {
         deliveryService = new DeliveryService(
                 1
         );
-        deliveryService.registerDeliveryPartners(List.of(new DeliveryTask(orders, deliveryQueue, orderStatus)));
+        deliveryService.submitDeliveryTask(new DeliveryTask(orders, deliveryQueue, orderStatus));
     }
 
     @Test
