@@ -6,7 +6,6 @@ import io.cucumber.java.en.When;
 import org.awaitility.Awaitility;
 import org.pancakelab.model.*;
 import org.pancakelab.service.*;
-import org.pancakelab.tasks.DeliveryPartnerTask;
 import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.HashMap;
@@ -23,8 +22,7 @@ public class PancakeServiceSteps {
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
     private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
     private static User authenticatedUser = new User("validUser", "validPassword".toCharArray());
-    private static final Thread deliveryService = new Thread(new DeliveryPartnerTask(orders, deliveryQueue, orderStatus));
-    private static final KitchenService kitchenService = new KitchenService(1);
+    private static final KitchenServiceImpl kitchenService = new KitchenServiceImpl(orders, orderStatus);
 
     private static final HashMap<String, User> systemUsers = new HashMap<>() {
         {
@@ -36,7 +34,7 @@ public class PancakeServiceSteps {
     };
     private static final OrderService orderService
             = new AuthenticatedOrderService(
-            new OrderServiceImpl(kitchenService, orders, orderStatus, new DeliveryInformationValidator(), deliveryQueue),
+            new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator()),
             new AuthenticationServiceImpl(
                     new HashSet<>() {
                         {
@@ -71,9 +69,7 @@ public class PancakeServiceSteps {
 
     @When("delivery partner is available for the delivery")
     public void delivery_partner_is_available_for_the_delivery() {
-        if (deliveryService.getState() == Thread.State.NEW) {
-            deliveryService.start();
-        }
+        // Implementation needed
     }
 
     @When("delivery partner notifies delivered")
