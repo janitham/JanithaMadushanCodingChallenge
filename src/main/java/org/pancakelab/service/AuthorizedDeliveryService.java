@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.pancakelab.util.PancakeUtils.authorizeUser;
 
 public class AuthorizedDeliveryService implements DeliveryService {
+
     private final DeliveryService deliveryService;
     private final AuthenticationService authenticationService;
 

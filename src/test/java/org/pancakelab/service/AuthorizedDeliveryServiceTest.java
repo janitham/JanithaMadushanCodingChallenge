@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.pancakelab.util.PancakeUtils.USER_IS_NOT_AUTHORIZED;
 
 public class AuthorizedDeliveryServiceTest {
 
@@ -68,5 +69,35 @@ public class AuthorizedDeliveryServiceTest {
         // Then
         verify(authenticationService).authenticate(privileged);
         verify(deliveryService).sendForTheDelivery(privileged, orderId);
+    }
+
+    @Test
+    public void whenViewingCompletedOrdersShouldThrowExceptionWhenUserIsNotPrivileged(){
+        // Given
+        // When
+        // Then
+        PancakeServiceException exception = assertThrows(
+                AuthorizationFailureException.class, () -> authorizedDeliveryService.viewCompletedOrders(unPrivileged));
+        assertEquals(USER_IS_NOT_AUTHORIZED, exception.getMessage());
+    }
+
+    @Test
+    public void whenAcceptingOrderShouldThrowExceptionWhenUserIsNotPrivileged(){
+        // Given
+        // When
+        // Then
+        PancakeServiceException exception = assertThrows(
+                AuthorizationFailureException.class, () -> authorizedDeliveryService.acceptOrder(unPrivileged, orderId));
+        assertEquals(USER_IS_NOT_AUTHORIZED, exception.getMessage());
+    }
+
+    @Test
+    public void whenSendingForDeliveryShouldThrowExceptionWhenUserIsNotPrivileged(){
+        // Given
+        // When
+        // Then
+        PancakeServiceException exception = assertThrows(
+                AuthorizationFailureException.class, () -> authorizedDeliveryService.sendForTheDelivery(unPrivileged, orderId));
+        assertEquals(USER_IS_NOT_AUTHORIZED, exception.getMessage());
     }
 }

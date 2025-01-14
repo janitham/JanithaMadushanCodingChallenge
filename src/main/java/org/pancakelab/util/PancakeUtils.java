@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 public class PancakeUtils {
 
     private static final Logger logger = Logger.getLogger(PancakeUtils.class.getName());
+    public static final String USER_IS_NOT_AUTHORIZED = "User does not have enough privileges to perform this action";
 
     private PancakeUtils() {
     }
@@ -33,16 +34,16 @@ public class PancakeUtils {
         logger.info("%s is ready!".formatted(pancakeRecipe.toString()));
     }
 
-    public static void notifyUser(User user, OrderStatus orderStatus){
-        if(user == null || orderStatus == null){
+    public static void notifyUser(User user, OrderStatus orderStatus) {
+        if (user == null || orderStatus == null) {
             throw new IllegalArgumentException("User and OrderStatus cannot be null");
         }
         logger.info("Notifying %s that the order is %s".formatted(user, orderStatus));
     }
 
-    public static void authorizeUser(User user, String service,  Character privilege) throws PancakeServiceException {
-        if (!user.getPrivileges().get(service).contains(privilege)) {
-            throw new PancakeServiceException("User does not have enough permission to perform this operation");
+    public static void authorizeUser(User user, String service, Character privilege) throws PancakeServiceException {
+        if (user.getPrivileges().isEmpty() || !user.getPrivileges().get(service).contains(privilege)) {
+            throw new AuthorizationFailureException(USER_IS_NOT_AUTHORIZED);
         }
     }
 }
