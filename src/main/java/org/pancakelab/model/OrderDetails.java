@@ -9,14 +9,14 @@ public class OrderDetails {
     public static final String PANCAKES_REQUIRED = "Order can not be completed without pancakes";
 
     private final DeliveryInfo deliveryInfo;
-    private final Map<PancakeMenu, Integer> pancakeItems;
+    private final Map<Pancakes, Integer> pancakeItems;
     private final UUID orderId;
     private final User user;
 
     private OrderDetails(
             final UUID orderId,
             final DeliveryInfo deliveryInfo,
-            final Map<PancakeMenu, Integer> pancakes,
+            final Map<Pancakes, Integer> pancakes,
             final User user
     ) {
         this.orderId = orderId;
@@ -33,7 +33,7 @@ public class OrderDetails {
         return deliveryInfo;
     }
 
-    public Map<PancakeMenu, Integer> getPancakes() {
+    public Map<Pancakes, Integer> getPancakes() {
         return pancakeItems;
     }
 
@@ -53,7 +53,7 @@ public class OrderDetails {
     public static class Builder {
         private DeliveryInfo deliveryInfo;
         private UUID orderId;
-        private Map<PancakeMenu, Integer> pancakeItems;
+        private Map<Pancakes, Integer> pancakeItems;
         private User user;
 
         public Builder withOrderId(final UUID orderId) {
@@ -71,7 +71,7 @@ public class OrderDetails {
             return this;
         }
 
-        public Builder withPanCakes(final Map<PancakeMenu, Integer> pancakeTypeIntegerMap) {
+        public Builder withPanCakes(final Map<Pancakes, Integer> pancakeTypeIntegerMap) {
             this.pancakeItems = new HashMap<>(pancakeTypeIntegerMap);
             return this;
         }

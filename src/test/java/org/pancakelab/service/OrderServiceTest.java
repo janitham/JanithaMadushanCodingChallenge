@@ -73,21 +73,21 @@ public class OrderServiceTest {
         // Given
         var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes1 = Map.of(
-                PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1,
-                PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2
+                Pancakes.DARK_CHOCOLATE_PANCAKE, 1,
+                Pancakes.MILK_CHOCOLATE_PANCAKE, 2
         );
         var pancakes2 = Map.of(
-                PancakeMenu.MILK_CHOCOLATE_PANCAKE, 1,
-                PancakeMenu.MILK_CHOCOLATE_HAZELNUTS_PANCAKE, 4
+                Pancakes.MILK_CHOCOLATE_PANCAKE, 1,
+                Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE, 4
         );
         orderService.addPancakes(user, orderId, pancakes1);
         orderService.addPancakes(user, orderId, pancakes2);
         // When
-        final Map<PancakeMenu, Integer> summary = orderService.orderSummary(user, orderId);
+        final Map<Pancakes, Integer> summary = orderService.orderSummary(user, orderId);
         // Then
-        assertEquals(1, summary.get(PancakeMenu.DARK_CHOCOLATE_PANCAKE));
-        assertEquals(3, summary.get(PancakeMenu.MILK_CHOCOLATE_PANCAKE));
-        assertEquals(4, summary.get(PancakeMenu.MILK_CHOCOLATE_HAZELNUTS_PANCAKE));
+        assertEquals(1, summary.get(Pancakes.DARK_CHOCOLATE_PANCAKE));
+        assertEquals(3, summary.get(Pancakes.MILK_CHOCOLATE_PANCAKE));
+        assertEquals(4, summary.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE));
     }
 
     @Test
@@ -118,7 +118,7 @@ public class OrderServiceTest {
     public void givenValidOrderId_then_completingOrderShouldReturnFutureObject() throws PancakeServiceException {
         // Given
         var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        var pancakes1 = Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1);
+        var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
         orderService.addPancakes(user, orderId, pancakes1);
         // When
         orderService.complete(user, orderId);
@@ -132,7 +132,7 @@ public class OrderServiceTest {
     public void givenValidOrderId_then_cancel_shouldRemoveOrder() throws PancakeServiceException {
         // Given
         var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        var pancakes1 = Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1);
+        var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
         orderService.addPancakes(user, orderId, pancakes1);
         // When
         orderService.cancel(user, orderId);
@@ -171,7 +171,7 @@ public class OrderServiceTest {
         // Given
         var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes = Map.of(
-                PancakeMenu.DARK_CHOCOLATE_PANCAKE, 10
+                Pancakes.DARK_CHOCOLATE_PANCAKE, 10
         );
         // When
         // Then
@@ -195,7 +195,7 @@ public class OrderServiceTest {
                 orderId,
                 new OrderDetails.Builder().withOrderId(orderId).withPanCakes(
                         Map.of(
-                                PancakeMenu.MILK_CHOCOLATE_PANCAKE, 1
+                                Pancakes.MILK_CHOCOLATE_PANCAKE, 1
                         )
                 ).withDeliveryInfo(new DeliveryInfo("1", "2")
                 ).withUser(user).build());

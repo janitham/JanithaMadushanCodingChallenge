@@ -45,7 +45,7 @@ public class DeliveryPartnerTaskTest {
         // Given
         var order = new OrderDetails.Builder().withPanCakes(
                         Map.of(
-                                PancakeMenu.DARK_CHOCOLATE_PANCAKE, 2
+                                Pancakes.DARK_CHOCOLATE_PANCAKE, 2
                         )
                 )
                 .withUser(user)

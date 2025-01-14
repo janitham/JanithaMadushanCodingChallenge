@@ -25,7 +25,7 @@ public class OrderServiceImpl implements OrderService {
     private final KitchenService kitchenService;
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, Map<PancakeMenu, Integer>> orderItems = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Map<Pancakes, Integer>> orderItems = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final DeliveryInformationValidator deliveryInformationValidator;
     private final BlockingDeque<UUID> deliveryQueue;
@@ -63,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void addPancakes(User user, final UUID orderId, final Map<PancakeMenu, Integer> pancakes) throws PancakeServiceException {
+    public void addPancakes(User user, final UUID orderId, final Map<Pancakes, Integer> pancakes) throws PancakeServiceException {
         validateOrderId(orderId);
         var currentTotal = orderItems.values().stream().mapToInt(item -> item.values().stream().mapToInt(Integer::intValue).sum()).sum();
         var incomingTotal = pancakes.values().stream().mapToInt(Integer::intValue).sum();
@@ -80,9 +80,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Map<PancakeMenu, Integer> orderSummary(User user, final UUID orderId) throws PancakeServiceException {
+    public Map<Pancakes, Integer> orderSummary(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
-        final Map<PancakeMenu, Integer> items = orderItems.get(orderId);
+        final Map<Pancakes, Integer> items = orderItems.get(orderId);
         if (items == null) {
             throw new PancakeServiceException(ORDER_NOT_FOUND);
         }

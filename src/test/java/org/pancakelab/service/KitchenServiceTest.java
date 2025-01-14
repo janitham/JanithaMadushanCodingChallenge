@@ -32,7 +32,7 @@ public class KitchenServiceTest {
     public void givenOrderIsPending_whenProcessed_thenItShouldBeReadyForDelivery() throws ExecutionException, InterruptedException {
         // Given
         var order = new OrderDetails.Builder()
-                .withPanCakes(Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 2))
+                .withPanCakes(Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 2))
                 .withDeliveryInfo(mock(DeliveryInfo.class))
                 .withUser(mock(User.class))
                 .build();

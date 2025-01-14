@@ -53,14 +53,14 @@ public class AuthenticatedOrderService implements OrderService {
     }
 
     @Override
-    public void addPancakes(User user, UUID orderId, Map<PancakeMenu, Integer> pancakes) throws PancakeServiceException {
+    public void addPancakes(User user, UUID orderId, Map<Pancakes, Integer> pancakes) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
         orderService.addPancakes(user, orderId, pancakes);
     }
 
     @Override
-    public Map<PancakeMenu, Integer> orderSummary(User user, UUID orderId) throws PancakeServiceException {
+    public Map<Pancakes, Integer> orderSummary(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
         return orderService.orderSummary(user, orderId);

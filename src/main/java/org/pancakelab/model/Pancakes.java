@@ -1,6 +1,6 @@
 package org.pancakelab.model;
 
-public enum PancakeMenu {
+public enum Pancakes {
     DARK_CHOCOLATE_PANCAKE,
     DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE,
     DARK_CHOCOLATE_WHIP_CREAM_PANCAKE,

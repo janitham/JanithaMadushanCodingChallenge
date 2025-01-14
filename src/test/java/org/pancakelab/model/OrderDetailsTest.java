@@ -34,7 +34,7 @@ public class OrderDetailsTest {
         // Given
         OrderDetails.Builder builder = new OrderDetails.Builder();
         DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);
-        builder.withDeliveryInfo(deliveryInfo).withPanCakes(Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 2));
+        builder.withDeliveryInfo(deliveryInfo).withPanCakes(Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 2));
         // When
         OrderDetails orderDetails = builder.build();
         // Then

@@ -40,7 +40,7 @@ public class DeliveryServiceTest {
                 .withUser(mock(User.class))
                 .withPanCakes(
                         Map.of(
-                                PancakeMenu.DARK_CHOCOLATE_PANCAKE, 1
+                                Pancakes.DARK_CHOCOLATE_PANCAKE, 1
                         )
                 )
                 .build();

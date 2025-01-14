@@ -31,7 +31,7 @@ public class PreparationTaskTest {
     public void givenOrderIsReadyForDelivery_whenProcessed_thenOrderShouldBeAddedToDeliveryQueue() {
         // Given
         OrderDetails order = new OrderDetails.Builder()
-                .withPanCakes(Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 2))
+                .withPanCakes(Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 2))
                 .withDeliveryInfo(mock(DeliveryInfo.class))
                 .withUser(user)
                 .build();

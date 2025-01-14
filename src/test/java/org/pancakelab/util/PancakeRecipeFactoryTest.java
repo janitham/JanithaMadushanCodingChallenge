@@ -2,7 +2,7 @@ package org.pancakelab.util;
 
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.PancakeRecipe;
-import org.pancakelab.model.PancakeMenu;
+import org.pancakelab.model.Pancakes;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,7 +12,7 @@ public class PancakeRecipeFactoryTest {
     public void whenDarkChocolateWhippedCreamHazelnutsPancake_thenIngredientsAreCorrect() {
         // Given
         PancakeRecipe pancakeRecipe = PancakeFactory
-                .get(PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE);
+                .get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE);
         // When
         // Then
         assertEquals(pancakeRecipe.getChocolate(), PancakeRecipe.CHOCOLATE.DARK);
@@ -23,7 +23,7 @@ public class PancakeRecipeFactoryTest {
     @Test
     public void whenDarkChocolatePancake_thenIngredientsAreCorrect() {
         // Given
-        PancakeRecipe pancakeRecipe = PancakeFactory.get(PancakeMenu.DARK_CHOCOLATE_PANCAKE);
+        PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE);
         // When
         // Then
         assertEquals(pancakeRecipe.getChocolate(), PancakeRecipe.CHOCOLATE.DARK);
@@ -34,7 +34,7 @@ public class PancakeRecipeFactoryTest {
     @Test
     public void whenDarkChocolateWhippedCreamPancake_thenIngredientsAreCorrect() {
         // Given
-        PancakeRecipe pancakeRecipe = PancakeFactory.get(PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_PANCAKE);
+        PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_PANCAKE);
         // When
         // Then
         assertEquals(pancakeRecipe.getChocolate(), PancakeRecipe.CHOCOLATE.DARK);
@@ -45,7 +45,7 @@ public class PancakeRecipeFactoryTest {
     @Test
     public void whenMilkChocolateHazelnutsPancake_thenIngredientsAreCorrect() {
         // Given
-        PancakeRecipe pancakeRecipe = PancakeFactory.get(PancakeMenu.MILK_CHOCOLATE_HAZELNUTS_PANCAKE);
+        PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE);
         // When
         // Then
         assertEquals(pancakeRecipe.getChocolate(), PancakeRecipe.CHOCOLATE.MILK);
@@ -56,7 +56,7 @@ public class PancakeRecipeFactoryTest {
     @Test
     public void whenMilkChocolatePancake_thenIngredientsAreCorrect() {
         // Given
-        PancakeRecipe pancakeRecipe = PancakeFactory.get(PancakeMenu.MILK_CHOCOLATE_PANCAKE);
+        PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
         // When
         // Then
         assertEquals(pancakeRecipe.getChocolate(), PancakeRecipe.CHOCOLATE.MILK);

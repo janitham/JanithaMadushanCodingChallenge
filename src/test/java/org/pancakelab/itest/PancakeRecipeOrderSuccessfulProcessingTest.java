@@ -55,8 +55,8 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
     public void whenOrderIsUpdatedWithItemsInTheMenu_thenOrderShouldContainTheItems() throws PancakeServiceException {
         // Given
         var pancakes = Map.of(
-                PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
-                PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2
+                Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
+                Pancakes.MILK_CHOCOLATE_PANCAKE, 2
         );
         // When
         orderService.addPancakes(authorizedUser, orderId, pancakes);

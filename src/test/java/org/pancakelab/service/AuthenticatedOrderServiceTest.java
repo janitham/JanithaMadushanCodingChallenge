@@ -22,10 +22,10 @@ public class AuthenticatedOrderServiceTest {
     private User testUser;
     private DeliveryInfo deliveryInfo;
     private final UUID testOrderId = UUID.randomUUID();
-    private final Map<PancakeMenu, Integer> testPancakes = new HashMap<>() {
+    private final Map<Pancakes, Integer> testPancakes = new HashMap<>() {
         {
-            put(PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1);
-            put(PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2);
+            put(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1);
+            put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
         }
     };
 
