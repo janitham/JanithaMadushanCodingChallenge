@@ -1,29 +1,18 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.OrderStatus;
-import org.pancakelab.model.OrderDetails;
 import org.pancakelab.tasks.PreparationTask;
 
-import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class KitchenService {
-    private static KitchenService instance;
     private final ExecutorService deliveryExecutor;
-    private final BlockingDeque<UUID> deliveryQueue;
-    private final ConcurrentMap<UUID, OrderDetails> orders;
-    private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
 
     public KitchenService(
-            final BlockingDeque<UUID> deliveryQueue,
-            final ConcurrentMap<UUID, OrderDetails> orders,
-            final ExecutorService executorService,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
+            final int numberOfChefsInTheKitchen
     ) {
-        this.deliveryQueue = deliveryQueue;
-        this.orders = orders;
-        this.deliveryExecutor = executorService;
-        this.orderStatus = orderStatus;
+        this.deliveryExecutor = Executors.newFixedThreadPool(numberOfChefsInTheKitchen);
     }
 
     public void submitTask(PreparationTask preparationTask){

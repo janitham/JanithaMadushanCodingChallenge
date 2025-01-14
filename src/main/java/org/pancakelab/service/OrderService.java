@@ -10,11 +10,11 @@ public interface OrderService {
 
     void addPancakes(User user, UUID orderId, Map<PancakeMenu, Integer> pancakes) throws PancakeServiceException;
 
-    void complete(User user,UUID orderId) throws PancakeServiceException;
+    void complete(User user, UUID orderId) throws PancakeServiceException;
 
-    void cancel(User user,UUID orderId) throws PancakeServiceException;
+    void cancel(User user, UUID orderId) throws PancakeServiceException;
 
-    Map<PancakeMenu, Integer> orderSummary(User user,UUID orderId) throws PancakeServiceException;
+    Map<PancakeMenu, Integer> orderSummary(User user, UUID orderId) throws PancakeServiceException;
 
-    OrderStatus status(User user,UUID orderId) throws PancakeServiceException;
+    OrderStatus status(User user, UUID orderId) throws PancakeServiceException;
 }

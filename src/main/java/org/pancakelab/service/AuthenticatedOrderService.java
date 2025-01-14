@@ -48,7 +48,6 @@ public class AuthenticatedOrderService implements OrderService {
     public UUID createOrder(User user, DeliveryInfo deliveryInformation) throws PancakeServiceException {
         authenticateUser(user);
         var orderId = orderService.createOrder(user, deliveryInformation);
-        // null pointer exception here
         assignOrderToUser(orderId, user);
         return orderId;
     }

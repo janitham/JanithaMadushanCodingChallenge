@@ -16,7 +16,6 @@ import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,7 +106,7 @@ public class PancakeOrderSuccessfulProcessingTest {
     }
 
     private static void initializeKitchenService() {
-        kitchenService = new KitchenService(deliveryQueue, orders, Executors.newFixedThreadPool(1), orderStatus);
+        kitchenService = new KitchenService(1);
     }
 
     private static void initializeOrderService() {
