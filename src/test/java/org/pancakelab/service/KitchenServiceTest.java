@@ -25,7 +25,7 @@ public class KitchenServiceTest {
     @BeforeAll
     public static void init() {
         var es = Executors.newFixedThreadPool(1);
-        kitchenService = new KitchenServiceImpl(deliveryQueue, orders, es, orderStatus);
+        kitchenService = new KitchenService(deliveryQueue, orders, es, orderStatus);
     }
 
     @Test

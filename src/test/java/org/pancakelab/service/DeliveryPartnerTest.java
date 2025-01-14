@@ -3,6 +3,7 @@ package org.pancakelab.service;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
+import org.pancakelab.tasks.DeliveryTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -29,7 +30,7 @@ public class DeliveryPartnerTest {
     private final User user = new User("user", "password".toCharArray());
 
     private Logger setupLogger(ByteArrayOutputStream logOutputStream) {
-        Logger logger = Logger.getLogger(DeliveryPartnerImpl.class.getName());
+        Logger logger = Logger.getLogger(DeliveryTask.class.getName());
         PrintStream logPrintStream = new PrintStream(logOutputStream);
         Handler logHandler = new StreamHandler(logPrintStream, new SimpleFormatter());
         logger.addHandler(logHandler);
@@ -50,7 +51,7 @@ public class DeliveryPartnerTest {
                 )
                 .withUser(user)
                 .withDeliveryInfo(mock(DeliveryInfo.class)).build();
-        var deliveryService = new DeliveryPartnerImpl(orders, deliveryQueue, orderStatus);
+        var deliveryService = new DeliveryTask(orders, deliveryQueue, orderStatus);
         orders.put(order.getOrderId(), order);
         deliveryQueue.add(order.getOrderId());
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
@@ -73,7 +74,7 @@ public class DeliveryPartnerTest {
     public void givenOrderDoesNotExist_whenTryingToDeliver_thenWarningShouldBeLogged() {
         // Given
         var orderId = UUID.randomUUID();
-        var deliveryService = new DeliveryPartnerImpl(orders, deliveryQueue, orderStatus);
+        var deliveryService = new DeliveryTask(orders, deliveryQueue, orderStatus);
         deliveryQueue.add(orderId);
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
         Logger logger = setupLogger(logOutputStream);

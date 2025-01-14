@@ -1,5 +1,7 @@
 package org.pancakelab.service;
 
+import org.pancakelab.tasks.DeliveryTask;
+
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -13,8 +15,8 @@ public class DeliveryService {
         this.deliveryPartnerPool = Executors.newFixedThreadPool(numberOfDeliveryPartners);
     }
 
-    public void registerDeliveryPartners(List<DeliveryPartner> deliveryPartners) {
-        for (DeliveryPartner deliveryPartner : deliveryPartners) {
+    public void registerDeliveryPartners(List<DeliveryTask> deliveryPartners) {
+        for (Runnable deliveryPartner : deliveryPartners) {
             deliveryPartnerPool.submit((Runnable) deliveryPartner);
         }
     }

@@ -1,4 +1,4 @@
-package org.pancakelab.service;
+package org.pancakelab.tasks;
 
 import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.OrderDetails;

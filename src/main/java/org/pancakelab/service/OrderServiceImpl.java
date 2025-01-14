@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentMap;
 
 public class OrderServiceImpl implements OrderService {
 
-    public static final String ORDER_DETAILS_SHOULD_NOT_BE_NULL = "Order details cannot be null";
     public static final String ORDER_NOT_FOUND = "Order not found";
     public static final String ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID = "Order id cannot be null";
     public static final String DUPLICATE_ORDERS_CANNOT_BE_PLACED = "Cannot create an order for the same delivery location";

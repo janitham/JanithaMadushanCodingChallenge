@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
 import org.pancakelab.service.*;
+import org.pancakelab.tasks.DeliveryTask;
 import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.HashSet;
@@ -103,11 +104,11 @@ public class PancakeOrderSuccessfulProcessingTest {
 
     private static void initializeDeliveryService() {
         deliveryService = new DeliveryService(1);
-        deliveryService.registerDeliveryPartners(List.of(new DeliveryPartnerImpl(orders, deliveryQueue, orderStatus)));
+        deliveryService.registerDeliveryPartners(List.of(new DeliveryTask(orders, deliveryQueue, orderStatus)));
     }
 
     private static void initializeKitchenService() {
-        kitchenService = new KitchenServiceImpl(deliveryQueue, orders, Executors.newFixedThreadPool(1), orderStatus);
+        kitchenService = new KitchenService(deliveryQueue, orders, Executors.newFixedThreadPool(1), orderStatus);
     }
 
     private static void initializeOrderService() {

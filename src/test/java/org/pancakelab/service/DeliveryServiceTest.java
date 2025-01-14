@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
+import org.pancakelab.tasks.DeliveryTask;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class DeliveryServiceTest {
         deliveryService = new DeliveryService(
                 1
         );
-        deliveryService.registerDeliveryPartners(List.of(new DeliveryPartnerImpl(orders, deliveryQueue, orderStatus)));
+        deliveryService.registerDeliveryPartners(List.of(new DeliveryTask(orders, deliveryQueue, orderStatus)));
     }
 
     @Test

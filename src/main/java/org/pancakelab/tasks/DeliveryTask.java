@@ -1,4 +1,4 @@
-package org.pancakelab.service;
+package org.pancakelab.tasks;
 
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
@@ -9,14 +9,14 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
-public class DeliveryPartnerImpl implements DeliveryPartner, Runnable {
+public class DeliveryTask implements Runnable {
 
-    private final Logger logger = Logger.getLogger(DeliveryPartnerImpl.class.getName());
+    private final Logger logger = Logger.getLogger(DeliveryTask.class.getName());
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final BlockingDeque<UUID> deliveryQueue;
     private final ConcurrentMap<UUID, OrderStatus> orderStatus;
 
-    public DeliveryPartnerImpl(
+    public DeliveryTask(
             final ConcurrentMap<UUID, OrderDetails> orders,
             final BlockingDeque<UUID> deliveryQueue,
             final ConcurrentMap<UUID, OrderStatus> orderStatus
