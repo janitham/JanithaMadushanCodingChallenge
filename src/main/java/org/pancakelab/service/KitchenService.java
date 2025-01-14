@@ -26,8 +26,8 @@ public class KitchenService {
         this.orderStatus = orderStatus;
     }
 
-    public void processOrder(UUID orderId) {
-        deliveryExecutor.submit(new PreparationTask(deliveryQueue, orders, orderId, orderStatus));
+    public void submitTask(PreparationTask preparationTask){
+        deliveryExecutor.submit(preparationTask);
     }
 
     public void shutdown() {

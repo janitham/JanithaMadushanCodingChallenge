@@ -8,8 +8,10 @@ import org.pancakelab.util.DeliveryInformationValidator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +35,9 @@ public class OrderServiceTest {
         kitchenService = mock(KitchenService.class);
         orderStatus = new ConcurrentHashMap<>();
         deliveryInformationValidator = mock(DeliveryInformationValidator.class);
-        orderService = new OrderServiceImpl(kitchenService, orders, orderStatus, deliveryInformationValidator);
+        final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
+        orderService = new OrderServiceImpl(
+                kitchenService, orders, orderStatus, deliveryInformationValidator, deliveryQueue);
         user = new User("user", "password".toCharArray());
     }
 
@@ -121,7 +125,7 @@ public class OrderServiceTest {
         // Then
         assertNotNull(orders.get(orderId));
         assertThrows(PancakeServiceException.class, () -> orderService.orderSummary(null, orderId));
-        verify(kitchenService).processOrder(orderId);
+        verify(kitchenService).submitTask(any());
     }
 
     @Test

@@ -118,6 +118,6 @@ public class PancakeOrderSuccessfulProcessingTest {
             }
         });
         orderService = new AuthenticatedOrderService(
-                new OrderServiceImpl(kitchenService, orders, orderStatus, new DeliveryInformationValidator()), authenticationService);
+                new OrderServiceImpl(kitchenService, orders, orderStatus, new DeliveryInformationValidator(), deliveryQueue), authenticationService);
     }
 }

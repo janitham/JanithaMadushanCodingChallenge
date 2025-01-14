@@ -1,6 +1,7 @@
 package org.pancakelab.service;
 
 import org.pancakelab.model.*;
+import org.pancakelab.tasks.PreparationTask;
 import org.pancakelab.util.DeliveryInformationValidator;
 import org.pancakelab.util.PancakeUtils;
 
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -26,16 +28,20 @@ public class OrderServiceImpl implements OrderService {
     private final ConcurrentHashMap<UUID, Map<PancakeMenu, Integer>> orderItems = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final DeliveryInformationValidator deliveryInformationValidator;
+    private final BlockingDeque<UUID> deliveryQueue;
 
     public OrderServiceImpl(
             final KitchenService kitchenService,
             final ConcurrentMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus, DeliveryInformationValidator deliveryInformationValidator
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
+            final DeliveryInformationValidator deliveryInformationValidator,
+            final BlockingDeque<UUID> deliveryQueue
     ) {
         this.kitchenService = kitchenService;
         this.orders = orders;
         this.orderStatus = orderStatus;
         this.deliveryInformationValidator = deliveryInformationValidator;
+        this.deliveryQueue = deliveryQueue;
     }
 
     @Override
@@ -103,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         orders.put(orderId, orderDetails);
         cleanUpOrder(orderId, deliveryInfo);
-        kitchenService.processOrder(orderId);
+        kitchenService.submitTask(new PreparationTask(deliveryQueue, orders, orderId, orderStatus));
         PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
     }
 

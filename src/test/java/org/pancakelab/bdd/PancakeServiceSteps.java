@@ -37,7 +37,7 @@ public class PancakeServiceSteps {
     };
     private static final OrderService orderService
             = new AuthenticatedOrderService(
-            new OrderServiceImpl(kitchenService, orders, orderStatus, new DeliveryInformationValidator()),
+            new OrderServiceImpl(kitchenService, orders, orderStatus, new DeliveryInformationValidator(), deliveryQueue),
             new AuthenticationServiceImpl(
                     new HashSet<>() {
                         {

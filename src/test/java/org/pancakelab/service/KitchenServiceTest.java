@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
+import org.pancakelab.tasks.PreparationTask;
 
 import java.util.Map;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class KitchenServiceTest {
                 .build();
         orders.put(order.getOrderId(), order);
         // When
-        kitchenService.processOrder(order.getOrderId());
+        kitchenService.submitTask(new PreparationTask(deliveryQueue, orders, order.getOrderId(), orderStatus));
         // Then
         Awaitility.await().until(() -> orderStatus.get(order.getOrderId()) == OrderStatus.READY_FOR_DELIVERY);
         assertTrue(deliveryQueue.contains(order.getOrderId()));
