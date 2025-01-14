@@ -1,7 +1,7 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.OrderDetails;
+import org.pancakelab.model.OrderStatus;
 import org.pancakelab.util.PancakeUtils;
 
 import java.util.UUID;
@@ -9,14 +9,14 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
-public class DeliveryServiceImpl implements DeliveryService, Runnable {
+public class DeliveryPartnerImpl implements DeliveryPartner, Runnable {
 
-    private final Logger logger = Logger.getLogger(DeliveryServiceImpl.class.getName());
+    private final Logger logger = Logger.getLogger(DeliveryPartnerImpl.class.getName());
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final BlockingDeque<UUID> deliveryQueue;
     private final ConcurrentMap<UUID, OrderStatus> orderStatus;
 
-    public DeliveryServiceImpl(
+    public DeliveryPartnerImpl(
             final ConcurrentMap<UUID, OrderDetails> orders,
             final BlockingDeque<UUID> deliveryQueue,
             final ConcurrentMap<UUID, OrderStatus> orderStatus
@@ -46,8 +46,12 @@ public class DeliveryServiceImpl implements DeliveryService, Runnable {
             orderStatus.put(orderId, OrderStatus.DELIVERED);
             PancakeUtils.notifyUser(orderDetails.getUser(), OrderStatus.DELIVERED);
         } else {
-            orderStatus.put(orderId, OrderStatus.ERROR);
-            logger.warning("Order not found: %s".formatted(orderId));
+            handleMissingOrder(orderId);
         }
+    }
+
+    private void handleMissingOrder(final UUID orderId) {
+        orderStatus.put(orderId, OrderStatus.ERROR);
+        logger.warning("Order not found: %s".formatted(orderId));
     }
 }

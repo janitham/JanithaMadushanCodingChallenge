@@ -23,7 +23,7 @@ public class PancakeServiceSteps {
     private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
     private static User authenticatedUser = new User("validUser", "validPassword".toCharArray());
     private static final Thread deliveryService
-            = new Thread(new DeliveryServiceImpl(orders, deliveryQueue, orderStatus));
+            = new Thread(new DeliveryPartnerImpl(orders, deliveryQueue, orderStatus));
     private static final KitchenService kitchenService
             = KitchenServiceImpl.getInstance(1, deliveryQueue, orders, orderStatus);
 

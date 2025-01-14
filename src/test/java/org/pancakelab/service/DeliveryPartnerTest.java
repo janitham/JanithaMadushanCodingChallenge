@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-public class DeliveryServiceTest {
+public class DeliveryPartnerTest {
 
     private final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
@@ -29,7 +29,7 @@ public class DeliveryServiceTest {
     private final User user = new User("user", "password".toCharArray());
 
     private Logger setupLogger(ByteArrayOutputStream logOutputStream) {
-        Logger logger = Logger.getLogger(DeliveryServiceImpl.class.getName());
+        Logger logger = Logger.getLogger(DeliveryPartnerImpl.class.getName());
         PrintStream logPrintStream = new PrintStream(logOutputStream);
         Handler logHandler = new StreamHandler(logPrintStream, new SimpleFormatter());
         logger.addHandler(logHandler);
@@ -50,7 +50,7 @@ public class DeliveryServiceTest {
                 )
                 .withUser(user)
                 .withDeliveryInfo(mock(DeliveryInfo.class)).build();
-        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, orderStatus);
+        var deliveryService = new DeliveryPartnerImpl(orders, deliveryQueue, orderStatus);
         orders.put(order.getOrderId(), order);
         deliveryQueue.add(order.getOrderId());
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
@@ -73,7 +73,7 @@ public class DeliveryServiceTest {
     public void givenOrderDoesNotExist_whenTryingToDeliver_thenWarningShouldBeLogged() {
         // Given
         var orderId = UUID.randomUUID();
-        var deliveryService = new DeliveryServiceImpl(orders, deliveryQueue, orderStatus);
+        var deliveryService = new DeliveryPartnerImpl(orders, deliveryQueue, orderStatus);
         deliveryQueue.add(orderId);
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
         Logger logger = setupLogger(logOutputStream);

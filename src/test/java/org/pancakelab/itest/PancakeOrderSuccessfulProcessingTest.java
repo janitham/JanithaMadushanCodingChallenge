@@ -23,7 +23,7 @@ public class PancakeOrderSuccessfulProcessingTest {
 
     private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
-    private static Thread deliveryService;
+    private static DeliveryService deliveryService;
     private static KitchenService kitchenService;
     private static OrderService orderService;
     private static UUID orderId;
@@ -35,7 +35,6 @@ public class PancakeOrderSuccessfulProcessingTest {
     public static void init() {
         initializeDeliveryInfo();
         initializeOrderStatus();
-        initializeDeliveryService();
         initializeKitchenService();
         initializeOrderService();
     }
@@ -43,25 +42,34 @@ public class PancakeOrderSuccessfulProcessingTest {
     @Test
     @Order(1)
     public void whenValidPancakeOrderIsPlaced_thenOrderShouldBePlaced() throws PancakeServiceException {
+        // Given
         orderId = orderService.createOrder(authorizedUser, deliveryInfo);
+        // When
+        // Then
         assertNotNull(orderId);
     }
 
     @Test
     @Order(2)
     public void whenOrderIsUpdatedWithItemsInTheMenu_thenOrderShouldContainTheItems() throws PancakeServiceException {
+        // Given
         var pancakes = Map.of(
                 PancakeMenu.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
                 PancakeMenu.MILK_CHOCOLATE_PANCAKE, 2
         );
+        // When
         orderService.addPancakes(authorizedUser, orderId, pancakes);
+        // Then
         assertEquals(pancakes, orderService.orderSummary(authorizedUser, orderId));
     }
 
     @Test
     @Order(3)
     public void whenOrderIsCompleted_thenOrderShouldBeProcessedByTheKitchenAndRemoved() throws PancakeServiceException {
+        // Given
         orderService.complete(authorizedUser, orderId);
+        // When
+        // Then
         Awaitility.await().until(() -> deliveryQueue.size() == 1);
         assertTrue(deliveryQueue.contains(orderId));
         assertEquals(orderStatus.get(orderId), OrderStatus.READY_FOR_DELIVERY);
@@ -70,18 +78,16 @@ public class PancakeOrderSuccessfulProcessingTest {
     @Test
     @Order(4)
     public void whenOrderIsReceivedByTheDeliveryService_thenOrderShouldBeDelivered() {
-        deliveryService.start();
+        // Given
+        // When
+        // Then
+        initializeDeliveryService();
         Awaitility.await().until(deliveryQueue::isEmpty);
     }
 
     @AfterAll
     public static void tearDown() {
-        deliveryService.interrupt();
-        try {
-            deliveryService.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        deliveryService.shutdown();
         kitchenService.shutdown();
     }
 
@@ -94,7 +100,7 @@ public class PancakeOrderSuccessfulProcessingTest {
     }
 
     private static void initializeDeliveryService() {
-        deliveryService = new Thread(new DeliveryServiceImpl(orders, deliveryQueue, orderStatus));
+        deliveryService = new DeliveryService(2, deliveryQueue, orders, orderStatus);
     }
 
     private static void initializeKitchenService() {
