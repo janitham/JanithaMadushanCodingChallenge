@@ -1,4 +1,4 @@
-Feature: Pancake Delivery Service
+Feature: Kitchen Service
 
   Scenario: Disciple creates an order, and haven't completed it yet
     Given a disciple "user1" creates an order with building "1" and room number "101"
@@ -21,13 +21,3 @@ Feature: Pancake Delivery Service
     Given a disciple "user4" has an order in progress
     When the chef "user4" completes the order
     Then the order status should be "READY_FOR_DELIVERY"
-
-  Scenario: Delivery Service accepts an order
-    Given a disciple "user5" has an order ready for delivery
-    When the rider "user5" accepts the order
-    Then the order status should be "OUT_FOR_DELIVERY"
-
-  Scenario: Delivery Service completes an order
-    Given a disciple "user6" has an order out for delivery
-    When the rider "user6" completes the order
-    Then the order status should be "DELIVERED"
