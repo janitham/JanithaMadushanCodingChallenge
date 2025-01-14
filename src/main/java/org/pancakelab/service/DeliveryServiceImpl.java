@@ -1,12 +1,15 @@
 package org.pancakelab.service;
 
+import org.pancakelab.model.DeliveryInfo;
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class DeliveryServiceImpl implements DeliveryService {
     private final ConcurrentHashMap<UUID, OrderDetails> orders;
@@ -23,10 +26,10 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public List<OrderDetails> viewCompletedOrders(User user) {
+    public Map<UUID, DeliveryInfo> viewCompletedOrders(User user) {
         return orders.values().stream()
                 .filter(order -> orderStatus.get(order.getOrderId()) == OrderStatus.READY_FOR_DELIVERY)
-                .toList();
+                .collect(Collectors.toMap(OrderDetails::getOrderId, OrderDetails::getDeliveryInfo));
     }
 
     @Override

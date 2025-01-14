@@ -3,11 +3,13 @@ package org.pancakelab.service;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.pancakelab.model.DeliveryInfo;
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.PancakeServiceException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,7 +41,7 @@ public class DeliveryServiceTest {
         // When
         deliveryService.acceptOrder(null, orderId);
         // Then
-        Awaitility.await().until(()->OrderStatus.OUT_FOR_DELIVERY.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.OUT_FOR_DELIVERY.equals(orderStatus.get(orderId)));
     }
 
     @Test
@@ -51,9 +53,9 @@ public class DeliveryServiceTest {
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
         // When
-        deliveryService.sendForTheDelivery(null,orderId);
+        deliveryService.sendForTheDelivery(null, orderId);
         // Then
-        Awaitility.await().until(()->OrderStatus.DELIVERED.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.DELIVERED.equals(orderStatus.get(orderId)));
         assertFalse(orders.containsKey(orderId));
     }
 
@@ -66,15 +68,22 @@ public class DeliveryServiceTest {
         OrderDetails orderDetails2 = mock(OrderDetails.class);
         when(orderDetails1.getOrderId()).thenReturn(orderId1);
         when(orderDetails2.getOrderId()).thenReturn(orderId2);
+        DeliveryInfo deliveryInfo1 = mock(DeliveryInfo.class);
+        DeliveryInfo deliveryInfo2 = mock(DeliveryInfo.class);
+        when(orderDetails1.getDeliveryInfo()).thenReturn(deliveryInfo1);
+        when(orderDetails2.getDeliveryInfo()).thenReturn(deliveryInfo2);
         orders.put(orderId1, orderDetails1);
         orders.put(orderId2, orderDetails2);
         orderStatus.put(orderId1, OrderStatus.READY_FOR_DELIVERY);
         orderStatus.put(orderId2, OrderStatus.DELIVERED);
+
         // When
-        List<OrderDetails> completedOrders = deliveryService.viewCompletedOrders(null);
+        Map<UUID, DeliveryInfo> completedOrders = deliveryService.viewCompletedOrders(null);
+
         // Then
         assertEquals(1, completedOrders.size());
-        assertTrue(completedOrders.contains(orderDetails1));
-        assertFalse(completedOrders.contains(orderDetails2));
+        assertTrue(completedOrders.containsKey(orderId1));
+        assertEquals(deliveryInfo1, completedOrders.get(orderId1));
+        assertFalse(completedOrders.containsKey(orderId2));
     }
 }

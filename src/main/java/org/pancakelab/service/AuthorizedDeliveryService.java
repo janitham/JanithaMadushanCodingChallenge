@@ -1,10 +1,12 @@
 package org.pancakelab.service;
 
+import org.pancakelab.model.DeliveryInfo;
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.PancakeServiceException;
 import org.pancakelab.model.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.pancakelab.util.PancakeUtils.authorizeUser;
@@ -27,7 +29,7 @@ public class AuthorizedDeliveryService implements DeliveryService {
     }
 
     @Override
-    public List<OrderDetails> viewCompletedOrders(User user) throws PancakeServiceException {
+    public Map<UUID, DeliveryInfo> viewCompletedOrders(User user) throws PancakeServiceException {
         authenticateUser(user);
         authorizeUser(user, "delivery", 'R');
         return deliveryService.viewCompletedOrders(user);

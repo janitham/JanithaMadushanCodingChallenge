@@ -46,13 +46,16 @@ public class AuthorizedDeliveryServiceTest {
     @Test
     public void shouldReturnCompletedOrdersWhenUserIsPrivileged() throws PancakeServiceException {
         // Given
-        List<OrderDetails> orders = List.of(mock(OrderDetails.class));
+        UUID orderId = UUID.randomUUID();
+        DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);
+        Map<UUID, DeliveryInfo> orders = Map.of(orderId, deliveryInfo);
         when(deliveryService.viewCompletedOrders(privileged)).thenReturn(orders);
         // When
-        List<OrderDetails> result = authorizedDeliveryService.viewCompletedOrders(privileged);
+        Map<UUID, DeliveryInfo> result = authorizedDeliveryService.viewCompletedOrders(privileged);
         // Then
         assertEquals(orders, result);
         verify(authenticationService).authenticate(privileged);
+        verify(deliveryService).viewCompletedOrders(privileged);
     }
 
     @Test
