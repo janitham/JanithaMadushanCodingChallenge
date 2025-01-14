@@ -28,7 +28,7 @@ public class DeliveryServiceTest {
         deliveryService = new DeliveryService(
                 1
         );
-        deliveryService.submitDeliveryTask(new DeliveryPartnerTask(orders, deliveryQueue, orderStatus));
+        deliveryService.registerDeliveryPartner(new DeliveryPartnerTask(orders, deliveryQueue, orderStatus));
     }
 
     @Test

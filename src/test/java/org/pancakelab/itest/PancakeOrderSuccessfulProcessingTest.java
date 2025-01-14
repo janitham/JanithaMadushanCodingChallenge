@@ -103,7 +103,7 @@ public class PancakeOrderSuccessfulProcessingTest {
 
     private static void initializeDeliveryService() {
         deliveryService = new DeliveryService(1);
-        deliveryService.submitDeliveryTask(new DeliveryPartnerTask(orders, deliveryQueue, orderStatus));
+        deliveryService.registerDeliveryPartner(new DeliveryPartnerTask(orders, deliveryQueue, orderStatus));
     }
 
     private static void initializeKitchenService() {

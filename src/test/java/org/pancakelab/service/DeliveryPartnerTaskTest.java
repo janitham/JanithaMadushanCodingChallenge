@@ -19,7 +19,6 @@ import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class DeliveryPartnerTaskTest {
@@ -60,15 +59,16 @@ public class DeliveryPartnerTaskTest {
         Handler logHandler = logger.getHandlers()[0];
         try {
             // When
-            Thread thread = new Thread(deliveryTask);
+            var thread = new Thread(deliveryTask);
             thread.start();
+            // Then
             Awaitility.await().until(deliveryQueue::isEmpty);
-            orderStatus.put(order.getOrderId(), OrderStatus.DELIVERED); // external service simulating delivery
-            thread.join();
-            logHandler.flush();
-            assertTrue(logOutputStream.toString().contains("Delivered order: %s".formatted(order.getOrderId())));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Awaitility.await().until(() -> {
+                        orderStatus.put(order.getOrderId(), OrderStatus.DELIVERED);
+                        logHandler.flush();
+                        return logOutputStream.toString().contains("Delivered order: %s".formatted(order.getOrderId()));
+                    }
+            );
         } finally {
             cleanupLogger(logger, logHandler);
         }

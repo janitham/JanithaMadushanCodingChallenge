@@ -14,7 +14,7 @@ public class DeliveryService {
         this.deliveryPartnerPool = Executors.newFixedThreadPool(numberOfDeliveryPartners);
     }
 
-    public void submitDeliveryTask(DeliveryPartnerTask deliveryPartnerTask){
+    public void registerDeliveryPartner(final DeliveryPartnerTask deliveryPartnerTask){
         deliveryPartnerPool.submit(deliveryPartnerTask);
     }
 

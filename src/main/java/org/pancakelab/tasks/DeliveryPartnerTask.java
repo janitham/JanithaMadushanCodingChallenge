@@ -28,13 +28,14 @@ public class DeliveryPartnerTask implements Runnable {
 
     @Override
     public void run() {
-        try {
-            deliverOrder(deliveryQueue.take());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.warning("DeliveryTask interrupted");
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                deliverOrder(deliveryQueue.take());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warning("DeliveryTask interrupted");
+            }
         }
-
     }
 
     private void deliverOrder(final UUID orderId) throws InterruptedException {
