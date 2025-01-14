@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
 import org.pancakelab.service.*;
+import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -107,6 +108,6 @@ public class PancakeOrderSuccessfulProcessingTest {
             }
         });
         orderService = new AuthenticatedOrderService(
-                new OrderServiceImpl(kitchenService, orders, orderStatus), authenticationService);
+                new OrderServiceImpl(kitchenService, orders, orderStatus, new DeliveryInformationValidator()), authenticationService);
     }
 }

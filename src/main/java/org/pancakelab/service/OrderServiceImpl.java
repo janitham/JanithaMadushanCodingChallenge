@@ -1,6 +1,7 @@
 package org.pancakelab.service;
 
 import org.pancakelab.model.*;
+import org.pancakelab.util.DeliveryInformationValidator;
 import org.pancakelab.util.PancakeUtils;
 
 import java.util.HashMap;
@@ -25,20 +26,22 @@ public class OrderServiceImpl implements OrderService {
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Map<PancakeMenu, Integer>> orderItems = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
+    private final DeliveryInformationValidator deliveryInformationValidator;
 
     public OrderServiceImpl(
             final KitchenService kitchenService,
             final ConcurrentMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus, DeliveryInformationValidator deliveryInformationValidator
     ) {
         this.kitchenService = kitchenService;
         this.orders = orders;
         this.orderStatus = orderStatus;
+        this.deliveryInformationValidator = deliveryInformationValidator;
     }
 
     @Override
     public UUID createOrder(User user, final DeliveryInfo deliveryInformation) throws PancakeServiceException {
-        validateDeliveryInfo(deliveryInformation);
+        deliveryInformationValidator.validate(deliveryInformation);
         var orderId = UUID.randomUUID();
         if (orderStorage.putIfAbsent(deliveryInformation, orderId) != null) {
             throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);

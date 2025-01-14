@@ -6,6 +6,7 @@ import io.cucumber.java.en.When;
 import org.awaitility.Awaitility;
 import org.pancakelab.model.*;
 import org.pancakelab.service.*;
+import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,7 +37,7 @@ public class PancakeServiceSteps {
     };
     private static final OrderService orderService
             = new AuthenticatedOrderService(
-            new OrderServiceImpl(kitchenService, orders, orderStatus),
+            new OrderServiceImpl(kitchenService, orders, orderStatus, new DeliveryInformationValidator()),
             new AuthenticationServiceImpl(
                     new HashSet<>() {
                         {
@@ -48,9 +49,9 @@ public class PancakeServiceSteps {
     );
     private static UUID orderId;
 
-    @Given("a disciple {string} creates an order with building {string} and room number {int}")
-    public void a_disciple_creates_an_order_with_building_and_room_number(String disciple, String building, int roomNumber) throws PancakeServiceException {
-        orderId = orderService.createOrder(systemUsers.get(disciple), new DeliveryInfo(building, String.valueOf(roomNumber)));
+    @Given("a disciple {string} creates an order with building {string} and room number {string}")
+    public void a_disciple_creates_an_order_with_building_and_room_number(String disciple, String building, String roomNumber) throws PancakeServiceException {
+        orderId = orderService.createOrder(systemUsers.get(disciple), new DeliveryInfo(roomNumber, building));
         assertNotNull(orderId);
     }
 
@@ -106,7 +107,7 @@ public class PancakeServiceSteps {
     @When("a disciple creates an order with building {string} and room number {string} and login fails")
     public void a_disciple_creates_an_order_with_building_and_room_number_and_login_fails(String buildingNo, String roomNumber) {
         assertThrows(AuthenticationFailureException.class,
-                () -> orderService.createOrder(authenticatedUser, new DeliveryInfo(buildingNo, roomNumber)));
+                () -> orderService.createOrder(authenticatedUser, new DeliveryInfo(roomNumber, buildingNo)));
     }
 
     @When("the disciple adds {int} pancake of type {string} and attempt fails")
@@ -124,7 +125,14 @@ public class PancakeServiceSteps {
     @When("a disciple creates an order with building {string} and room number {string} and multiple orders fail")
     public void a_disciple_creates_an_order_with_building_and_room_number_and_multiple_orders_fail(String buildingNo, String roomNumber) {
         assertThrows(PancakeServiceException.class,
-                () -> orderService.createOrder(authenticatedUser, new DeliveryInfo(buildingNo, roomNumber)));
+                () -> orderService.createOrder(authenticatedUser, new DeliveryInfo(roomNumber, buildingNo)));
+    }
+
+    @When("a disciple {string} creates an order with building {string} and room number {string} and system complains about invalid delivery information")
+    public void a_disciple_creates_an_order_with_building_and_room_number_and_system_complains_about_invalid_delivery_information(
+            String user, String buildingNo, String roomNumber) {
+        assertThrows(ValidationException.class,
+                () -> orderService.createOrder(systemUsers.get(user), new DeliveryInfo(roomNumber, buildingNo)));
     }
 
     @Then("the system should reject the orderId")
@@ -136,6 +144,6 @@ public class PancakeServiceSteps {
     public void a_disciple_creates_an_order_with_building_and_room_number_and_system_complains_about_ongoing_order(
             String disciple, String buildingNo, String roomNumber) {
         assertThrows(PancakeServiceException.class,
-                () -> orderService.createOrder(systemUsers.get(disciple), new DeliveryInfo(buildingNo, roomNumber)));
+                () -> orderService.createOrder(systemUsers.get(disciple), new DeliveryInfo(roomNumber, buildingNo)));
     }
 }

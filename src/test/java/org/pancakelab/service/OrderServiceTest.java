@@ -3,6 +3,7 @@ package org.pancakelab.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
+import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.pancakelab.service.OrderServiceImpl.ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID;
@@ -23,13 +25,15 @@ public class OrderServiceTest {
     private OrderService orderService;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private User user;
+    private DeliveryInformationValidator deliveryInformationValidator;
 
     @BeforeEach
     public void setUp() {
         orders = new ConcurrentHashMap<>();
         kitchenService = mock(KitchenService.class);
         orderStatus = new ConcurrentHashMap<>();
-        orderService = new OrderServiceImpl(kitchenService, orders, orderStatus);
+        deliveryInformationValidator = mock(DeliveryInformationValidator.class);
+        orderService = new OrderServiceImpl(kitchenService, orders, orderStatus, deliveryInformationValidator);
         user = new User("user", "password".toCharArray());
     }
 
@@ -42,6 +46,7 @@ public class OrderServiceTest {
         // Then
         assertNotNull(orderId);
         assertEquals(orderService.status(user, orderId), OrderStatus.CREATED);
+        verify(deliveryInformationValidator).validate(any());
     }
 
     @Test
