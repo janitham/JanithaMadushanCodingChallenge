@@ -1,7 +1,6 @@
 package org.pancakelab.service;
 
 import org.pancakelab.model.*;
-import org.pancakelab.tasks.PreparationTask;
 import org.pancakelab.util.DeliveryInformationValidator;
 import org.pancakelab.util.PancakeUtils;
 
@@ -9,9 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.*;
 
 public class OrderServiceImpl implements OrderService {
 
@@ -22,26 +19,22 @@ public class OrderServiceImpl implements OrderService {
     public static final String MAXIMUM_PANCAKES_EXCEEDED = "The maximum number of pancakes that can be ordered is %d".formatted(MAXIMUM_PANCAKES);
     public static final String USER_HAS_AN_ONGOING_ORDER = "The user has an ongoing order";
 
-    private final KitchenService kitchenService;
     private final ConcurrentMap<UUID, OrderDetails> orders;
-    private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, Map<Pancakes, Integer>> orderItems = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final DeliveryInformationValidator deliveryInformationValidator;
-    private final BlockingDeque<UUID> deliveryQueue;
+    private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Map<Pancakes, Integer>> orderItems = new ConcurrentHashMap<>();
+    private final ExecutorService executorService;
 
     public OrderServiceImpl(
-            final KitchenService kitchenService,
             final ConcurrentMap<UUID, OrderDetails> orders,
             final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
-            final DeliveryInformationValidator deliveryInformationValidator,
-            final BlockingDeque<UUID> deliveryQueue
+            final DeliveryInformationValidator deliveryInformationValidator
     ) {
-        this.kitchenService = kitchenService;
         this.orders = orders;
         this.orderStatus = orderStatus;
         this.deliveryInformationValidator = deliveryInformationValidator;
-        this.deliveryQueue = deliveryQueue;
+        this.executorService = Executors.newFixedThreadPool(10); // Example thread pool size
     }
 
     @Override
@@ -100,17 +93,19 @@ public class OrderServiceImpl implements OrderService {
         if (!orderStorage.containsValue(orderId)) {
             throw new PancakeServiceException(ORDER_NOT_FOUND);
         }
-        var deliveryInfo = getDeliveryInfoByOrderId(orderId);
-        var orderDetails = new OrderDetails.Builder()
-                .withDeliveryInfo(deliveryInfo)
-                .withOrderId(orderId)
-                .withUser(user)
-                .withPanCakes(orderItems.get(orderId))
-                .build();
-        orders.put(orderId, orderDetails);
-        cleanUpOrder(orderId, deliveryInfo);
-        kitchenService.submitTask(new PreparationTask(deliveryQueue, orders, orderId, orderStatus));
-        PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
+        CompletableFuture.runAsync(() -> {
+            var deliveryInfo = getDeliveryInfoByOrderId(orderId);
+            var orderDetails = new OrderDetails.Builder()
+                    .withDeliveryInfo(deliveryInfo)
+                    .withOrderId(orderId)
+                    .withUser(user)
+                    .withPanCakes(orderItems.get(orderId))
+                    .build();
+            orders.put(orderId, orderDetails);
+            cleanUpOrder(orderId, deliveryInfo);
+            orderStatus.put(orderId, OrderStatus.COMPLETED);
+            PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
+        }, executorService);
     }
 
     @Override
@@ -122,7 +117,9 @@ public class OrderServiceImpl implements OrderService {
         var deliveryInfo = getDeliveryInfoByOrderId(orderId);
         cleanUpOrder(orderId, deliveryInfo);
         orderStatus.put(orderId, OrderStatus.CANCELLED);
-        PancakeUtils.notifyUser(user, OrderStatus.CANCELLED);
+        CompletableFuture.runAsync(() -> {
+            PancakeUtils.notifyUser(user, OrderStatus.CANCELLED);
+        }, executorService);
     }
 
     private void validateOrderId(final UUID orderId) throws PancakeServiceException {
@@ -142,5 +139,17 @@ public class OrderServiceImpl implements OrderService {
     private void cleanUpOrder(final UUID orderId, final DeliveryInfo deliveryInfo) {
         orderStorage.remove(deliveryInfo);
         orderItems.remove(orderId);
+    }
+
+    public void shutdown() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }

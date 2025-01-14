@@ -1,5 +1,6 @@
 package org.pancakelab.service;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
@@ -8,22 +9,19 @@ import org.pancakelab.util.DeliveryInformationValidator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.pancakelab.service.AuthenticatedOrderService.ORDER_NOT_FOUND;
 import static org.pancakelab.service.OrderServiceImpl.ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID;
-import static org.pancakelab.service.OrderServiceImpl.ORDER_NOT_FOUND;
 
 public class OrderServiceTest {
 
     private ConcurrentMap<UUID, OrderDetails> orders;
-    private KitchenService kitchenService;
     private OrderService orderService;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private User user;
@@ -32,12 +30,9 @@ public class OrderServiceTest {
     @BeforeEach
     public void setUp() {
         orders = new ConcurrentHashMap<>();
-        kitchenService = mock(KitchenService.class);
         orderStatus = new ConcurrentHashMap<>();
         deliveryInformationValidator = mock(DeliveryInformationValidator.class);
-        final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
-        orderService = new OrderServiceImpl(
-                kitchenService, orders, orderStatus, deliveryInformationValidator, deliveryQueue);
+        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator);
         user = new User("user", "password".toCharArray());
     }
 
@@ -115,7 +110,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenValidOrderId_then_completingOrderShouldReturnFutureObject() throws PancakeServiceException {
+    public void givenValidOrderId_then_completingOrderShouldCompleteAsync() throws PancakeServiceException {
         // Given
         var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
@@ -123,9 +118,7 @@ public class OrderServiceTest {
         // When
         orderService.complete(user, orderId);
         // Then
-        assertNotNull(orders.get(orderId));
-        assertThrows(PancakeServiceException.class, () -> orderService.orderSummary(null, orderId));
-        verify(kitchenService).submitTask(any());
+        Awaitility.await().until(() -> orders.get(orderId) != null);
     }
 
     @Test
@@ -137,8 +130,7 @@ public class OrderServiceTest {
         // When
         orderService.cancel(user, orderId);
         // Then
-        assertFalse(orders.containsKey(orderId));
-        assertThrows(PancakeServiceException.class, () -> orderService.orderSummary(null, orderId));
+        Awaitility.await().until(()->!orders.containsKey(orderId));
         assertEquals(OrderStatus.CANCELLED, orderStatus.get(orderId));
     }
 
@@ -186,7 +178,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenValidOrder_then_creatingAnotherOrderShouldThrowAnException() throws PancakeServiceException {
+    public void givenValidOrder_then_creatingAnotherOrderShouldThrowAnException() {
         // Given
         var user = new User("user2", "password2".toCharArray());
         var orderId = UUID.randomUUID();

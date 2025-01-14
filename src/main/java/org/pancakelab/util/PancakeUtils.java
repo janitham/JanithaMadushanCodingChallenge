@@ -16,8 +16,7 @@ public class PancakeUtils {
 
     public static void preparePancake(Pancakes type) {
         validateInputs(type);
-        PancakeRecipe pancakeRecipe = PancakeFactory.get(type);
-        logPancakeDetails(pancakeRecipe);
+        logPancakeDetails(PancakeFactory.get(type));
     }
 
     private static void validateInputs(Pancakes type) {

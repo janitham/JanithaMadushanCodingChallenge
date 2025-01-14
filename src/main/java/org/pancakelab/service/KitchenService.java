@@ -1,33 +1,12 @@
 package org.pancakelab.service;
 
-import org.pancakelab.tasks.PreparationTask;
+import org.pancakelab.model.OrderDetails;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.UUID;
 
-public class KitchenService {
-    private final ExecutorService deliveryExecutor;
-
-    public KitchenService(
-            final int numberOfChefsInTheKitchen
-    ) {
-        this.deliveryExecutor = Executors.newFixedThreadPool(numberOfChefsInTheKitchen);
-    }
-
-    public void submitTask(PreparationTask preparationTask){
-        deliveryExecutor.submit(preparationTask);
-    }
-
-    public void shutdown() {
-        deliveryExecutor.shutdown();
-        try {
-            if (!deliveryExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
-                deliveryExecutor.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            deliveryExecutor.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
-    }
+public interface KitchenService {
+    List<OrderDetails> viewOrders();
+    void acceptOrder(UUID orderId);
+    void notifyOrderCompletion(UUID orderId);
 }
