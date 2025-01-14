@@ -1,45 +1,43 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.OrderStatus;
-
-import java.util.UUID;
+import java.util.List;
 import java.util.concurrent.*;
 
 public class DeliveryService {
 
     private final ExecutorService deliveryPartnerPool;
-    private final BlockingDeque<UUID> deliveryQueue;
-    private final ConcurrentMap<UUID, OrderDetails> orders;
-    private final ConcurrentMap<UUID, OrderStatus> orderStatus;
 
     public DeliveryService(
-            final int numberOfDeliveryPartners,
-            final BlockingDeque<UUID> deliveryQueue,
-            final ConcurrentMap<UUID, OrderDetails> orders,
-            final ConcurrentMap<UUID, OrderStatus> orderStatus
+            final int numberOfDeliveryPartners
     ) {
-        this.deliveryQueue = deliveryQueue;
-        this.orders = orders;
-        this.orderStatus = orderStatus;
         this.deliveryPartnerPool = Executors.newFixedThreadPool(numberOfDeliveryPartners);
-        initializeDeliveryPartners(numberOfDeliveryPartners);
     }
 
-    private void initializeDeliveryPartners(int numberOfDeliveryPartners) {
-        for (int i = 0; i < numberOfDeliveryPartners; i++) {
-            deliveryPartnerPool.submit(new DeliveryPartnerImpl(orders, deliveryQueue, orderStatus));
+    public void registerDeliveryPartners(List<DeliveryPartner> deliveryPartners) {
+        for (DeliveryPartner deliveryPartner : deliveryPartners) {
+            deliveryPartnerPool.submit((Runnable) deliveryPartner);
         }
     }
 
     public void shutdown() {
         deliveryPartnerPool.shutdown();
         try {
-            if (!deliveryPartnerPool.awaitTermination(60, TimeUnit.SECONDS)) {
-                deliveryPartnerPool.shutdownNow();
+            if (!deliveryPartnerPool.awaitTermination(1, TimeUnit.SECONDS)) {
+                for (Runnable task : deliveryPartnerPool.shutdownNow()) {
+                    if (task instanceof Thread) {
+                        ((Thread) task).interrupt();
+                    }
+                }
+                if (!deliveryPartnerPool.awaitTermination(1, TimeUnit.SECONDS)) {
+                    System.err.println("DeliveryPartnerPool did not terminate");
+                }
             }
         } catch (InterruptedException e) {
-            deliveryPartnerPool.shutdownNow();
+            for (Runnable task : deliveryPartnerPool.shutdownNow()) {
+                if (task instanceof Thread) {
+                    ((Thread) task).interrupt();
+                }
+            }
             Thread.currentThread().interrupt();
         }
     }
