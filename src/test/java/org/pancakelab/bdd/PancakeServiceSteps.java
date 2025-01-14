@@ -18,12 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PancakeServiceSteps {
 
-    private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
-    private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
-    private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
-    private static User authenticatedUser = new User("validUser", "validPassword".toCharArray());
-    private static final KitchenServiceImpl kitchenService = new KitchenServiceImpl(orders, orderStatus);
-
     private static final HashMap<String, User> systemUsers = new HashMap<>() {
         {
             put("user1", new User("user", "password".toCharArray()));
@@ -32,8 +26,14 @@ public class PancakeServiceSteps {
             put("user4", new User("user3", "password3".toCharArray()));
         }
     };
-    private static final OrderService orderService
-            = new AuthenticatedOrderService(
+    private static final ConcurrentHashMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
+    private static User authenticatedUser = new User("validUser", "validPassword".toCharArray());
+    private static UUID orderId;
+
+    private static final KitchenServiceImpl kitchenService = new KitchenServiceImpl(orders, orderStatus);
+    private static final DeliveryService deliveryService = new DeliveryServiceImpl(orders, orderStatus);
+    private static final OrderService orderService = new AuthenticatedOrderService(
             new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator()),
             new AuthenticationServiceImpl(
                     new HashSet<>() {
@@ -44,7 +44,6 @@ public class PancakeServiceSteps {
                     }
             )
     );
-    private static UUID orderId;
 
     @Given("a disciple {string} creates an order with building {string} and room number {string}")
     public void a_disciple_creates_an_order_with_building_and_room_number(String disciple, String building, String roomNumber) throws PancakeServiceException {
@@ -67,17 +66,6 @@ public class PancakeServiceSteps {
         orderService.cancel(systemUsers.get(disciple), orderId);
     }
 
-    @When("delivery partner is available for the delivery")
-    public void delivery_partner_is_available_for_the_delivery() {
-        // Implementation needed
-    }
-
-    @When("delivery partner notifies delivered")
-    public void delivery_partner_notifies_delivered() throws InterruptedException {
-        Thread.sleep(1000);
-        orderStatus.put(orderId, OrderStatus.DELIVERED);
-    }
-
     @Then("the order status should be {string}")
     public void the_order_status_should_be(String string) {
         Awaitility.await().until(() -> orderStatus.get(orderId) == OrderStatus.valueOf(string));
@@ -86,6 +74,45 @@ public class PancakeServiceSteps {
     @Then("the order should be removed from the database")
     public void the_order_should_be_removed_from_the_database() {
         assertThrows(AuthorizationFailureException.class, () -> orderService.orderSummary(authenticatedUser, orderId));
+    }
+
+    @When("the chef {string} accepts the order")
+    public void the_chef_accepts_the_order(String chef) {
+        kitchenService.acceptOrder(orderId);
+    }
+
+    @Given("a disciple {string} has a created order")
+    public void a_disciple_has_a_created_order(String user) {
+        addOrderToTheSystem(user, OrderStatus.CREATED);
+    }
+
+    @Given("a disciple {string} has an order in progress")
+    public void a_disciple_has_an_order_in_progress(String user) {
+        addOrderToTheSystem(user, OrderStatus.IN_PROGRESS);
+    }
+
+    @When("the chef {string} completes the order")
+    public void the_chef_completes_the_order(String string) {
+        kitchenService.notifyOrderCompletion(orderId);
+    }
+
+    @Given("a disciple {string} has an order ready for delivery")
+    public void a_disciple_has_an_order_ready_for_delivery(String user) {
+        addOrderToTheSystem(user, OrderStatus.READY_FOR_DELIVERY);
+    }
+    @When("the rider {string} accepts the order")
+    public void the_rider_accepts_the_order(String string) {
+        deliveryService.acceptOrder(orderId);
+    }
+
+
+    @Given("a disciple {string} has an order out for delivery")
+    public void a_disciple_has_an_order_out_for_delivery(String user) {
+        addOrderToTheSystem(user, OrderStatus.OUT_FOR_DELIVERY);
+    }
+    @When("the rider {string} completes the order")
+    public void the_rider_completes_the_order(String string) {
+        deliveryService.sendForTheDelivery(orderId);
     }
 
     // Security
@@ -98,11 +125,6 @@ public class PancakeServiceSteps {
     @Given("a username as {string} and a password as {string}")
     public void a_username_as_and_a_password_as(String username, String password) {
         authenticatedUser = new User(username, password.toCharArray());
-    }
-
-    @When("the orderId is added to the delivery queue")
-    public void the_order_id_is_added_to_the_delivery_queue() throws InterruptedException {
-        deliveryQueue.put(orderId);
     }
 
     @When("a disciple creates an order with building {string} and room number {string} and login fails")
@@ -146,5 +168,18 @@ public class PancakeServiceSteps {
             String disciple, String buildingNo, String roomNumber) {
         assertThrows(PancakeServiceException.class,
                 () -> orderService.createOrder(systemUsers.get(disciple), new DeliveryInfo(roomNumber, buildingNo)));
+    }
+
+    private void addOrderToTheSystem(String user, OrderStatus status) {
+        orderId = UUID.randomUUID();
+        orders.put(
+                orderId,
+                new OrderDetails.Builder()
+                        .withOrderId(orderId)
+                        .withUser(systemUsers.get(user))
+                        .withDeliveryInfo(new DeliveryInfo("1", "2")).withPanCakes(
+                                Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1)
+                        ).build());
+        orderStatus.put(orderId, status);
     }
 }

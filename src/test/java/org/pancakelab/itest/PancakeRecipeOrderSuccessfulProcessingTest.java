@@ -13,14 +13,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+//import java.util.concurrent.ConcurrentMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PancakeRecipeOrderSuccessfulProcessingTest {
 
-    private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<UUID, OrderDetails> orders;
     private static DeliveryServiceImpl deliveryService;
     private static KitchenServiceImpl kitchenService;
     private static OrderService orderService;
@@ -33,6 +33,7 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
     public static void init() {
         deliveryInfo = new DeliveryInfo("1", "2");
         orderStatus = new ConcurrentHashMap<>();
+        orders = new ConcurrentHashMap<>();
         deliveryService = new DeliveryServiceImpl(orders, orderStatus);
         kitchenService = new KitchenServiceImpl(orders, orderStatus);
         AuthenticationService authenticationService = new AuthenticationServiceImpl(new HashSet<>() {

@@ -9,7 +9,6 @@ import org.pancakelab.model.OrderStatus;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -17,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 public class DeliveryServiceTest {
 
-    private ConcurrentMap<UUID, OrderDetails> orders;
+    private ConcurrentHashMap<UUID, OrderDetails> orders;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private DeliveryService deliveryService;
 

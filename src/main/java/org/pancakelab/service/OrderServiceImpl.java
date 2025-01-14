@@ -19,7 +19,7 @@ public class OrderServiceImpl implements OrderService {
     public static final String MAXIMUM_PANCAKES_EXCEEDED = "The maximum number of pancakes that can be ordered is %d".formatted(MAXIMUM_PANCAKES);
     public static final String USER_HAS_AN_ONGOING_ORDER = "The user has an ongoing order";
 
-    private final ConcurrentMap<UUID, OrderDetails> orders;
+    private final ConcurrentHashMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final DeliveryInformationValidator deliveryInformationValidator;
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
@@ -27,7 +27,7 @@ public class OrderServiceImpl implements OrderService {
     private final ExecutorService executorService;
 
     public OrderServiceImpl(
-            final ConcurrentMap<UUID, OrderDetails> orders,
+            final ConcurrentHashMap<UUID, OrderDetails> orders,
             final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
             final DeliveryInformationValidator deliveryInformationValidator
     ) {
@@ -101,9 +101,13 @@ public class OrderServiceImpl implements OrderService {
                     .withUser(user)
                     .withPanCakes(orderItems.get(orderId))
                     .build();
-            orders.put(orderId, orderDetails);
+            synchronized (orders) {
+                orders.put(orderId, orderDetails);
+            }
+            synchronized (orderStatus) {
+                orderStatus.put(orderId, OrderStatus.COMPLETED);
+            }
             cleanUpOrder(orderId, deliveryInfo);
-            orderStatus.put(orderId, OrderStatus.COMPLETED);
             PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
         }, executorService);
     }

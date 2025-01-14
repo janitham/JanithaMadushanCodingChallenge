@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,7 +20,7 @@ import static org.pancakelab.service.OrderServiceImpl.ORDER_CANNOT_BE_PROCESSED_
 
 public class OrderServiceTest {
 
-    private ConcurrentMap<UUID, OrderDetails> orders;
+    private ConcurrentHashMap<UUID, OrderDetails> orders;
     private OrderService orderService;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private User user;

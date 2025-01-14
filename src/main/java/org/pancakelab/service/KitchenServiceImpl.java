@@ -8,12 +8,12 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 public class KitchenServiceImpl implements KitchenService {
-    private final ConcurrentMap<UUID, OrderDetails> orders;
+    private final ConcurrentHashMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final ExecutorService executorService;
 
     public KitchenServiceImpl(
-            final ConcurrentMap<UUID, OrderDetails> orders,
+            final ConcurrentHashMap<UUID, OrderDetails> orders,
             final ConcurrentHashMap<UUID, OrderStatus> orderStatus
     ) {
         this.orders = orders;
@@ -31,7 +31,9 @@ public class KitchenServiceImpl implements KitchenService {
         CompletableFuture.runAsync(() -> {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null) {
-                orderStatus.put(orderId, OrderStatus.IN_PROGRESS);
+                synchronized (orderStatus) {
+                    orderStatus.put(orderId, OrderStatus.IN_PROGRESS);
+                }
             }
         }, executorService);
     }

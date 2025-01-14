@@ -8,12 +8,12 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 public class DeliveryServiceImpl implements DeliveryService {
-    private final ConcurrentMap<UUID, OrderDetails> orders;
+    private final ConcurrentHashMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final ExecutorService executorService;
 
     public DeliveryServiceImpl(
-            final ConcurrentMap<UUID, OrderDetails> orders,
+            final ConcurrentHashMap<UUID, OrderDetails> orders,
             final ConcurrentHashMap<UUID, OrderStatus> orderStatus
     ) {
         this.orders = orders;
