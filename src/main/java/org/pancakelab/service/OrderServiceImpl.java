@@ -4,6 +4,7 @@ import org.pancakelab.model.*;
 import org.pancakelab.util.PancakeUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,7 @@ public class OrderServiceImpl implements OrderService {
     public static final String DUPLICATE_ORDERS_CANNOT_BE_PLACED = "Cannot create an order for the same delivery location";
     public static final Integer MAXIMUM_PANCAKES = 10;
     public static final String MAXIMUM_PANCAKES_EXCEEDED = "The maximum number of pancakes that can be ordered is %d".formatted(MAXIMUM_PANCAKES);
+    public static final String USER_HAS_AN_ONGOING_ORDER = "The user has an ongoing order";
 
     private final KitchenService kitchenService;
     private final ConcurrentMap<UUID, OrderDetails> orders;
@@ -40,6 +42,12 @@ public class OrderServiceImpl implements OrderService {
         var orderId = UUID.randomUUID();
         if (orderStorage.putIfAbsent(deliveryInformation, orderId) != null) {
             throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);
+        }
+        if (orders.values().stream().anyMatch(orderDetails ->
+                orderDetails.getUser().equals(user) && orderStatus.containsKey(orderDetails.getOrderId()) &&
+                        List.of(OrderStatus.CREATED, OrderStatus.READY_FOR_DELIVERY)
+                                .contains(orderStatus.get(orderDetails.getOrderId())))) {
+            throw new PancakeServiceException(USER_HAS_AN_ONGOING_ORDER);
         }
         orderStatus.put(orderId, OrderStatus.CREATED);
         PancakeUtils.notifyUser(user, OrderStatus.CREATED);

@@ -175,4 +175,25 @@ public class OrderServiceTest {
         );
         assertEquals(OrderServiceImpl.MAXIMUM_PANCAKES_EXCEEDED, exception.getMessage());
     }
+
+    @Test
+    public void givenValidOrder_then_creatingAnotherOrderShouldThrowAnException() throws PancakeServiceException {
+        // Given
+        var user = new User("user2", "password2".toCharArray());
+        var orderId = UUID.randomUUID();
+        orderStatus.put(orderId, OrderStatus.CREATED);
+        orders.put(
+                orderId,
+                new OrderDetails.Builder().withOrderId(orderId).withPanCakes(
+                        Map.of(
+                                PancakeMenu.MILK_CHOCOLATE_PANCAKE, 1
+                        )
+                ).withDeliveryInfo(new DeliveryInfo("1", "2")
+                ).withUser(user).build());
+        // When
+        // Then
+        Exception exception = assertThrows(PancakeServiceException.class,
+                () -> orderService.createOrder(user, new DeliveryInfo("1", "7")));
+        assertEquals(OrderServiceImpl.USER_HAS_AN_ONGOING_ORDER, exception.getMessage());
+    }
 }
