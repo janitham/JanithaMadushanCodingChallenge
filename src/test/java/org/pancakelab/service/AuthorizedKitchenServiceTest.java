@@ -2,6 +2,8 @@ package org.pancakelab.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.pancakelab.model.AuthenticationFailureException;
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.PancakeServiceException;
@@ -24,6 +26,7 @@ public class AuthorizedKitchenServiceTest {
     private AuthorizedKitchenService authorizedKitchenService;
     private User privileged;
     private User unPrivileged;
+    private User inCorrectPermissions;
     private UUID orderId;
 
     @BeforeEach
@@ -40,6 +43,9 @@ public class AuthorizedKitchenServiceTest {
         authorizedKitchenService = new AuthorizedKitchenService(kitchenService, authenticationService);
         privileged = new User("testUser", "password".toCharArray(), privileges);
         unPrivileged = new User("testUser", "password".toCharArray(), new HashMap<>());
+        inCorrectPermissions = new User("testUser", "password".toCharArray(), new HashMap<>() {{
+            put("delivery", List.of('C', 'R', 'U', 'D'));
+        }});
         orderId = UUID.randomUUID();
     }
 
@@ -91,38 +97,44 @@ public class AuthorizedKitchenServiceTest {
         assertEquals(USER_IS_NOT_AUTHENTICATED, exception.getMessage());
     }
 
-    @Test
-    public void givenUnprivilegedUser_whenViewOrders_thenThrowsException() {
+    @ParameterizedTest
+    @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
+    public void givenUnprivilegedUser_whenViewOrders_thenThrowsException(String userType) {
         // Given
+        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         PancakeServiceException exception = assertThrows(
                 PancakeServiceException.class,
-                () -> authorizedKitchenService.viewOrders(unPrivileged)
+                () -> authorizedKitchenService.viewOrders(user)
         );
         assertEquals(USER_IS_NOT_AUTHORIZED, exception.getMessage());
     }
 
-    @Test
-    public void givenUnprivilegedUser_whenAcceptOrder_thenThrowsException() {
+    @ParameterizedTest
+    @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
+    public void givenUnprivilegedUser_whenAcceptOrder_thenThrowsException(String userType) {
         // Given
+        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         PancakeServiceException exception = assertThrows(
                 PancakeServiceException.class,
-                () -> authorizedKitchenService.acceptOrder(unPrivileged, orderId)
+                () -> authorizedKitchenService.acceptOrder(user, orderId)
         );
         assertEquals(USER_IS_NOT_AUTHORIZED, exception.getMessage());
     }
 
-    @Test
-    public void givenUnprivilegedUser_whenNotifyOrderCompletion_thenThrowsException() {
+    @ParameterizedTest
+    @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
+    public void givenUnprivilegedUser_whenNotifyOrderCompletion_thenThrowsException(String userType) {
         // Given
+        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         PancakeServiceException exception = assertThrows(
                 PancakeServiceException.class,
-                () -> authorizedKitchenService.notifyOrderCompletion(unPrivileged, orderId)
+                () -> authorizedKitchenService.notifyOrderCompletion(user, orderId)
         );
         assertEquals(USER_IS_NOT_AUTHORIZED, exception.getMessage());
     }

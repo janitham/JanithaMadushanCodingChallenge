@@ -2,6 +2,7 @@ package org.pancakelab.util;
 
 import org.pancakelab.model.*;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 public class PancakeUtils {
@@ -42,7 +43,8 @@ public class PancakeUtils {
     }
 
     public static void authorizeUser(User user, String service, Character privilege) throws PancakeServiceException {
-        if (user.getPrivileges().isEmpty() || !user.getPrivileges().get(service).contains(privilege)) {
+        List<Character> userPrivileges = user.getPrivileges().get(service);
+        if (userPrivileges == null || !userPrivileges.contains(privilege)) {
             throw new AuthorizationFailureException(USER_IS_NOT_AUTHORIZED);
         }
     }

@@ -2,6 +2,8 @@ package org.pancakelab.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.pancakelab.model.*;
 
@@ -21,6 +23,8 @@ public class AuthorizedOrderServiceTest {
     private AuthenticationService authenticationService;
     private AuthorizedOrderService authorizedOrderService;
     private User testUser;
+    private User unPrivileged;
+    private User inCorrectPermissions;
     private DeliveryInfo deliveryInfo;
     private final UUID testOrderId = UUID.randomUUID();
     private final Map<Pancakes, Integer> testPancakes = new HashMap<>() {
@@ -40,6 +44,10 @@ public class AuthorizedOrderServiceTest {
     @BeforeEach
     public void setUp() {
         testUser = new User("testUser", "password".toCharArray(), privileges);
+        inCorrectPermissions = new User("testUser", "password".toCharArray(), new HashMap<>() {{
+            put("delivery", List.of('C', 'R', 'U', 'D'));
+        }});
+        unPrivileged = new User("testUser", "password".toCharArray(), new HashMap<>());
         authenticationService = Mockito.mock(AuthenticationService.class);
         orderService = Mockito.mock(OrderService.class);
         authorizedOrderService = new AuthorizedOrderService(orderService, authenticationService);
@@ -172,63 +180,68 @@ public class AuthorizedOrderServiceTest {
         assertThrows(AuthenticationFailureException.class, () -> authorizedOrderService.cancel(testUser, testOrderId));
     }
 
-    @Test
-    public void shouldThrowExceptionWhenUserNotAuthorizedForAddPancakes() throws PancakeServiceException {
+    @ParameterizedTest
+    @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
+    public void shouldThrowExceptionWhenUserNotAuthorizedForAddPancakes(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
+        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authorizedOrderService.addPancakes(unauthorizedUser, testOrderId, testPancakes));
+                () -> authorizedOrderService.addPancakes(user, testOrderId, testPancakes));
     }
 
-    @Test
-    public void shouldThrowExceptionWhenUserNotAuthorizedForOrderSummary() throws PancakeServiceException {
+    @ParameterizedTest
+    @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
+    public void shouldThrowExceptionWhenUserNotAuthorizedForOrderSummary(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
+        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authorizedOrderService.orderSummary(unauthorizedUser, testOrderId));
+                () -> authorizedOrderService.orderSummary(user, testOrderId));
     }
 
-    @Test
-    public void shouldThrowExceptionWhenUserNotAuthorizedForOrderStatus() throws PancakeServiceException {
+    @ParameterizedTest
+    @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
+    public void shouldThrowExceptionWhenUserNotAuthorizedForOrderStatus(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
+        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authorizedOrderService.status(unauthorizedUser, testOrderId));
+                () -> authorizedOrderService.status(user, testOrderId));
     }
 
-    @Test
-    public void shouldThrowExceptionWhenUserNotAuthorizedForCompleteOrder() throws PancakeServiceException {
+    @ParameterizedTest
+    @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
+    public void shouldThrowExceptionWhenUserNotAuthorizedForCompleteOrder(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
+        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authorizedOrderService.complete(unauthorizedUser, testOrderId));
+                () -> authorizedOrderService.complete(user, testOrderId));
     }
 
-    @Test
-    public void shouldThrowExceptionWhenUserNotAuthorizedForCancelOrder() throws PancakeServiceException {
+    @ParameterizedTest
+    @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
+    public void shouldThrowExceptionWhenUserNotAuthorizedForCancelOrder(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User unauthorizedUser = new User("unauthorizedUser", "password".toCharArray(), privileges);
+        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
-                () -> authorizedOrderService.cancel(unauthorizedUser, testOrderId));
+                () -> authorizedOrderService.cancel(user, testOrderId));
     }
 }
