@@ -2,7 +2,7 @@ package org.pancakelab.model;
 
 import java.util.Objects;
 
-public class Pancake {
+public class PancakeRecipe {
     private final CHOCOLATE chocolate;
     private final boolean hazelNuts;
     private final boolean whippedCream;
@@ -11,8 +11,8 @@ public class Pancake {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Pancake pancake = (Pancake) o;
-        return hazelNuts == pancake.hazelNuts && whippedCream == pancake.whippedCream && chocolate == pancake.chocolate;
+        PancakeRecipe pancakeRecipe = (PancakeRecipe) o;
+        return hazelNuts == pancakeRecipe.hazelNuts && whippedCream == pancakeRecipe.whippedCream && chocolate == pancakeRecipe.chocolate;
     }
 
     @Override
@@ -20,7 +20,7 @@ public class Pancake {
         return Objects.hash(chocolate, hazelNuts, whippedCream);
     }
 
-    private Pancake(Builder builder) {
+    private PancakeRecipe(Builder builder) {
         this.chocolate = builder.chocolate;
         this.hazelNuts = builder.hazelNuts;
         this.whippedCream = builder.whippedCream;
@@ -54,11 +54,11 @@ public class Pancake {
             return this;
         }
 
-        public Pancake build() {
+        public PancakeRecipe build() {
             if (chocolate == null) {
                 throw new IllegalArgumentException("Chocolate is required");
             }
-            return new Pancake(this);
+            return new PancakeRecipe(this);
         }
     }
 

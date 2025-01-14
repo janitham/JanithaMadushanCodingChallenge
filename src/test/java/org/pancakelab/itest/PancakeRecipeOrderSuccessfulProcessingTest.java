@@ -20,7 +20,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PancakeOrderSuccessfulProcessingTest {
+public class PancakeRecipeOrderSuccessfulProcessingTest {
 
     private static final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();

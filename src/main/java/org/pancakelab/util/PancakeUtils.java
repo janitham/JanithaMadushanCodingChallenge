@@ -1,7 +1,7 @@
 package org.pancakelab.util;
 
 import org.pancakelab.model.OrderStatus;
-import org.pancakelab.model.Pancake;
+import org.pancakelab.model.PancakeRecipe;
 import org.pancakelab.model.PancakeMenu;
 import org.pancakelab.model.User;
 
@@ -16,8 +16,8 @@ public class PancakeUtils {
 
     public static void preparePancake(PancakeMenu type) {
         validateInputs(type);
-        Pancake pancake = PancakeFactory.get(type);
-        logPancakeDetails(pancake);
+        PancakeRecipe pancakeRecipe = PancakeFactory.get(type);
+        logPancakeDetails(pancakeRecipe);
     }
 
     private static void validateInputs(PancakeMenu type) {
@@ -26,15 +26,15 @@ public class PancakeUtils {
         }
     }
 
-    private static void logPancakeDetails(Pancake pancake) {
-        logger.info("Adding " + (pancake.getChocolate() == Pancake.CHOCOLATE.DARK ? "Dark" : "Milk") + " chocolate...");
-        if (pancake.isWhippedCream()) {
+    private static void logPancakeDetails(PancakeRecipe pancakeRecipe) {
+        logger.info("Adding " + (pancakeRecipe.getChocolate() == PancakeRecipe.CHOCOLATE.DARK ? "Dark" : "Milk") + " chocolate...");
+        if (pancakeRecipe.isWhippedCream()) {
             logger.info("Adding whipped cream...");
         }
-        if (pancake.isHazelNuts()) {
+        if (pancakeRecipe.isHazelNuts()) {
             logger.info("Adding hazelnuts...");
         }
-        logger.info("%s is ready!".formatted(pancake.toString()));
+        logger.info("%s is ready!".formatted(pancakeRecipe.toString()));
     }
 
     public static void notifyUser(User user, OrderStatus orderStatus){
