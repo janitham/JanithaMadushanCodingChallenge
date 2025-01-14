@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -17,71 +16,57 @@ public class AuthorizedDeliveryServiceTest {
 
     private DeliveryService deliveryService;
     private AuthenticationService authenticationService;
-    private ConcurrentHashMap<UUID, User> orderUserMap;
     private AuthorizedDeliveryService authorizedDeliveryService;
-    private User user;
+    private User privileged;
+    private User unPrivileged;
     private UUID orderId;
 
     @BeforeEach
     public void setUp() {
         final Map<String, List<Character>> privileges = new HashMap<>() {
             {
-                put("order", List.of('C', 'R', 'U', 'D'));
-                put("kitchen", List.of('C', 'R', 'U', 'D'));
                 put("delivery", List.of('C', 'R', 'U', 'D'));
             }
         };
         deliveryService = mock(DeliveryService.class);
         authenticationService = mock(AuthenticationService.class);
-        orderUserMap = new ConcurrentHashMap<>();
         authorizedDeliveryService = new AuthorizedDeliveryService(deliveryService, authenticationService);
-        user = new User("testUser", "password".toCharArray(), privileges);
+        privileged = new User("testUser", "password".toCharArray(), privileges);
+        unPrivileged = new User("testUser", "password".toCharArray(), new HashMap<>());
         orderId = UUID.randomUUID();
-        orderUserMap.put(orderId, user);
     }
 
     @Test
-    public void testViewCompletedOrders() throws PancakeServiceException {
+    public void shouldReturnCompletedOrdersWhenUserIsPrivileged() throws PancakeServiceException {
+        // Given
         List<OrderDetails> orders = List.of(mock(OrderDetails.class));
-        when(deliveryService.viewCompletedOrders(user)).thenReturn(orders);
-
-        List<OrderDetails> result = authorizedDeliveryService.viewCompletedOrders(user);
-
+        when(deliveryService.viewCompletedOrders(privileged)).thenReturn(orders);
+        // When
+        List<OrderDetails> result = authorizedDeliveryService.viewCompletedOrders(privileged);
+        // Then
         assertEquals(orders, result);
-        verify(authenticationService).authenticate(user);
+        verify(authenticationService).authenticate(privileged);
     }
 
     @Test
-    public void testAcceptOrder() throws PancakeServiceException {
-        doNothing().when(deliveryService).acceptOrder(user, orderId);
-
-        authorizedDeliveryService.acceptOrder(user, orderId);
-
-        verify(authenticationService).authenticate(user);
-        verify(deliveryService).acceptOrder(user, orderId);
+    public void shouldAcceptOrderWhenUserIsPrivileged() throws PancakeServiceException {
+        // Given
+        doNothing().when(deliveryService).acceptOrder(privileged, orderId);
+        // When
+        authorizedDeliveryService.acceptOrder(privileged, orderId);
+        // Then
+        verify(authenticationService).authenticate(privileged);
+        verify(deliveryService).acceptOrder(privileged, orderId);
     }
 
     @Test
-    public void testSendForTheDelivery() throws PancakeServiceException {
-        doNothing().when(deliveryService).sendForTheDelivery(user, orderId);
-
-        authorizedDeliveryService.sendForTheDelivery(user, orderId);
-
-        verify(authenticationService).authenticate(user);
-        verify(deliveryService).sendForTheDelivery(user, orderId);
+    public void shouldSendForDeliveryWhenUserIsPrivileged() throws PancakeServiceException {
+        // Given
+        doNothing().when(deliveryService).sendForTheDelivery(privileged, orderId);
+        // When
+        authorizedDeliveryService.sendForTheDelivery(privileged, orderId);
+        // Then
+        verify(authenticationService).authenticate(privileged);
+        verify(deliveryService).sendForTheDelivery(privileged, orderId);
     }
-
-    /*//@Test
-    public void testUnauthorizedAccess() {
-        User anotherUser = new User("anotherUser", "password".toCharArray());
-        UUID anotherOrderId = UUID.randomUUID();
-        orderUserMap.put(anotherOrderId, anotherUser);
-
-        AuthorizationFailureException exception = assertThrows(
-                AuthorizationFailureException.class,
-                () -> authorizedDeliveryService.acceptOrder(user, anotherOrderId)
-        );
-
-        assertEquals("User not authorized to access order", exception.getMessage());
-    }*/
 }
