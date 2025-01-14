@@ -13,7 +13,7 @@ public class KitchenServiceImpl implements KitchenService {
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
 
-    private KitchenServiceImpl(
+    public KitchenServiceImpl(
             final BlockingDeque<UUID> deliveryQueue,
             final ConcurrentMap<UUID, OrderDetails> orders,
             final ExecutorService executorService,
@@ -23,35 +23,6 @@ public class KitchenServiceImpl implements KitchenService {
         this.orders = orders;
         this.deliveryExecutor = executorService;
         this.orderStatus = orderStatus;
-    }
-
-    public static synchronized KitchenServiceImpl getInstance(
-            final int numberOfChefsInTheKitchen,
-            final BlockingDeque<UUID> deliveryQueue,
-            final ConcurrentMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
-    ) {
-        if (instance == null) {
-            instance = new KitchenServiceImpl(
-                    deliveryQueue,
-                    orders,
-                    Executors.newFixedThreadPool(numberOfChefsInTheKitchen),
-                    orderStatus
-            );
-        }
-        return instance;
-    }
-
-    public static synchronized KitchenServiceImpl getInstance(
-            final BlockingDeque<UUID> deliveryQueue,
-            final ConcurrentMap<UUID, OrderDetails> orders,
-            final ExecutorService deliveryExecutor,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
-    ) {
-        if (instance == null) {
-            instance = new KitchenServiceImpl(deliveryQueue, orders, deliveryExecutor, orderStatus);
-        }
-        return instance;
     }
 
     @Override

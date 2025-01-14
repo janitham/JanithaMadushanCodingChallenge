@@ -24,7 +24,8 @@ public class KitchenServiceTest {
 
     @BeforeAll
     public static void init() {
-        kitchenService = KitchenServiceImpl.getInstance(5, deliveryQueue, orders, orderStatus);
+        var es = Executors.newFixedThreadPool(1);
+        kitchenService = new KitchenServiceImpl(deliveryQueue, orders, es, orderStatus);
     }
 
     @Test
@@ -33,6 +34,7 @@ public class KitchenServiceTest {
         var order = new OrderDetails.Builder()
                 .withPanCakes(Map.of(PancakeMenu.DARK_CHOCOLATE_PANCAKE, 2))
                 .withDeliveryInfo(mock(DeliveryInfo.class))
+                .withUser(mock(User.class))
                 .build();
         orders.put(order.getOrderId(), order);
         // When

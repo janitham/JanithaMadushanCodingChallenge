@@ -10,11 +10,13 @@ import org.pancakelab.service.*;
 import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -100,11 +102,12 @@ public class PancakeOrderSuccessfulProcessingTest {
     }
 
     private static void initializeDeliveryService() {
-        deliveryService = new DeliveryService(2, deliveryQueue, orders, orderStatus);
+        deliveryService = new DeliveryService(1);
+        deliveryService.registerDeliveryPartners(List.of(new DeliveryPartnerImpl(orders, deliveryQueue, orderStatus)));
     }
 
     private static void initializeKitchenService() {
-        kitchenService = KitchenServiceImpl.getInstance(2, deliveryQueue, orders, orderStatus);
+        kitchenService = new KitchenServiceImpl(deliveryQueue, orders, Executors.newFixedThreadPool(1), orderStatus);
     }
 
     private static void initializeOrderService() {
