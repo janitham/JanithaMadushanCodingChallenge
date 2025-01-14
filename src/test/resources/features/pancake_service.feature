@@ -16,6 +16,7 @@ Feature: Pancake Delivery Service
     And the disciple "user3" adds 2 pancake of type "DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE"
     And the disciple "user3" completes the order
     When delivery partner is available for the delivery
+    And delivery partner notifies delivered
     Then the order status should be "DELIVERED"
 
   Scenario: Disciple cancels the order

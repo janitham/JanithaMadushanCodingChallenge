@@ -77,6 +77,12 @@ public class PancakeServiceSteps {
         }
     }
 
+    @When("delivery partner notifies delivered")
+    public void delivery_partner_notifies_delivered() throws InterruptedException {
+        Thread.sleep(1000);
+        orderStatus.put(orderId, OrderStatus.DELIVERED);
+    }
+
     @Then("the order status should be {string}")
     public void the_order_status_should_be(String string) {
         Awaitility.await().until(() -> orderStatus.get(orderId) == OrderStatus.valueOf(string));

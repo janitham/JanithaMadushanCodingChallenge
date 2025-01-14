@@ -28,22 +28,33 @@ public class DeliveryTask implements Runnable {
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                deliverOrder(deliveryQueue.take());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
+        try {
+            deliverOrder(deliveryQueue.take());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warning("DeliveryTask interrupted");
         }
+
     }
 
-    private void deliverOrder(final UUID orderId) {
+    private void deliverOrder(final UUID orderId) throws InterruptedException {
         final OrderDetails orderDetails = orders.get(orderId);
         if (orderDetails != null) {
+            if (orderStatus.get(orderId) != OrderStatus.WAITING_FOR_DELIVERY) {
+                orderStatus.put(orderId, OrderStatus.ERROR);
+                logger.warning("Order not ready for delivery: %s".formatted(orderId));
+                return;
+            }
             orders.remove(orderId);
             logger.info("Delivering order: %s".formatted(orderDetails.getOrderId()));
-            orderStatus.put(orderId, OrderStatus.DELIVERED);
+            PancakeUtils.notifyUser(orderDetails.getUser(), OrderStatus.DELIVERY_PARTNER_ASSIGNED);
+            synchronized (orderStatus) {
+                while (orderStatus.get(orderId) != OrderStatus.DELIVERED) {
+                    orderStatus.wait(1000);
+                }
+                orderStatus.notifyAll();
+            }
+            logger.info("Delivered order: %s".formatted(orderDetails.getOrderId()));
             PancakeUtils.notifyUser(orderDetails.getUser(), OrderStatus.DELIVERED);
         } else {
             handleMissingOrder(orderId);
@@ -51,7 +62,10 @@ public class DeliveryTask implements Runnable {
     }
 
     private void handleMissingOrder(final UUID orderId) {
-        orderStatus.put(orderId, OrderStatus.ERROR);
+        synchronized (orderStatus) {
+            orderStatus.put(orderId, OrderStatus.ERROR);
+            orderStatus.notifyAll();
+        }
         logger.warning("Order not found: %s".formatted(orderId));
     }
 }

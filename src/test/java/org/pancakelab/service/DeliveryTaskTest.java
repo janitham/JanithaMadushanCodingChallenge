@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-public class DeliveryPartnerTest {
+public class DeliveryTaskTest {
 
     private final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
@@ -51,20 +51,24 @@ public class DeliveryPartnerTest {
                 )
                 .withUser(user)
                 .withDeliveryInfo(mock(DeliveryInfo.class)).build();
-        var deliveryService = new DeliveryTask(orders, deliveryQueue, orderStatus);
+        var deliveryTask = new DeliveryTask(orders, deliveryQueue, orderStatus);
         orders.put(order.getOrderId(), order);
         deliveryQueue.add(order.getOrderId());
+        orderStatus.put(order.getOrderId(), OrderStatus.WAITING_FOR_DELIVERY);
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
         Logger logger = setupLogger(logOutputStream);
         Handler logHandler = logger.getHandlers()[0];
         try {
             // When
-            new Thread(deliveryService).start();
-            // Then
-            Awaitility.await().until(orders::isEmpty);
-            assertEquals(orderStatus.get(order.getOrderId()), OrderStatus.DELIVERED);
+            Thread thread = new Thread(deliveryTask);
+            thread.start();
+            Awaitility.await().until(deliveryQueue::isEmpty);
+            orderStatus.put(order.getOrderId(), OrderStatus.DELIVERED); // external service simulating delivery
+            thread.join();
             logHandler.flush();
-            assertTrue(logOutputStream.toString().contains("Delivering order: %s".formatted(order.getOrderId())));
+            assertTrue(logOutputStream.toString().contains("Delivered order: %s".formatted(order.getOrderId())));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         } finally {
             cleanupLogger(logger, logHandler);
         }
@@ -74,14 +78,14 @@ public class DeliveryPartnerTest {
     public void givenOrderDoesNotExist_whenTryingToDeliver_thenWarningShouldBeLogged() {
         // Given
         var orderId = UUID.randomUUID();
-        var deliveryService = new DeliveryTask(orders, deliveryQueue, orderStatus);
+        var deliveryTask = new DeliveryTask(orders, deliveryQueue, orderStatus);
         deliveryQueue.add(orderId);
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
         Logger logger = setupLogger(logOutputStream);
         Handler logHandler = logger.getHandlers()[0];
         try {
             // When
-            new Thread(deliveryService).start();
+            new Thread(deliveryTask).start();
             // Then
             Awaitility.await().until(() -> {
                 logHandler.flush();
