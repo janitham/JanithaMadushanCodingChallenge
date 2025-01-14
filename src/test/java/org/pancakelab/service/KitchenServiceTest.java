@@ -3,11 +3,9 @@ package org.pancakelab.service;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.OrderStatus;
-import org.pancakelab.model.PancakeServiceException;
+import org.pancakelab.model.*;
 
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,7 +38,7 @@ public class KitchenServiceTest {
         // When
         kitchenService.acceptOrder(null, orderId);
         // Then
-        Awaitility.await().until(()->OrderStatus.IN_PROGRESS.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatus.get(orderId)));
     }
 
     @Test
@@ -54,7 +52,7 @@ public class KitchenServiceTest {
         // When
         kitchenService.notifyOrderCompletion(null, orderId);
         // Then
-        Awaitility.await().until(()->OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId)));
     }
 
     @Test
@@ -68,11 +66,20 @@ public class KitchenServiceTest {
         when(orderDetails2.getOrderId()).thenReturn(orderId2);
         orders.put(orderId1, orderDetails1);
         orders.put(orderId2, orderDetails2);
+
+        Map<Pancakes, Integer> pancakeItems1 = new ConcurrentHashMap<>();
+        Map<Pancakes, Integer> pancakeItems2 = new ConcurrentHashMap<>();
+        when(orderDetails1.getPancakes()).thenReturn(pancakeItems1);
+        when(orderDetails2.getPancakes()).thenReturn(pancakeItems2);
+
         // When
-        List<OrderDetails> allOrders = kitchenService.viewOrders(null);
+        Map<UUID, Map<PancakeRecipe, Integer>> allOrders = kitchenService.viewOrders(null);
+
         // Then
         assertEquals(2, allOrders.size());
-        assertTrue(allOrders.contains(orderDetails1));
-        assertTrue(allOrders.contains(orderDetails2));
+        assertTrue(allOrders.containsKey(orderId1));
+        assertTrue(allOrders.containsKey(orderId2));
+        assertEquals(pancakeItems1, allOrders.get(orderId1));
+        assertEquals(pancakeItems2, allOrders.get(orderId2));
     }
 }

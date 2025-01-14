@@ -1,10 +1,10 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.OrderDetails;
+import org.pancakelab.model.PancakeRecipe;
 import org.pancakelab.model.PancakeServiceException;
 import org.pancakelab.model.User;
 
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.pancakelab.util.PancakeUtils.authorizeUser;
@@ -26,7 +26,7 @@ public class AuthorizedKitchenService implements KitchenService {
     }
 
     @Override
-    public List<OrderDetails> viewOrders(User user) throws PancakeServiceException {
+    public Map<UUID, Map<PancakeRecipe, Integer>> viewOrders(User user) throws PancakeServiceException {
         authenticateUser(user);
         authorizeUser(user, "kitchen", 'R');
         return kitchenService.viewOrders(user);

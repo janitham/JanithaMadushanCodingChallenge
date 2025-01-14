@@ -2,9 +2,11 @@ package org.pancakelab.service;
 
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
+import org.pancakelab.model.PancakeRecipe;
 import org.pancakelab.model.User;
+import org.pancakelab.util.PancakeFactory;
 
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -23,8 +25,17 @@ public class KitchenServiceImpl implements KitchenService {
     }
 
     @Override
-    public List<OrderDetails> viewOrders(User user) {
-        return List.copyOf(orders.values());
+    public Map<UUID, Map<PancakeRecipe, Integer>> viewOrders(User user) {
+        Map<UUID, Map<PancakeRecipe, Integer>> result = new ConcurrentHashMap<>();
+        for (OrderDetails order : orders.values()) {
+            Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>();
+            order.getPancakes().forEach((pancake, quantity) -> {
+                PancakeRecipe recipe = PancakeFactory.get(pancake);
+                pancakeRecipes.put(recipe, quantity);
+            });
+            result.put(order.getOrderId(), pancakeRecipes);
+        }
+        return result;
     }
 
     @Override

@@ -1,13 +1,11 @@
 package org.pancakelab.service;
 
 import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.User;
-import org.pancakelab.model.AuthorizationFailureException;
 import org.pancakelab.model.PancakeServiceException;
+import org.pancakelab.model.User;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.pancakelab.util.PancakeUtils.authorizeUser;
 

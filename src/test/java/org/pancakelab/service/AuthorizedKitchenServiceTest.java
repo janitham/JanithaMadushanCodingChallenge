@@ -4,10 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.pancakelab.model.AuthenticationFailureException;
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.PancakeServiceException;
-import org.pancakelab.model.User;
+import org.pancakelab.model.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,10 +49,10 @@ public class AuthorizedKitchenServiceTest {
     @Test
     public void givenAuthenticatedUser_whenViewOrders_thenReturnsOrders() throws PancakeServiceException {
         // Given
-        List<OrderDetails> orders = List.of(mock(OrderDetails.class));
+        Map<UUID, Map<PancakeRecipe, Integer>> orders = new HashMap<>();
         when(kitchenService.viewOrders(privileged)).thenReturn(orders);
         // When
-        List<OrderDetails> result = authorizedKitchenService.viewOrders(privileged);
+        Map<UUID, Map<PancakeRecipe, Integer>> result = authorizedKitchenService.viewOrders(privileged);
         // Then
         verify(authenticationService).authenticate(privileged);
         verify(kitchenService).viewOrders(privileged);
