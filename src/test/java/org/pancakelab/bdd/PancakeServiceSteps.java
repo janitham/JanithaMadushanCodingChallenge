@@ -6,7 +6,7 @@ import io.cucumber.java.en.When;
 import org.awaitility.Awaitility;
 import org.pancakelab.model.*;
 import org.pancakelab.service.*;
-import org.pancakelab.tasks.DeliveryTask;
+import org.pancakelab.tasks.DeliveryPartnerTask;
 import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public class PancakeServiceSteps {
     private static final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
     private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
     private static User authenticatedUser = new User("validUser", "validPassword".toCharArray());
-    private static final Thread deliveryService = new Thread(new DeliveryTask(orders, deliveryQueue, orderStatus));
+    private static final Thread deliveryService = new Thread(new DeliveryPartnerTask(orders, deliveryQueue, orderStatus));
     private static final ExecutorService es = Executors.newFixedThreadPool(1);
     private static final KitchenService kitchenService = new KitchenService(deliveryQueue, orders, es, orderStatus);
 

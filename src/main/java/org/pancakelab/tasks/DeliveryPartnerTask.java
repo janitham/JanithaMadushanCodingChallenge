@@ -9,14 +9,14 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
-public class DeliveryTask implements Runnable {
+public class DeliveryPartnerTask implements Runnable {
 
-    private final Logger logger = Logger.getLogger(DeliveryTask.class.getName());
+    private final Logger logger = Logger.getLogger(DeliveryPartnerTask.class.getName());
     private final ConcurrentMap<UUID, OrderDetails> orders;
     private final BlockingDeque<UUID> deliveryQueue;
     private final ConcurrentMap<UUID, OrderStatus> orderStatus;
 
-    public DeliveryTask(
+    public DeliveryPartnerTask(
             final ConcurrentMap<UUID, OrderDetails> orders,
             final BlockingDeque<UUID> deliveryQueue,
             final ConcurrentMap<UUID, OrderStatus> orderStatus

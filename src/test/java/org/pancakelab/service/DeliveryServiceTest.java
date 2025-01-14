@@ -5,9 +5,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
-import org.pancakelab.tasks.DeliveryTask;
+import org.pancakelab.tasks.DeliveryPartnerTask;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -29,7 +28,7 @@ public class DeliveryServiceTest {
         deliveryService = new DeliveryService(
                 1
         );
-        deliveryService.submitDeliveryTask(new DeliveryTask(orders, deliveryQueue, orderStatus));
+        deliveryService.submitDeliveryTask(new DeliveryPartnerTask(orders, deliveryQueue, orderStatus));
     }
 
     @Test

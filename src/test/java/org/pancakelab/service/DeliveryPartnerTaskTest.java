@@ -3,7 +3,7 @@ package org.pancakelab.service;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
-import org.pancakelab.tasks.DeliveryTask;
+import org.pancakelab.tasks.DeliveryPartnerTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-public class DeliveryTaskTest {
+public class DeliveryPartnerTaskTest {
 
     private final ConcurrentMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private final BlockingDeque<UUID> deliveryQueue = new LinkedBlockingDeque<>();
@@ -30,7 +30,7 @@ public class DeliveryTaskTest {
     private final User user = new User("user", "password".toCharArray());
 
     private Logger setupLogger(ByteArrayOutputStream logOutputStream) {
-        Logger logger = Logger.getLogger(DeliveryTask.class.getName());
+        Logger logger = Logger.getLogger(DeliveryPartnerTask.class.getName());
         PrintStream logPrintStream = new PrintStream(logOutputStream);
         Handler logHandler = new StreamHandler(logPrintStream, new SimpleFormatter());
         logger.addHandler(logHandler);
@@ -51,7 +51,7 @@ public class DeliveryTaskTest {
                 )
                 .withUser(user)
                 .withDeliveryInfo(mock(DeliveryInfo.class)).build();
-        var deliveryTask = new DeliveryTask(orders, deliveryQueue, orderStatus);
+        var deliveryTask = new DeliveryPartnerTask(orders, deliveryQueue, orderStatus);
         orders.put(order.getOrderId(), order);
         deliveryQueue.add(order.getOrderId());
         orderStatus.put(order.getOrderId(), OrderStatus.WAITING_FOR_DELIVERY);
@@ -78,7 +78,7 @@ public class DeliveryTaskTest {
     public void givenOrderDoesNotExist_whenTryingToDeliver_thenWarningShouldBeLogged() {
         // Given
         var orderId = UUID.randomUUID();
-        var deliveryTask = new DeliveryTask(orders, deliveryQueue, orderStatus);
+        var deliveryTask = new DeliveryPartnerTask(orders, deliveryQueue, orderStatus);
         deliveryQueue.add(orderId);
         ByteArrayOutputStream logOutputStream = new ByteArrayOutputStream();
         Logger logger = setupLogger(logOutputStream);

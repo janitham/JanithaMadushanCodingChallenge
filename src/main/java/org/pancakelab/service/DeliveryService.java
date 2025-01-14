@@ -1,8 +1,7 @@
 package org.pancakelab.service;
 
-import org.pancakelab.tasks.DeliveryTask;
+import org.pancakelab.tasks.DeliveryPartnerTask;
 
-import java.util.List;
 import java.util.concurrent.*;
 
 public class DeliveryService {
@@ -15,8 +14,8 @@ public class DeliveryService {
         this.deliveryPartnerPool = Executors.newFixedThreadPool(numberOfDeliveryPartners);
     }
 
-    public void submitDeliveryTask(DeliveryTask deliveryTask){
-        deliveryPartnerPool.submit(deliveryTask);
+    public void submitDeliveryTask(DeliveryPartnerTask deliveryPartnerTask){
+        deliveryPartnerPool.submit(deliveryPartnerTask);
     }
 
     public void shutdown() {
