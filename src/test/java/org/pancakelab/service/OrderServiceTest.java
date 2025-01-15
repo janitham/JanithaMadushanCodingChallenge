@@ -47,7 +47,7 @@ public class OrderServiceTest {
         orderStatus = new ConcurrentHashMap<>();
         ordersQueue = new LinkedBlockingDeque<>();
         deliveryInformationValidator = mock(DeliveryInformationValidator.class);
-        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator, ordersQueue);
+        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator, ordersQueue, 10);
         user = new User("user", "password".toCharArray(), privileges);
     }
 

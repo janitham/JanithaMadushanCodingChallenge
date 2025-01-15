@@ -28,7 +28,7 @@ public class DeliveryServiceTest {
         orders = new ConcurrentHashMap<>();
         orderStatus = new ConcurrentHashMap<>();
         deliveriesQueue = new LinkedBlockingDeque<>();
-        deliveryService = new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue);
+        deliveryService = new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue, 2);
         user = new User("user", "password".toCharArray(), new HashMap<>());
     }
 

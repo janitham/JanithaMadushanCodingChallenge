@@ -33,7 +33,7 @@ public class KitchenServiceTest {
         orderStatus = new ConcurrentHashMap<>();
         ordersQueue = new LinkedBlockingDeque<>();
         deliveriesQueue = new LinkedBlockingDeque<>();
-        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue);
+        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue, 2);
         user = new User("user", "password".toCharArray(), new HashMap<>());
     }
 

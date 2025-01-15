@@ -58,16 +58,16 @@ public class PancakeServiceSteps {
             }
     );
     private static final KitchenService kitchenService = new AuthorizedKitchenService(
-            new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue),
+            new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue, 2),
             authenticationService
     );
     private static final DeliveryService deliveryService = new AuthorizedDeliveryService(
-            new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue),
+            new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue, 2),
             authenticationService
     );
 
     private static final OrderService orderService = new AuthorizedOrderService(
-            new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator(), ordersQueue),
+            new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator(), ordersQueue, 2),
             authenticationService
     );
 

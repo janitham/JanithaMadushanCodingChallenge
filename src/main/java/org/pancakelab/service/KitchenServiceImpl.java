@@ -22,13 +22,14 @@ public class KitchenServiceImpl implements KitchenService {
     public KitchenServiceImpl(
             final ConcurrentHashMap<UUID, OrderDetails> orders,
             final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
-            final BlockingDeque<UUID> orderQueue, BlockingDeque<UUID> deliveryQueue
+            final BlockingDeque<UUID> orderQueue, BlockingDeque<UUID> deliveryQueue,
+            final Integer internalThreads
     ) {
         this.orders = orders;
         this.orderStatus = orderStatus;
         this.orderQueue = orderQueue;
         this.deliveryQueue = deliveryQueue;
-        this.executorService = Executors.newFixedThreadPool(10);
+        this.executorService = Executors.newFixedThreadPool(internalThreads);
         this.localOrderMap = new ConcurrentHashMap<>();
         startOrderUpdateThread();
     }

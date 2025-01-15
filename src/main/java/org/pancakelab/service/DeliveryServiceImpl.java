@@ -19,12 +19,13 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     public DeliveryServiceImpl(
             final ConcurrentHashMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus, BlockingDeque<UUID> deliveryQueue
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus, BlockingDeque<UUID> deliveryQueue,
+            final Integer internalThreads
     ) {
         this.orders = orders;
         this.orderStatus = orderStatus;
         this.deliveryQueue = deliveryQueue;
-        this.executorService = Executors.newFixedThreadPool(10);
+        this.executorService = Executors.newFixedThreadPool(internalThreads);
         startOrderUpdateThread();
     }
 

@@ -34,13 +34,14 @@ public class OrderServiceImpl implements OrderService {
             final ConcurrentHashMap<UUID, OrderDetails> orders,
             final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
             final DeliveryInformationValidator deliveryInformationValidator,
-            final BlockingDeque<UUID> ordersQueue
+            final BlockingDeque<UUID> ordersQueue,
+            final Integer internalThreads
     ) {
         this.orders = orders;
         this.orderStatus = orderStatus;
         this.deliveryInformationValidator = deliveryInformationValidator;
         this.ordersQueue = ordersQueue;
-        this.executorService = Executors.newFixedThreadPool(10);
+        this.executorService = Executors.newFixedThreadPool(internalThreads);
     }
 
     @Override

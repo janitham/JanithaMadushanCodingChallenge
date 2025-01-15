@@ -1,7 +1,6 @@
 package org.pancakelab.itest;
 
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -47,17 +46,17 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
             }
         });
         deliveryService = new AuthorizedDeliveryService(
-                new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue),
+                new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue, 2),
                 authenticationService
         );
         kitchenService = new AuthorizedKitchenService(
-                new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue),
+                new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue, 2),
                 authenticationService
         );
         orderService = new AuthorizedOrderService(
                 new OrderServiceImpl(
                         orders, orderStatus,
-                        new DeliveryInformationValidator(), ordersQueue),
+                        new DeliveryInformationValidator(), ordersQueue, 2),
                 authenticationService);
 
     }
