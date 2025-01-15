@@ -46,6 +46,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public UUID createOrder(User user, final DeliveryInfo deliveryInformation) throws PancakeServiceException {
         deliveryInformationValidator.validate(deliveryInformation);
+
+        boolean hasOngoingOrder = orders.values().stream()
+                .anyMatch(order -> order.getUser().equals(user) &&
+                        List.of(OrderStatus.CREATED, OrderStatus.READY_FOR_DELIVERY, OrderStatus.COMPLETED, OrderStatus.IN_PROGRESS, OrderStatus.OUT_FOR_DELIVERY)
+                                .contains(orderStatus.get(order.getOrderId())));
+        if (hasOngoingOrder) {
+            throw new PancakeServiceException(USER_HAS_AN_ONGOING_ORDER);
+        }
+
         var orderId = UUID.randomUUID();
         if (orderStorage.putIfAbsent(deliveryInformation, orderId) != null) {
             throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);

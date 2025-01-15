@@ -30,7 +30,8 @@ public class OrderServiceTest {
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private User user;
     private DeliveryInformationValidator deliveryInformationValidator;
-    private BlockingDeque<UUID> ordersQueue;;
+    private BlockingDeque<UUID> ordersQueue;
+    ;
 
     private final Map<String, List<Character>> privileges = new HashMap<>() {
         {
@@ -207,6 +208,26 @@ public class OrderServiceTest {
                         )
                 ).withDeliveryInfo(new DeliveryInfo("1", "2")
                 ).withUser(user).build());
+        // When
+        // Then
+        Exception exception = assertThrows(PancakeServiceException.class,
+                () -> orderService.createOrder(user, new DeliveryInfo("1", "7")));
+        assertEquals(OrderServiceImpl.USER_HAS_AN_ONGOING_ORDER, exception.getMessage());
+    }
+
+    @Test
+    public void givenUserHasAnOngoingOrder_then_creatingAnotherOrderShouldThrowAnException() throws PancakeServiceException {
+        // Given
+        var orderId = UUID.randomUUID();
+        orderStatus.put(orderId, OrderStatus.CREATED);
+        orders.put(orderId, new OrderDetails.Builder()
+                .withOrderId(orderId)
+                .withUser(user)
+                .withPanCakes(Map.of(
+                        Pancakes.DARK_CHOCOLATE_PANCAKE, 1
+                ))
+                .withDeliveryInfo(new DeliveryInfo("1", "2"))
+                .build());
         // When
         // Then
         Exception exception = assertThrows(PancakeServiceException.class,
