@@ -40,9 +40,6 @@ public class PancakeServiceSteps {
     private static final BlockingDeque<UUID> deliveriesQueue = new LinkedBlockingDeque<>();
     private static User authenticatedUser = new User("validUser", "validPassword".toCharArray(), privileges);
     private static UUID orderId;
-    private static final ReentrantLock lock = new ReentrantLock();
-    private static final Condition newOrderCondition = lock.newCondition();
-
 
     private static final AuthenticationService authenticationService = new AuthenticationServiceImpl(
             new HashSet<>() {
@@ -53,7 +50,7 @@ public class PancakeServiceSteps {
             }
     );
     private static final KitchenService kitchenService = new AuthorizedKitchenService(
-            new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue, lock, newOrderCondition),
+            new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue),
             authenticationService
     );
     private static final DeliveryService deliveryService = new AuthorizedDeliveryService(
@@ -62,7 +59,7 @@ public class PancakeServiceSteps {
     );
 
     private static final OrderService orderService = new AuthorizedOrderService(
-            new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator(), ordersQueue, lock, newOrderCondition),
+            new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator(), ordersQueue),
             authenticationService
     );
 

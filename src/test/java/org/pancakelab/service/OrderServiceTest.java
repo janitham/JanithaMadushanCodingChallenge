@@ -30,9 +30,7 @@ public class OrderServiceTest {
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private User user;
     private DeliveryInformationValidator deliveryInformationValidator;
-    private BlockingDeque<UUID> ordersQueue;
-    private static final ReentrantLock lock = new ReentrantLock();
-    private static final Condition newOrderCondition = lock.newCondition();
+    private BlockingDeque<UUID> ordersQueue;;
 
     private final Map<String, List<Character>> privileges = new HashMap<>() {
         {
@@ -48,7 +46,7 @@ public class OrderServiceTest {
         orderStatus = new ConcurrentHashMap<>();
         ordersQueue = new LinkedBlockingDeque<>();
         deliveryInformationValidator = mock(DeliveryInformationValidator.class);
-        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator, ordersQueue, lock, newOrderCondition);
+        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator, ordersQueue);
         user = new User("user", "password".toCharArray(), privileges);
     }
 

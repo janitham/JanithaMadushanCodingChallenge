@@ -25,8 +25,6 @@ public class KitchenServiceTest {
     private ConcurrentHashMap<UUID, OrderDetails> orders;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private KitchenService kitchenService;
-    private static final ReentrantLock lock = new ReentrantLock();
-    private static final Condition newOrderCondition = lock.newCondition();
     private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
     private static final BlockingDeque<UUID> deliveriesQueue = new LinkedBlockingDeque<>();
 
@@ -34,7 +32,7 @@ public class KitchenServiceTest {
     public void setUp() {
         orders = new ConcurrentHashMap<>();
         orderStatus = new ConcurrentHashMap<>();
-        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue, lock, newOrderCondition);
+        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue);
     }
 
     @Test
@@ -48,14 +46,7 @@ public class KitchenServiceTest {
         // When
         kitchenService.acceptOrder(null, orderId);
         // Then
-        Awaitility.await().until(() -> {
-            lock.lock();
-            try {
-                return OrderStatus.IN_PROGRESS.equals(orderStatus.get(orderId));
-            } finally {
-                lock.unlock();
-            }
-        });
+        Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatus.get(orderId)));
     }
 
     @Test
@@ -69,14 +60,7 @@ public class KitchenServiceTest {
         // When
         kitchenService.notifyOrderCompletion(null, orderId);
         // Then
-        Awaitility.await().until(() -> {
-            lock.lock();
-            try {
-                return OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId));
-            } finally {
-                lock.unlock();
-            }
-        });
+        Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId)));
     }
 
     //@Test
