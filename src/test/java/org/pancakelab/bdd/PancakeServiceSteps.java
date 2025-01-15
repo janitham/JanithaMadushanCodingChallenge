@@ -210,7 +210,7 @@ public class PancakeServiceSteps {
         if (privileges != null && !privileges.isBlank()) {
             for (String privilege : privileges.split(",")) {
                 String[] parts = privilege.split("\\.");
-                privilegesMap.put(parts[0], parts[1].chars().mapToObj(c -> (char) c).collect(Collectors.toList()));
+                privilegesMap.put(parts[0], parts[1].chars().mapToObj(c -> (char) c).toList());
             }
         }
         authenticatedUser = new User(username, password.toCharArray(), privilegesMap);

@@ -7,10 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.pancakelab.model.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,12 +24,12 @@ class AuthorizedOrderServiceTest {
     private User inCorrectPermissions;
     private DeliveryInfo deliveryInfo;
     private final UUID testOrderId = UUID.randomUUID();
-    private final Map<Pancakes, Integer> testPancakes = new HashMap<>() {
-        {
-            put(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1);
-            put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
-        }
-    };
+    private final Map<Pancakes, Integer> testPancakes = new EnumMap<>(Pancakes.class) {
+    {
+        put(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1);
+        put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
+    }
+};
     private final Map<String, List<Character>> privileges = new HashMap<>() {
         {
             put("order", List.of('C', 'R', 'U', 'D'));

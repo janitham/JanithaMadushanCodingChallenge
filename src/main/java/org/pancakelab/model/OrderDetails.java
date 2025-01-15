@@ -1,5 +1,6 @@
 package org.pancakelab.model;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -72,7 +73,7 @@ public class OrderDetails {
         }
 
         public Builder withPanCakes(final Map<Pancakes, Integer> pancakeTypeIntegerMap) {
-            this.pancakeItems = new HashMap<>(pancakeTypeIntegerMap);
+            this.pancakeItems = new EnumMap<>(pancakeTypeIntegerMap);
             return this;
         }
 

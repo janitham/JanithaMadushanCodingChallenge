@@ -4,10 +4,7 @@ import org.pancakelab.model.*;
 import org.pancakelab.util.DeliveryInformationValidator;
 import org.pancakelab.util.PancakeUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class OrderServiceImpl implements OrderService {
@@ -79,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
         if (!orderStorage.containsValue(orderId)) {
             throw new PancakeServiceException(ORDER_NOT_FOUND);
         }
-        orderItems.merge(orderId, new HashMap<>(pancakes), (oldPancakes, newPancakes) -> {
+        orderItems.merge(orderId, new EnumMap<>(pancakes), (oldPancakes, newPancakes) -> {
             newPancakes.forEach((type, count) -> oldPancakes.merge(type, count, Integer::sum));
             return oldPancakes;
         });
@@ -92,7 +89,7 @@ public class OrderServiceImpl implements OrderService {
         if (items == null) {
             throw new PancakeServiceException(ORDER_NOT_FOUND);
         }
-        return new HashMap<>(items);
+        return new EnumMap<>(items);
     }
 
     @Override

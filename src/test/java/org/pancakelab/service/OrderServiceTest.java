@@ -104,7 +104,7 @@ class OrderServiceTest {
         // Then
         Exception exception = assertThrows(
                 PancakeServiceException.class,
-                () -> orderService.addPancakes(user, UUID.randomUUID(), new HashMap<>())
+                () -> orderService.addPancakes(user, UUID.randomUUID(), Map.of())
         );
         assertEquals(ORDER_NOT_FOUND, exception.getMessage());
     }
@@ -116,7 +116,7 @@ class OrderServiceTest {
         // Then
         Exception exception = assertThrows(
                 PancakeServiceException.class,
-                () -> orderService.addPancakes(user, null, new HashMap<>())
+                () -> orderService.addPancakes(user, null, Map.of())
         );
         assertEquals(ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID, exception.getMessage());
     }
@@ -181,12 +181,10 @@ class OrderServiceTest {
         );
         // When
         // Then
+        orderService.addPancakes(user, orderId, pancakes);
         Exception exception = assertThrows(
                 PancakeServiceException.class,
-                () -> {
-                    orderService.addPancakes(user, orderId, pancakes);
-                    orderService.addPancakes(user, orderId, pancakes);
-                }
+                () -> orderService.addPancakes(user, orderId, pancakes)
         );
         assertEquals(OrderServiceImpl.MAXIMUM_PANCAKES_EXCEEDED, exception.getMessage());
     }
