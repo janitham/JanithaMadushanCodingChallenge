@@ -28,12 +28,13 @@ public class KitchenServiceTest {
     private static final ReentrantLock lock = new ReentrantLock();
     private static final Condition newOrderCondition = lock.newCondition();
     private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
+    private static final BlockingDeque<UUID> deliveriesQueue = new LinkedBlockingDeque<>();
 
     @BeforeEach
     public void setUp() {
         orders = new ConcurrentHashMap<>();
         orderStatus = new ConcurrentHashMap<>();
-        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue, lock, newOrderCondition);
+        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue, lock, newOrderCondition);
     }
 
     @Test

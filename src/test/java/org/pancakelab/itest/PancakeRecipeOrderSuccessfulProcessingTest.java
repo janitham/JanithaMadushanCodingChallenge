@@ -36,6 +36,7 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
     };
     private static final User authorizedUser = new User("testUser", "password".toCharArray(), privileges);
     private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
+    private static final BlockingDeque<UUID> deliveriesQueue = new LinkedBlockingDeque<>();
     private static final ReentrantLock lock = new ReentrantLock();
     private static final Condition newOrderCondition = lock.newCondition();
 
@@ -50,11 +51,11 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
             }
         });
         deliveryService = new AuthorizedDeliveryService(
-                new DeliveryServiceImpl(orders, orderStatus),
+                new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue),
                 authenticationService
         );
         kitchenService = new AuthorizedKitchenService(
-                new KitchenServiceImpl(orders, orderStatus, ordersQueue, lock, newOrderCondition),
+                new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue, lock, newOrderCondition),
                 authenticationService
         );
         orderService = new AuthorizedOrderService(

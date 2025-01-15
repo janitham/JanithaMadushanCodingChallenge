@@ -37,6 +37,7 @@ public class PancakeServiceSteps {
     private static final ConcurrentHashMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
+    private static final BlockingDeque<UUID> deliveriesQueue = new LinkedBlockingDeque<>();
     private static User authenticatedUser = new User("validUser", "validPassword".toCharArray(), privileges);
     private static UUID orderId;
     private static final ReentrantLock lock = new ReentrantLock();
@@ -52,11 +53,11 @@ public class PancakeServiceSteps {
             }
     );
     private static final KitchenService kitchenService = new AuthorizedKitchenService(
-            new KitchenServiceImpl(orders, orderStatus, ordersQueue, lock, newOrderCondition),
+            new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue, lock, newOrderCondition),
             authenticationService
     );
     private static final DeliveryService deliveryService = new AuthorizedDeliveryService(
-            new DeliveryServiceImpl(orders, orderStatus),
+            new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue),
             authenticationService
     );
 

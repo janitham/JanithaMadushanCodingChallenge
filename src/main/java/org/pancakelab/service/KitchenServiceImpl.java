@@ -17,6 +17,7 @@ public class KitchenServiceImpl implements KitchenService {
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final ExecutorService executorService;
     private final BlockingDeque<UUID> orderQueue;
+    private final BlockingDeque<UUID> deliveryQueue;
     private final Map<UUID, Map<PancakeRecipe, Integer>> localOrderMap;
     private final ReentrantLock lock; //= new ReentrantLock();
     private final Condition newOrderCondition; //= lock.newCondition();
@@ -24,13 +25,14 @@ public class KitchenServiceImpl implements KitchenService {
     public KitchenServiceImpl(
             final ConcurrentHashMap<UUID, OrderDetails> orders,
             final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
-            final BlockingDeque<UUID> orderQueue,
+            final BlockingDeque<UUID> orderQueue, BlockingDeque<UUID> deliveryQueue,
             final ReentrantLock lock,
             final Condition newOrderCondition
     ) {
         this.orders = orders;
         this.orderStatus = orderStatus;
         this.orderQueue = orderQueue;
+        this.deliveryQueue = deliveryQueue;
         this.lock = lock;
         this.newOrderCondition = newOrderCondition;
         this.executorService = Executors.newFixedThreadPool(10);
@@ -93,7 +95,7 @@ public class KitchenServiceImpl implements KitchenService {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null) {
                 orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
-                orderQueue.add(orderId);
+                deliveryQueue.add(orderId);
             }
         }, executorService);
     }

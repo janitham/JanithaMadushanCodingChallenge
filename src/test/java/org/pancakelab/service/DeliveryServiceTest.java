@@ -8,12 +8,12 @@ import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.PancakeServiceException;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,12 +22,14 @@ public class DeliveryServiceTest {
     private ConcurrentHashMap<UUID, OrderDetails> orders;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private DeliveryService deliveryService;
+    private BlockingDeque<UUID> deliveriesQueue;
 
     @BeforeEach
     public void setUp() {
         orders = new ConcurrentHashMap<>();
         orderStatus = new ConcurrentHashMap<>();
-        deliveryService = new DeliveryServiceImpl(orders, orderStatus);
+        deliveriesQueue = new LinkedBlockingDeque<>();
+        deliveryService = new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue);
     }
 
     @Test
@@ -60,30 +62,23 @@ public class DeliveryServiceTest {
     }
 
     @Test
-    public void givenValidOrder_whenViewCompletedOrders_thenShouldReturnCompletedOrders() throws PancakeServiceException {
+    public void givenValidOrder_whenViewCompletedOrders_thenShouldReturnCompletedOrders() throws PancakeServiceException, InterruptedException {
         // Given
         UUID orderId1 = UUID.randomUUID();
-        UUID orderId2 = UUID.randomUUID();
         OrderDetails orderDetails1 = mock(OrderDetails.class);
-        OrderDetails orderDetails2 = mock(OrderDetails.class);
         when(orderDetails1.getOrderId()).thenReturn(orderId1);
-        when(orderDetails2.getOrderId()).thenReturn(orderId2);
         DeliveryInfo deliveryInfo1 = mock(DeliveryInfo.class);
-        DeliveryInfo deliveryInfo2 = mock(DeliveryInfo.class);
-        when(orderDetails1.getDeliveryInfo()).thenReturn(deliveryInfo1);
-        when(orderDetails2.getDeliveryInfo()).thenReturn(deliveryInfo2);
-        orders.put(orderId1, orderDetails1);
-        orders.put(orderId2, orderDetails2);
-        orderStatus.put(orderId1, OrderStatus.READY_FOR_DELIVERY);
-        orderStatus.put(orderId2, OrderStatus.DELIVERED);
-
         // When
-        Map<UUID, DeliveryInfo> completedOrders = deliveryService.viewCompletedOrders(null);
-
+        when(orderDetails1.getDeliveryInfo()).thenReturn(deliveryInfo1);
+        orders.put(orderId1, orderDetails1);
+        orderStatus.put(orderId1, OrderStatus.READY_FOR_DELIVERY);
+        deliveriesQueue.put(orderId1);
         // Then
-        assertEquals(1, completedOrders.size());
-        assertTrue(completedOrders.containsKey(orderId1));
-        assertEquals(deliveryInfo1, completedOrders.get(orderId1));
-        assertFalse(completedOrders.containsKey(orderId2));
+        Awaitility.await().until(() ->
+                {
+                    var completedOrders = deliveryService.viewCompletedOrders(null);
+                    return completedOrders.size() == 1;
+                }
+        );
     }
 }

@@ -8,27 +8,45 @@ import org.pancakelab.model.User;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 public class DeliveryServiceImpl implements DeliveryService {
     private final ConcurrentHashMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final ExecutorService executorService;
+    private final BlockingDeque<UUID> deliveryQueue;
+    private final Map<UUID, DeliveryInfo> localDeliveryMap = new ConcurrentHashMap<>();
 
     public DeliveryServiceImpl(
             final ConcurrentHashMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus, BlockingDeque<UUID> deliveryQueue
     ) {
         this.orders = orders;
         this.orderStatus = orderStatus;
+        this.deliveryQueue = deliveryQueue;
         this.executorService = Executors.newFixedThreadPool(10);
+        startOrderUpdateThread();
     }
 
     @Override
-    public Map<UUID, DeliveryInfo> viewCompletedOrders(User user) {
-        return orders.values().stream()
-                .filter(order -> orderStatus.get(order.getOrderId()) == OrderStatus.READY_FOR_DELIVERY)
-                .collect(Collectors.toMap(OrderDetails::getOrderId, OrderDetails::getDeliveryInfo));
+    public synchronized Map<UUID, DeliveryInfo> viewCompletedOrders(User user) {
+        return localDeliveryMap;
+    }
+
+    private void startOrderUpdateThread() {
+        executorService.submit(() -> {
+            while (true) {
+                try {
+                    final UUID orderId = deliveryQueue.take();
+                    OrderDetails orderDetails = orders.get(orderId);
+                    if (orderDetails != null) {
+                        localDeliveryMap.put(orderId, orderDetails.getDeliveryInfo());
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
     }
 
     @Override
