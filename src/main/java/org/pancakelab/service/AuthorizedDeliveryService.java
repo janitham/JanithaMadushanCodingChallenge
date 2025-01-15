@@ -1,11 +1,9 @@
 package org.pancakelab.service;
 
 import org.pancakelab.model.DeliveryInfo;
-import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.PancakeServiceException;
 import org.pancakelab.model.User;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 

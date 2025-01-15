@@ -10,8 +10,6 @@ import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static org.junit.jupiter.api.Assertions.*;
 

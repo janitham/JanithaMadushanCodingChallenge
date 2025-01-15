@@ -9,8 +9,6 @@ import org.pancakelab.util.PancakeFactory;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class KitchenServiceImpl implements KitchenService {
     private final ConcurrentHashMap<UUID, OrderDetails> orders;
