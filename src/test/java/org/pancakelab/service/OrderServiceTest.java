@@ -13,6 +13,8 @@ import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +31,8 @@ public class OrderServiceTest {
     private User user;
     private DeliveryInformationValidator deliveryInformationValidator;
     private BlockingDeque<UUID> ordersQueue;
+    private static final ReentrantLock lock = new ReentrantLock();
+    private static final Condition newOrderCondition = lock.newCondition();
 
     private final Map<String, List<Character>> privileges = new HashMap<>() {
         {
@@ -44,7 +48,7 @@ public class OrderServiceTest {
         orderStatus = new ConcurrentHashMap<>();
         ordersQueue = new LinkedBlockingDeque<>();
         deliveryInformationValidator = mock(DeliveryInformationValidator.class);
-        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator, ordersQueue);
+        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator, ordersQueue, lock, newOrderCondition);
         user = new User("user", "password".toCharArray(), privileges);
     }
 

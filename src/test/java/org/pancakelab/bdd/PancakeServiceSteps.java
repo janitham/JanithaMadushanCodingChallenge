@@ -10,6 +10,8 @@ import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,6 +39,8 @@ public class PancakeServiceSteps {
     private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
     private static User authenticatedUser = new User("validUser", "validPassword".toCharArray(), privileges);
     private static UUID orderId;
+    private static final ReentrantLock lock = new ReentrantLock();
+    private static final Condition newOrderCondition = lock.newCondition();
 
 
     private static final AuthenticationService authenticationService = new AuthenticationServiceImpl(
@@ -48,7 +52,7 @@ public class PancakeServiceSteps {
             }
     );
     private static final KitchenService kitchenService = new AuthorizedKitchenService(
-            new KitchenServiceImpl(orders, orderStatus, ordersQueue),
+            new KitchenServiceImpl(orders, orderStatus, ordersQueue, lock, newOrderCondition),
             authenticationService
     );
     private static final DeliveryService deliveryService = new AuthorizedDeliveryService(
@@ -57,7 +61,7 @@ public class PancakeServiceSteps {
     );
 
     private static final OrderService orderService = new AuthorizedOrderService(
-            new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator(), ordersQueue),
+            new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator(), ordersQueue, lock, newOrderCondition),
             authenticationService
     );
 

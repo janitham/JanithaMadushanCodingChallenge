@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class OrderServiceImpl implements OrderService {
 
@@ -25,18 +27,26 @@ public class OrderServiceImpl implements OrderService {
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Map<Pancakes, Integer>> orderItems = new ConcurrentHashMap<>();
     private final ExecutorService executorService;
+    private final ReentrantLock lock; //= new ReentrantLock();
+    private final Condition newOrderCondition; //= lock.newCondition();
     private final BlockingDeque<UUID> ordersQueue;
+
 
     public OrderServiceImpl(
             final ConcurrentHashMap<UUID, OrderDetails> orders,
             final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
-            final DeliveryInformationValidator deliveryInformationValidator, BlockingDeque<UUID> ordersQueue
+            final DeliveryInformationValidator deliveryInformationValidator,
+            final BlockingDeque<UUID> ordersQueue,
+            final ReentrantLock lock,
+            final Condition newOrderCondition
     ) {
         this.orders = orders;
         this.orderStatus = orderStatus;
         this.deliveryInformationValidator = deliveryInformationValidator;
+        this.lock = lock;
+        this.newOrderCondition = newOrderCondition;
         this.ordersQueue = ordersQueue;
-        this.executorService = Executors.newFixedThreadPool(10); // Example thread pool size
+        this.executorService = Executors.newFixedThreadPool(10);
     }
 
     @Override
@@ -109,8 +119,12 @@ public class OrderServiceImpl implements OrderService {
             synchronized (orderStatus) {
                 orderStatus.put(orderId, OrderStatus.COMPLETED);
             }
-            synchronized (ordersQueue) {
+            lock.lock();
+            try {
                 ordersQueue.add(orderId);
+                newOrderCondition.signal();
+            } finally {
+                lock.unlock();
             }
             cleanUpOrder(orderId, deliveryInfo);
             PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);

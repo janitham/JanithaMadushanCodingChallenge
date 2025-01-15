@@ -13,6 +13,8 @@ import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,6 +36,8 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
     };
     private static final User authorizedUser = new User("testUser", "password".toCharArray(), privileges);
     private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
+    private static final ReentrantLock lock = new ReentrantLock();
+    private static final Condition newOrderCondition = lock.newCondition();
 
     @BeforeAll
     public static void init() {
@@ -50,11 +54,14 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
                 authenticationService
         );
         kitchenService = new AuthorizedKitchenService(
-                new KitchenServiceImpl(orders, orderStatus, ordersQueue),
+                new KitchenServiceImpl(orders, orderStatus, ordersQueue, lock, newOrderCondition),
                 authenticationService
         );
         orderService = new AuthorizedOrderService(
-                new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator(),ordersQueue), authenticationService);
+                new OrderServiceImpl(
+                        orders, orderStatus,
+                        new DeliveryInformationValidator(), ordersQueue, lock, newOrderCondition),
+                authenticationService);
 
     }
 
@@ -120,7 +127,7 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
 
     @AfterAll
     public static void tearDown() {
-        //deliveryService.shutdown();
+        //deliveryService.s();
         //kitchenService.shutdown();
     }
 }

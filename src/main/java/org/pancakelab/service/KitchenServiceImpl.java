@@ -9,21 +9,30 @@ import org.pancakelab.util.PancakeFactory;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class KitchenServiceImpl implements KitchenService {
     private final ConcurrentHashMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final ExecutorService executorService;
-    private final BlockingDeque<UUID> deliveryQueue;
+    private final BlockingDeque<UUID> orderQueue;
     private final Map<UUID, Map<PancakeRecipe, Integer>> localOrderMap;
+    private final ReentrantLock lock; //= new ReentrantLock();
+    private final Condition newOrderCondition; //= lock.newCondition();
 
     public KitchenServiceImpl(
             final ConcurrentHashMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus, BlockingDeque<UUID> deliveryQueue
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
+            final BlockingDeque<UUID> orderQueue,
+            final ReentrantLock lock,
+            final Condition newOrderCondition
     ) {
         this.orders = orders;
         this.orderStatus = orderStatus;
-        this.deliveryQueue = deliveryQueue;
+        this.orderQueue = orderQueue;
+        this.lock = lock;
+        this.newOrderCondition = newOrderCondition;
         this.executorService = Executors.newFixedThreadPool(10);
         this.localOrderMap = new ConcurrentHashMap<>();
         startOrderUpdateThread();
@@ -32,12 +41,18 @@ public class KitchenServiceImpl implements KitchenService {
     private void startOrderUpdateThread() {
         executorService.submit(() -> {
             while (true) {
+                //lock.lock();
                 try {
-                    UUID orderId = deliveryQueue.take();
+                    /*while (orderQueue.isEmpty()) {
+                        newOrderCondition.await();
+                    }*/
+                    UUID orderId = orderQueue.take();
                     updateLocalOrderMap(orderId);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
+                } finally {
+                    //lock.unlock();
                 }
             }
         });
@@ -78,7 +93,7 @@ public class KitchenServiceImpl implements KitchenService {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null) {
                 orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
-                deliveryQueue.add(orderId);
+                orderQueue.add(orderId);
             }
         }, executorService);
     }
