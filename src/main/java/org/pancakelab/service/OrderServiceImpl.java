@@ -139,7 +139,7 @@ public class OrderServiceImpl implements OrderService {
      * @return the status of the order
      */
     @Override
-    public OrderStatus status(User user, UUID orderId) {
+    public synchronized OrderStatus status(User user, UUID orderId) {
         return orderStatus.get(orderId);
     }
 
@@ -229,7 +229,7 @@ public class OrderServiceImpl implements OrderService {
      * @param orderId the ID of the order to clean up
      * @param deliveryInfo the delivery information of the order
      */
-    private void cleanUpOrder(final UUID orderId, final DeliveryInfo deliveryInfo) {
+    private synchronized void cleanUpOrder(final UUID orderId, final DeliveryInfo deliveryInfo) {
         orderStorage.remove(deliveryInfo);
         orderItems.remove(orderId);
     }
