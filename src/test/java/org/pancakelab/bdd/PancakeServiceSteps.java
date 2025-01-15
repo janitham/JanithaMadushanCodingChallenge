@@ -35,6 +35,10 @@ public class PancakeServiceSteps {
             // Kitchen Service
             put("orderUser1", new User("orderUser1", "orderPassword1".toCharArray(), Map.of("order", List.of('C', 'R', 'U', 'D'))));
             put("hackedChef1", new User("hackedChef1", "hackedPassword1".toCharArray(), Map.of("kitchen", List.of())));
+
+            // Delivery Service
+            put("kitchenUser1", new User("kitchenUser1", "kitchenPassword1".toCharArray(), Map.of("kitchen", List.of('C', 'R', 'U', 'D'))));
+            put("hackedRider1", new User("hackedRider1", "hackedPassword1".toCharArray(), Map.of("delivery", List.of())));
         }
     };
     private static final ConcurrentHashMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
@@ -227,6 +231,30 @@ public class PancakeServiceSteps {
     public void notifies_an_order_then_authorization_fails() {
         assertThrows(AuthorizationFailureException.class,
                 () -> kitchenService.notifyOrderCompletion(authenticatedUser, UUID.randomUUID()));
+    }
+
+    @When("accepts a delivery then authentication fails")
+    public void accepts_a_delivery_then_authentication_fails() {
+        assertThrows(AuthenticationFailureException.class,
+                () -> deliveryService.acceptOrder(authenticatedUser, UUID.randomUUID()));
+    }
+
+    @When("sends a delivery then authentication fails")
+    public void sends_a_delivery_then_authentication_fails() {
+        assertThrows(AuthenticationFailureException.class,
+                () -> deliveryService.sendForTheDelivery(authenticatedUser, UUID.randomUUID()));
+    }
+
+    @When("accepts a delivery then authorization fails")
+    public void accepts_a_delivery_then_authorization_fails() {
+        assertThrows(AuthorizationFailureException.class,
+                () -> deliveryService.acceptOrder(authenticatedUser, UUID.randomUUID()));
+    }
+
+    @When("sends a delivery then authorization fails")
+    public void sends_a_delivery_then_authorization_fails() {
+        assertThrows(AuthorizationFailureException.class,
+                () -> deliveryService.sendForTheDelivery(authenticatedUser, UUID.randomUUID()));
     }
 
     private void addOrderToTheSystem(String user, OrderStatus status) {
