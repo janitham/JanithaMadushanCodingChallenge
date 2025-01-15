@@ -7,6 +7,12 @@ import org.pancakelab.util.PancakeUtils;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * Implementation of the OrderService interface.
+ * This service handles the creation, modification, and completion of orders.
+ * It uses a separate thread to process orders and manages order and delivery queues.
+ * The service also validates delivery information and ensures that users do not have multiple ongoing orders.
+ */
 public class OrderServiceImpl implements OrderService {
 
     public static final String ORDER_NOT_FOUND = "Order not found";
@@ -24,6 +30,15 @@ public class OrderServiceImpl implements OrderService {
     private final ConcurrentMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentMap<UUID, Map<Pancakes, Integer>> orderItems = new ConcurrentHashMap<>();
 
+    /**
+     * Constructs a new OrderServiceImpl.
+     *
+     * @param orders the map of order details
+     * @param orderStatus the map of order statuses
+     * @param deliveryInformationValidator the validator for delivery information
+     * @param ordersQueue the queue of orders to be processed
+     * @param internalThreads the number of internal threads to use
+     */
     public OrderServiceImpl(
             final ConcurrentMap<UUID, OrderDetails> orders,
             final ConcurrentMap<UUID, OrderStatus> orderStatus,
@@ -38,6 +53,14 @@ public class OrderServiceImpl implements OrderService {
         this.executorService = Executors.newFixedThreadPool(internalThreads);
     }
 
+    /**
+     * Creates a new order.
+     *
+     * @param user the user creating the order
+     * @param deliveryInformation the delivery information for the order
+     * @return the UUID of the created order
+     * @throws PancakeServiceException if the order cannot be created
+     */
     @Override
     public UUID createOrder(User user, final DeliveryInfo deliveryInformation) throws PancakeServiceException {
         deliveryInformationValidator.validate(deliveryInformation);
@@ -65,6 +88,14 @@ public class OrderServiceImpl implements OrderService {
         return orderId;
     }
 
+    /**
+     * Adds pancakes to an existing order.
+     *
+     * @param user the user adding pancakes
+     * @param orderId the ID of the order to add pancakes to
+     * @param pancakes the pancakes to add
+     * @throws PancakeServiceException if the pancakes cannot be added
+     */
     @Override
     public void addPancakes(User user, final UUID orderId, final Map<Pancakes, Integer> pancakes) throws PancakeServiceException {
         validateOrderId(orderId);
@@ -82,6 +113,14 @@ public class OrderServiceImpl implements OrderService {
         });
     }
 
+    /**
+     * Provides a summary of an order.
+     *
+     * @param user the user requesting the summary
+     * @param orderId the ID of the order to summarize
+     * @return a map of pancakes and their quantities
+     * @throws PancakeServiceException if the order cannot be summarized
+     */
     @Override
     public Map<Pancakes, Integer> orderSummary(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
@@ -92,11 +131,25 @@ public class OrderServiceImpl implements OrderService {
         return new EnumMap<>(items);
     }
 
+    /**
+     * Gets the status of an order.
+     *
+     * @param user the user requesting the status
+     * @param orderId the ID of the order to get the status of
+     * @return the status of the order
+     */
     @Override
     public OrderStatus status(User user, UUID orderId) {
         return orderStatus.get(orderId);
     }
 
+    /**
+     * Completes an order.
+     *
+     * @param user the user completing the order
+     * @param orderId the ID of the order to complete
+     * @throws PancakeServiceException if the order cannot be completed
+     */
     @Override
     public void complete(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
@@ -121,6 +174,13 @@ public class OrderServiceImpl implements OrderService {
         }, executorService);
     }
 
+    /**
+     * Cancels an order.
+     *
+     * @param user the user canceling the order
+     * @param orderId the ID of the order to cancel
+     * @throws PancakeServiceException if the order cannot be canceled
+     */
     @Override
     public void cancel(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
@@ -137,12 +197,24 @@ public class OrderServiceImpl implements OrderService {
         }, executorService);
     }
 
+    /**
+     * Validates the order ID.
+     *
+     * @param orderId the ID of the order to validate
+     * @throws PancakeServiceException if the order ID is null
+     */
     private void validateOrderId(final UUID orderId) throws PancakeServiceException {
         if (orderId == null) {
             throw new PancakeServiceException(ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID);
         }
     }
 
+    /**
+     * Gets the delivery information by order ID.
+     *
+     * @param orderId the ID of the order
+     * @return the delivery information
+     */
     private DeliveryInfo getDeliveryInfoByOrderId(final UUID orderId) {
         return orderStorage.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(orderId))
@@ -151,11 +223,20 @@ public class OrderServiceImpl implements OrderService {
                 .getKey();
     }
 
+    /**
+     * Cleans up the order.
+     *
+     * @param orderId the ID of the order to clean up
+     * @param deliveryInfo the delivery information of the order
+     */
     private void cleanUpOrder(final UUID orderId, final DeliveryInfo deliveryInfo) {
         orderStorage.remove(deliveryInfo);
         orderItems.remove(orderId);
     }
 
+    /**
+     * Shuts down the executor service, waiting for tasks to complete or forcing shutdown if necessary.
+     */
     public void shutdown() {
         executorService.shutdown();
         try {
