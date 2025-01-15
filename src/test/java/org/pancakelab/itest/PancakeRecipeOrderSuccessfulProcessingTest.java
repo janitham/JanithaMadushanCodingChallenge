@@ -1,9 +1,7 @@
 package org.pancakelab.itest;
 
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.pancakelab.model.*;
 import org.pancakelab.service.*;
 import org.pancakelab.util.DeliveryInformationValidator;
@@ -16,6 +14,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PancakeRecipeOrderSuccessfulProcessingTest {
 
     private static DeliveryService deliveryService;
@@ -50,7 +49,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
                 authenticationService
         );
         kitchenService = new AuthorizedKitchenService(
-                new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue, 2),
+                new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue, 2),
                 authenticationService
         );
         orderService = new AuthorizedOrderService(
@@ -58,12 +57,11 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
                         orders, orderStatus,
                         new DeliveryInformationValidator(), ordersQueue, 2),
                 authenticationService);
-
     }
 
     @Test
     @Order(1)
-    void whenValidPancakeOrderIsPlaced_thenOrderShouldBePlaced() throws PancakeServiceException {
+    void givenValidPancakeOrder_whenOrderIsPlaced_thenOrderShouldBePlaced() throws PancakeServiceException {
         // Given
         orderId = orderService.createOrder(authorizedUser, deliveryInfo);
         // When
@@ -73,7 +71,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
 
     @Test
     @Order(2)
-    void whenOrderIsUpdatedWithItemsInTheMenu_thenOrderShouldContainTheItems() throws PancakeServiceException {
+    void givenOrderWithItemsInTheMenu_whenOrderIsUpdated_thenOrderShouldContainTheItems() throws PancakeServiceException {
         // Given
         var pancakes = Map.of(
                 Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
@@ -87,38 +85,52 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
 
     @Test
     @Order(3)
-    void whenOrderIsCompleted_thenOrderOrderStatusShouldBeChangedToCompleted() throws PancakeServiceException {
+    void givenOrder_whenOrderIsCompleted_thenOrderStatusShouldBeChangedToCompleted() throws PancakeServiceException {
         // Given
         // When
         orderService.complete(authorizedUser, orderId);
         // Then
         Awaitility.await().until(() -> orderStatus.get(orderId).equals(OrderStatus.COMPLETED));
+    }
+
+    @Test
+    @Order(5)
+    void givenOrder_whenOrderIsReceivedByTheChef_thenOrderStatusShouldBeInProgress() throws PancakeServiceException {
         // Given
         kitchenService.acceptOrder(authorizedUser, orderId);
         // When
         // Then
         Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatus.get(orderId)));
+    }
+
+    @Test
+    @Order(6)
+    void givenOrder_whenOrderIsCompletedByTheChef_thenOrderStatusShouldBeReadyForDelivery() throws PancakeServiceException {
         // Given
         kitchenService.notifyOrderCompletion(authorizedUser, orderId);
         // When
         // Then
         Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId)));
+    }
+
+    @Test
+    @Order(7)
+    void givenOrder_whenOrderIsAcceptedByDeliveryService_thenOrderStatusShouldBeOutForDelivery() throws PancakeServiceException {
         // Given
         deliveryService.acceptOrder(authorizedUser, orderId);
         // When
         // Then
         Awaitility.await().until(() -> OrderStatus.OUT_FOR_DELIVERY.equals(orderStatus.get(orderId)));
+    }
+
+    @Test
+    @Order(8)
+    void givenOrder_whenOrderIsSentForDelivery_thenOrderStatusShouldBeDelivered() throws PancakeServiceException {
         // Given
         deliveryService.sendForTheDelivery(authorizedUser, orderId);
         // When
         // Then
         Awaitility.await().until(() -> OrderStatus.DELIVERED.equals(orderStatus.get(orderId)));
-    }
-
-    @Test
-    @Order(5)
-    void whenOrderIsReceivedByTheChef_thenOrderShouldBeInProgress() {
-
     }
 
     /*@AfterAll
