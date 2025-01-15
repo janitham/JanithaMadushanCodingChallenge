@@ -3,11 +3,9 @@ package org.pancakelab.service;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pancakelab.model.DeliveryInfo;
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.OrderStatus;
-import org.pancakelab.model.PancakeServiceException;
+import org.pancakelab.model.*;
 
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +21,7 @@ public class DeliveryServiceTest {
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private DeliveryService deliveryService;
     private BlockingDeque<UUID> deliveriesQueue;
+    private User user;
 
     @BeforeEach
     public void setUp() {
@@ -30,6 +29,7 @@ public class DeliveryServiceTest {
         orderStatus = new ConcurrentHashMap<>();
         deliveriesQueue = new LinkedBlockingDeque<>();
         deliveryService = new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue);
+        user = new User("user", "password".toCharArray(), new HashMap<>());
     }
 
     @Test
@@ -41,7 +41,7 @@ public class DeliveryServiceTest {
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
         // When
-        deliveryService.acceptOrder(null, orderId);
+        deliveryService.acceptOrder(user, orderId);
         // Then
         Awaitility.await().until(() -> OrderStatus.OUT_FOR_DELIVERY.equals(orderStatus.get(orderId)));
     }
@@ -55,7 +55,7 @@ public class DeliveryServiceTest {
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
         // When
-        deliveryService.sendForTheDelivery(null, orderId);
+        deliveryService.sendForTheDelivery(user, orderId);
         // Then
         Awaitility.await().until(() -> OrderStatus.DELIVERED.equals(orderStatus.get(orderId)));
         assertFalse(orders.containsKey(orderId));
@@ -76,7 +76,7 @@ public class DeliveryServiceTest {
         // Then
         Awaitility.await().until(() ->
                 {
-                    var completedOrders = deliveryService.viewCompletedOrders(null);
+                    var completedOrders = deliveryService.viewCompletedOrders(user);
                     return completedOrders.size() == 1;
                 }
         );

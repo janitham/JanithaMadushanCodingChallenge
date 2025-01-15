@@ -3,11 +3,9 @@ package org.pancakelab.service;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.OrderStatus;
-import org.pancakelab.model.PancakeServiceException;
-import org.pancakelab.model.Pancakes;
+import org.pancakelab.model.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
@@ -25,14 +23,18 @@ public class KitchenServiceTest {
     private ConcurrentHashMap<UUID, OrderDetails> orders;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private KitchenService kitchenService;
-    private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
-    private static final BlockingDeque<UUID> deliveriesQueue = new LinkedBlockingDeque<>();
+    private BlockingDeque<UUID> ordersQueue;
+    private BlockingDeque<UUID> deliveriesQueue;
+    private User user;
 
     @BeforeEach
     public void setUp() {
         orders = new ConcurrentHashMap<>();
         orderStatus = new ConcurrentHashMap<>();
-        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue);
+        ordersQueue = new LinkedBlockingDeque<>();
+        deliveriesQueue = new LinkedBlockingDeque<>();
+        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue);
+        user = new User("user", "password".toCharArray(), new HashMap<>());
     }
 
     @Test
@@ -44,7 +46,7 @@ public class KitchenServiceTest {
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
         // When
-        kitchenService.acceptOrder(null, orderId);
+        kitchenService.acceptOrder(user, orderId);
         // Then
         Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatus.get(orderId)));
     }
@@ -58,7 +60,7 @@ public class KitchenServiceTest {
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.IN_PROGRESS);
         // When
-        kitchenService.notifyOrderCompletion(null, orderId);
+        kitchenService.notifyOrderCompletion(user, orderId);
         // Then
         Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId)));
     }
@@ -81,7 +83,7 @@ public class KitchenServiceTest {
         ordersQueue.add(orderId1);
 
         // Then
-        Awaitility.await().until(() -> kitchenService.viewOrders(null).size() == 1);
+        Awaitility.await().until(() -> kitchenService.viewOrders(user).size() == 1);
         var pancakesList = kitchenService.viewOrders(null).values().stream()
                 .flatMap(map -> map.keySet().stream())
                 .toList();

@@ -5,6 +5,7 @@ import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.PancakeRecipe;
 import org.pancakelab.model.User;
 import org.pancakelab.util.PancakeFactory;
+import org.pancakelab.util.PancakeUtils;
 
 import java.util.Map;
 import java.util.UUID;
@@ -71,6 +72,7 @@ public class KitchenServiceImpl implements KitchenService {
                 synchronized (orderStatus) {
                     orderStatus.put(orderId, OrderStatus.IN_PROGRESS);
                 }
+                PancakeUtils.notifyUser(user, OrderStatus.IN_PROGRESS);
             }
         }, executorService);
     }
@@ -81,7 +83,9 @@ public class KitchenServiceImpl implements KitchenService {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null) {
                 orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
+                PancakeUtils.notifyUser(user, OrderStatus.READY_FOR_DELIVERY);
                 deliveryQueue.add(orderId);
+                localOrderMap.remove(orderId);
             }
         }, executorService);
     }

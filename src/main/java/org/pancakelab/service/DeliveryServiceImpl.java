@@ -4,6 +4,7 @@ import org.pancakelab.model.DeliveryInfo;
 import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.User;
+import org.pancakelab.util.PancakeUtils;
 
 import java.util.Map;
 import java.util.UUID;
@@ -55,6 +56,7 @@ public class DeliveryServiceImpl implements DeliveryService {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null && orderStatus.get(orderId) == OrderStatus.READY_FOR_DELIVERY) {
                 orderStatus.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
+                PancakeUtils.notifyUser(user, OrderStatus.OUT_FOR_DELIVERY);
             }
         }, executorService);
     }
@@ -65,6 +67,8 @@ public class DeliveryServiceImpl implements DeliveryService {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null && orderStatus.get(orderId) == OrderStatus.OUT_FOR_DELIVERY) {
                 orderStatus.put(orderId, OrderStatus.DELIVERED);
+                PancakeUtils.notifyUser(user, OrderStatus.DELIVERED);
+                localDeliveryMap.remove(orderId);
                 orders.remove(orderId);
             }
         }, executorService);
