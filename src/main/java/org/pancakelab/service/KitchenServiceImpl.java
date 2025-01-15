@@ -38,7 +38,9 @@ public class KitchenServiceImpl implements KitchenService {
             while (true) {
                 try {
                     UUID orderId = orderQueue.take();
-                    updateLocalOrderMap(orderId);
+                    synchronized (localOrderMap) {
+                        updateLocalOrderMap(orderId);
+                    }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
@@ -48,14 +50,16 @@ public class KitchenServiceImpl implements KitchenService {
     }
 
     private void updateLocalOrderMap(UUID orderId) {
-        OrderDetails orderDetails = orders.get(orderId);
-        if (orderDetails != null) {
-            Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>();
-            orderDetails.getPancakes().forEach((pancake, quantity) -> {
-                PancakeRecipe recipe = PancakeFactory.get(pancake);
-                pancakeRecipes.put(recipe, quantity);
-            });
-            localOrderMap.put(orderId, pancakeRecipes);
+        synchronized (orders) {
+            OrderDetails orderDetails = orders.get(orderId);
+            if (orderDetails != null) {
+                Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>();
+                orderDetails.getPancakes().forEach((pancake, quantity) -> {
+                    PancakeRecipe recipe = PancakeFactory.get(pancake);
+                    pancakeRecipes.put(recipe, quantity);
+                });
+                localOrderMap.put(orderId, pancakeRecipes);
+            }
         }
     }
 
@@ -67,7 +71,10 @@ public class KitchenServiceImpl implements KitchenService {
     @Override
     public void acceptOrder(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
-            OrderDetails orderDetails = orders.get(orderId);
+            OrderDetails orderDetails;
+            synchronized (orders) {
+                orderDetails = orders.get(orderId);
+            }
             if (orderDetails != null) {
                 synchronized (orderStatus) {
                     orderStatus.put(orderId, OrderStatus.IN_PROGRESS);
@@ -80,12 +87,21 @@ public class KitchenServiceImpl implements KitchenService {
     @Override
     public void notifyOrderCompletion(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
-            OrderDetails orderDetails = orders.get(orderId);
+            OrderDetails orderDetails;
+            synchronized (orders) {
+                orderDetails = orders.get(orderId);
+            }
             if (orderDetails != null) {
-                orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
+                synchronized (orderStatus) {
+                    orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
+                }
                 PancakeUtils.notifyUser(user, OrderStatus.READY_FOR_DELIVERY);
-                deliveryQueue.add(orderId);
-                localOrderMap.remove(orderId);
+                synchronized (deliveryQueue) {
+                    deliveryQueue.add(orderId);
+                }
+                synchronized (localOrderMap) {
+                    localOrderMap.remove(orderId);
+                }
             }
         }, executorService);
     }

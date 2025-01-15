@@ -122,9 +122,9 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
 
     }
 
-    @AfterAll
+    /*@AfterAll
     public static void tearDown() {
-        //deliveryService.s();
-        //kitchenService.shutdown();
-    }
+        ((DeliveryServiceImpl) deliveryService).shutdown();
+        ((KitchenServiceImpl) kitchenService).shutdown();
+    }*/
 }

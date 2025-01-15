@@ -109,22 +109,20 @@ public class OrderServiceImpl implements OrderService {
             throw new PancakeServiceException(ORDER_NOT_FOUND);
         }
         CompletableFuture.runAsync(() -> {
-            var deliveryInfo = getDeliveryInfoByOrderId(orderId);
-            var orderDetails = new OrderDetails.Builder()
-                    .withDeliveryInfo(deliveryInfo)
-                    .withOrderId(orderId)
-                    .withUser(user)
-                    .withPanCakes(orderItems.get(orderId))
-                    .build();
-            synchronized (orders) {
+            synchronized (this) {
+                var deliveryInfo = getDeliveryInfoByOrderId(orderId);
+                var orderDetails = new OrderDetails.Builder()
+                        .withDeliveryInfo(deliveryInfo)
+                        .withOrderId(orderId)
+                        .withUser(user)
+                        .withPanCakes(orderItems.get(orderId))
+                        .build();
                 orders.put(orderId, orderDetails);
-            }
-            synchronized (orderStatus) {
                 orderStatus.put(orderId, OrderStatus.COMPLETED);
+                ordersQueue.add(orderId);
+                cleanUpOrder(orderId, deliveryInfo);
+                PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
             }
-            ordersQueue.add(orderId);
-            cleanUpOrder(orderId, deliveryInfo);
-            PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
         }, executorService);
     }
 
@@ -134,10 +132,12 @@ public class OrderServiceImpl implements OrderService {
         if (!orderStorage.containsValue(orderId)) {
             throw new IllegalStateException(ORDER_NOT_FOUND);
         }
-        var deliveryInfo = getDeliveryInfoByOrderId(orderId);
-        cleanUpOrder(orderId, deliveryInfo);
-        orderStatus.put(orderId, OrderStatus.CANCELLED);
         CompletableFuture.runAsync(() -> {
+            synchronized (this) {
+                var deliveryInfo = getDeliveryInfoByOrderId(orderId);
+                cleanUpOrder(orderId, deliveryInfo);
+                orderStatus.put(orderId, OrderStatus.CANCELLED);
+            }
             PancakeUtils.notifyUser(user, OrderStatus.CANCELLED);
         }, executorService);
     }

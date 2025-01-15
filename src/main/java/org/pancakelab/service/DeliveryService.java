@@ -9,8 +9,6 @@ import java.util.UUID;
 
 public interface DeliveryService {
     Map<UUID, DeliveryInfo> viewCompletedOrders(User user) throws PancakeServiceException;
-
     void acceptOrder(User user, UUID orderId) throws PancakeServiceException;
-
     void sendForTheDelivery(User user, UUID orderId) throws PancakeServiceException;
 }

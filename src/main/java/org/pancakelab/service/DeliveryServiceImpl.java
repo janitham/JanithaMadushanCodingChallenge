@@ -38,9 +38,14 @@ public class DeliveryServiceImpl implements DeliveryService {
             while (true) {
                 try {
                     final UUID orderId = deliveryQueue.take();
-                    OrderDetails orderDetails = orders.get(orderId);
+                    OrderDetails orderDetails;
+                    synchronized (orders) {
+                        orderDetails = orders.get(orderId);
+                    }
                     if (orderDetails != null) {
-                        localDeliveryMap.put(orderId, orderDetails.getDeliveryInfo());
+                        synchronized (localDeliveryMap) {
+                            localDeliveryMap.put(orderId, orderDetails.getDeliveryInfo());
+                        }
                     }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -53,10 +58,14 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public void acceptOrder(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
-            OrderDetails orderDetails = orders.get(orderId);
-            if (orderDetails != null && orderStatus.get(orderId) == OrderStatus.READY_FOR_DELIVERY) {
-                orderStatus.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
-                PancakeUtils.notifyUser(user, OrderStatus.OUT_FOR_DELIVERY);
+            final OrderDetails orderDetails = orders.get(orderId);
+            if (orderDetails != null) {
+                synchronized (orderStatus) {
+                    if (orderStatus.get(orderId) == OrderStatus.READY_FOR_DELIVERY) {
+                        orderStatus.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
+                        PancakeUtils.notifyUser(user, OrderStatus.OUT_FOR_DELIVERY);
+                    }
+                }
             }
         }, executorService);
     }
@@ -64,13 +73,19 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public void sendForTheDelivery(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
-            OrderDetails orderDetails = orders.get(orderId);
-            if (orderDetails != null && orderStatus.get(orderId) == OrderStatus.OUT_FOR_DELIVERY) {
-                orderStatus.put(orderId, OrderStatus.DELIVERED);
-                PancakeUtils.notifyUser(user, OrderStatus.DELIVERED);
-                localDeliveryMap.remove(orderId);
-                orders.remove(orderId);
+            synchronized (orderStatus) {
+                OrderDetails orderDetails = orders.get(orderId);
+                if (orderDetails != null && orderStatus.get(orderId) == OrderStatus.OUT_FOR_DELIVERY) {
+                    orderStatus.put(orderId, OrderStatus.DELIVERED);
+                    synchronized (localDeliveryMap) {
+                        localDeliveryMap.remove(orderId);
+                    }
+                    synchronized (orders) {
+                        orders.remove(orderId);
+                    }
+                }
             }
+            PancakeUtils.notifyUser(user, OrderStatus.DELIVERED);
         }, executorService);
     }
 
