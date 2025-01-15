@@ -87,16 +87,21 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public void sendForTheDelivery(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
-            synchronized (orderStatus) {
-                OrderDetails orderDetails = orders.get(orderId);
-                if (orderDetails != null && orderStatus.get(orderId) == OrderStatus.OUT_FOR_DELIVERY) {
-                    orderStatus.put(orderId, OrderStatus.DELIVERED);
-                    synchronized (localDeliveryMap) {
-                        localDeliveryMap.remove(orderId);
+            OrderDetails orderDetails;
+            synchronized (orders) {
+                orderDetails = orders.get(orderId);
+            }
+            if (orderDetails != null) {
+                synchronized (orderStatus) {
+                    if (orderStatus.get(orderId) == OrderStatus.OUT_FOR_DELIVERY) {
+                        orderStatus.put(orderId, OrderStatus.DELIVERED);
                     }
-                    synchronized (orders) {
-                        orders.remove(orderId);
-                    }
+                }
+                synchronized (localDeliveryMap) {
+                    localDeliveryMap.remove(orderId);
+                }
+                synchronized (orders) {
+                    orders.remove(orderId);
                 }
             }
             PancakeUtils.notifyUser(user, OrderStatus.DELIVERED);
