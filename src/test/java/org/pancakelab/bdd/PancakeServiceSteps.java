@@ -10,6 +10,7 @@ import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,6 +31,10 @@ public class PancakeServiceSteps {
             put("user4", new User("user4", "password4".toCharArray(), privileges));
             put("user5", new User("user5", "password5".toCharArray(), privileges));
             put("user6", new User("user5", "password6".toCharArray(), privileges));
+
+            // Kitchen Service
+            put("orderUser1", new User("orderUser1", "orderPassword1".toCharArray(), Map.of("order", List.of('C', 'R', 'U', 'D'))));
+            put("hackedChef1", new User("hackedChef1", "hackedPassword1".toCharArray(), Map.of("kitchen", List.of())));
         }
     };
     private static final ConcurrentHashMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
@@ -48,7 +53,7 @@ public class PancakeServiceSteps {
             }
     );
     private static final KitchenService kitchenService = new AuthorizedKitchenService(
-            new KitchenServiceImpl(orders, orderStatus, ordersQueue,deliveriesQueue),
+            new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue),
             authenticationService
     );
     private static final DeliveryService deliveryService = new AuthorizedDeliveryService(
@@ -186,6 +191,42 @@ public class PancakeServiceSteps {
             String disciple, String buildingNo, String roomNumber) {
         assertThrows(PancakeServiceException.class,
                 () -> orderService.createOrder(systemUsers.get(disciple), new DeliveryInfo(roomNumber, buildingNo)));
+    }
+
+    @Given("a username as {string} and a password as {string} with privileges {string}")
+    public void a_username_as_and_a_password_as_with_privileges(String username, String password, String privileges) {
+        Map<String, List<Character>> privilegesMap = new HashMap<>();
+        if (privileges != null && !privileges.isBlank()) {
+            for (String privilege : privileges.split(",")) {
+                String[] parts = privilege.split("\\.");
+                privilegesMap.put(parts[0], parts[1].chars().mapToObj(c -> (char) c).collect(Collectors.toList()));
+            }
+        }
+        authenticatedUser = new User(username, password.toCharArray(), privilegesMap);
+    }
+
+    @When("accepts an order then authentication fails")
+    public void accepts_an_order_then_authentication_fails() {
+        assertThrows(AuthenticationFailureException.class,
+                () -> kitchenService.acceptOrder(authenticatedUser, UUID.randomUUID()));
+    }
+
+    @When("notifies an order then authentication fails")
+    public void notifies_an_order_then_authentication_fails() {
+        assertThrows(AuthenticationFailureException.class,
+                () -> kitchenService.notifyOrderCompletion(authenticatedUser, UUID.randomUUID()));
+    }
+
+    @When("accepts an order then authorization fails")
+    public void accepts_an_order_then_authorization_fails() {
+        assertThrows(AuthorizationFailureException.class,
+                () -> kitchenService.acceptOrder(authenticatedUser, UUID.randomUUID()));
+    }
+
+    @When("notifies an order then authorization fails")
+    public void notifies_an_order_then_authorization_fails() {
+        assertThrows(AuthorizationFailureException.class,
+                () -> kitchenService.notifyOrderCompletion(authenticatedUser, UUID.randomUUID()));
     }
 
     private void addOrderToTheSystem(String user, OrderStatus status) {
