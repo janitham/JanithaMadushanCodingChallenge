@@ -14,28 +14,50 @@ public class KitchenServiceImpl implements KitchenService {
     private final ConcurrentHashMap<UUID, OrderDetails> orders;
     private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private final ExecutorService executorService;
+    private final BlockingDeque<UUID> deliveryQueue;
+    private final Map<UUID, Map<PancakeRecipe, Integer>> localOrderMap;
 
     public KitchenServiceImpl(
             final ConcurrentHashMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus
+            final ConcurrentHashMap<UUID, OrderStatus> orderStatus, BlockingDeque<UUID> deliveryQueue
     ) {
         this.orders = orders;
         this.orderStatus = orderStatus;
+        this.deliveryQueue = deliveryQueue;
         this.executorService = Executors.newFixedThreadPool(10);
+        this.localOrderMap = new ConcurrentHashMap<>();
+        startOrderUpdateThread();
+    }
+
+    private void startOrderUpdateThread() {
+        executorService.submit(() -> {
+            while (true) {
+                try {
+                    UUID orderId = deliveryQueue.take();
+                    updateLocalOrderMap(orderId);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
+    }
+
+    private void updateLocalOrderMap(UUID orderId) {
+        OrderDetails orderDetails = orders.get(orderId);
+        if (orderDetails != null) {
+            Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>();
+            orderDetails.getPancakes().forEach((pancake, quantity) -> {
+                PancakeRecipe recipe = PancakeFactory.get(pancake);
+                pancakeRecipes.put(recipe, quantity);
+            });
+            localOrderMap.put(orderId, pancakeRecipes);
+        }
     }
 
     @Override
     public Map<UUID, Map<PancakeRecipe, Integer>> viewOrders(User user) {
-        Map<UUID, Map<PancakeRecipe, Integer>> result = new ConcurrentHashMap<>();
-        for (OrderDetails order : orders.values()) {
-            Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>();
-            order.getPancakes().forEach((pancake, quantity) -> {
-                PancakeRecipe recipe = PancakeFactory.get(pancake);
-                pancakeRecipes.put(recipe, quantity);
-            });
-            result.put(order.getOrderId(), pancakeRecipes);
-        }
-        return result;
+        return new ConcurrentHashMap<>(localOrderMap);
     }
 
     @Override
@@ -56,6 +78,7 @@ public class KitchenServiceImpl implements KitchenService {
             OrderDetails orderDetails = orders.get(orderId);
             if (orderDetails != null) {
                 orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
+                deliveryQueue.add(orderId);
             }
         }, executorService);
     }

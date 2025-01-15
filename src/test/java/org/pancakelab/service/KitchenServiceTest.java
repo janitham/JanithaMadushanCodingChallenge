@@ -7,7 +7,9 @@ import org.pancakelab.model.*;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,9 +24,10 @@ public class KitchenServiceTest {
 
     @BeforeEach
     public void setUp() {
+        BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
         orders = new ConcurrentHashMap<>();
         orderStatus = new ConcurrentHashMap<>();
-        kitchenService = new KitchenServiceImpl(orders, orderStatus);
+        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue);
     }
 
     @Test
@@ -72,7 +75,12 @@ public class KitchenServiceTest {
         when(orderDetails1.getPancakes()).thenReturn(pancakeItems1);
         when(orderDetails2.getPancakes()).thenReturn(pancakeItems2);
 
+        // Simulate order processing
+        kitchenService.notifyOrderCompletion(null, orderId1);
+        kitchenService.notifyOrderCompletion(null, orderId2);
+
         // When
+        Awaitility.await().until(() -> !kitchenService.viewOrders(null).isEmpty());
         Map<UUID, Map<PancakeRecipe, Integer>> allOrders = kitchenService.viewOrders(null);
 
         // Then

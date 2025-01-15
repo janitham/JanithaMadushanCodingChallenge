@@ -25,15 +25,17 @@ public class OrderServiceImpl implements OrderService {
     private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Map<Pancakes, Integer>> orderItems = new ConcurrentHashMap<>();
     private final ExecutorService executorService;
+    private final BlockingDeque<UUID> ordersQueue;
 
     public OrderServiceImpl(
             final ConcurrentHashMap<UUID, OrderDetails> orders,
             final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
-            final DeliveryInformationValidator deliveryInformationValidator
+            final DeliveryInformationValidator deliveryInformationValidator, BlockingDeque<UUID> ordersQueue
     ) {
         this.orders = orders;
         this.orderStatus = orderStatus;
         this.deliveryInformationValidator = deliveryInformationValidator;
+        this.ordersQueue = ordersQueue;
         this.executorService = Executors.newFixedThreadPool(10); // Example thread pool size
     }
 
@@ -106,6 +108,9 @@ public class OrderServiceImpl implements OrderService {
             }
             synchronized (orderStatus) {
                 orderStatus.put(orderId, OrderStatus.COMPLETED);
+            }
+            synchronized (ordersQueue) {
+                ordersQueue.add(orderId);
             }
             cleanUpOrder(orderId, deliveryInfo);
             PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);

@@ -10,7 +10,9 @@ import org.pancakelab.service.*;
 import org.pancakelab.util.DeliveryInformationValidator;
 
 import java.util.*;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,6 +33,7 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
         }
     };
     private static final User authorizedUser = new User("testUser", "password".toCharArray(), privileges);
+    private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
 
     @BeforeAll
     public static void init() {
@@ -47,11 +50,11 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
                 authenticationService
         );
         kitchenService = new AuthorizedKitchenService(
-                new KitchenServiceImpl(orders, orderStatus),
+                new KitchenServiceImpl(orders, orderStatus, ordersQueue),
                 authenticationService
         );
         orderService = new AuthorizedOrderService(
-                new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator()), authenticationService);
+                new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator(),ordersQueue), authenticationService);
 
     }
 

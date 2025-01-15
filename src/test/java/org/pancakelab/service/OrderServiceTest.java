@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +28,7 @@ public class OrderServiceTest {
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private User user;
     private DeliveryInformationValidator deliveryInformationValidator;
+    private BlockingDeque<UUID> ordersQueue;
 
     private final Map<String, List<Character>> privileges = new HashMap<>() {
         {
@@ -39,8 +42,9 @@ public class OrderServiceTest {
     public void setUp() {
         orders = new ConcurrentHashMap<>();
         orderStatus = new ConcurrentHashMap<>();
+        ordersQueue = new LinkedBlockingDeque<>();
         deliveryInformationValidator = mock(DeliveryInformationValidator.class);
-        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator);
+        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator, ordersQueue);
         user = new User("user", "password".toCharArray(), privileges);
     }
 
@@ -127,6 +131,7 @@ public class OrderServiceTest {
         orderService.complete(user, orderId);
         // Then
         Awaitility.await().until(() -> orders.get(orderId) != null);
+        Awaitility.await().until(() -> ordersQueue.contains(orderId));
     }
 
     @Test
@@ -139,6 +144,7 @@ public class OrderServiceTest {
         orderService.cancel(user, orderId);
         // Then
         Awaitility.await().until(() -> !orders.containsKey(orderId));
+        Awaitility.await().until(() -> !ordersQueue.contains(orderId));
         assertEquals(OrderStatus.CANCELLED, orderStatus.get(orderId));
     }
 
