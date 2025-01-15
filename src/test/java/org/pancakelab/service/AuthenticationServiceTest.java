@@ -29,7 +29,7 @@ public class AuthenticationServiceTest {
 
     @BeforeAll
     public static void setUp() {
-        HashSet<User> predefinedUsers = new HashSet<>();
+        final HashSet<User> predefinedUsers = new HashSet<>();
         predefinedUsers.add(new User("validUser", "validPassword".toCharArray(), privileges));
         authService = new AuthenticationServiceImpl(predefinedUsers);
     }
@@ -37,7 +37,7 @@ public class AuthenticationServiceTest {
     @Test
     void givenValidUser_whenAuthenticate_thenNoExceptionThrown() {
         // Given
-        User validUser = new User("validUser", "validPassword".toCharArray(), privileges);
+        final User validUser = new User("validUser", "validPassword".toCharArray(), privileges);
         // When
         // Then
         assertDoesNotThrow(() -> authService.authenticate(validUser));
@@ -46,7 +46,7 @@ public class AuthenticationServiceTest {
     @Test
     void givenInvalidUser_whenAuthenticate_thenExceptionThrown() {
         // Given
-        User invalidUser = new User("invalidUser", "invalidPassword".toCharArray(), privileges);
+        final User invalidUser = new User("invalidUser", "invalidPassword".toCharArray(), privileges);
         // When
         // Then
         PancakeServiceException exception = assertThrows(

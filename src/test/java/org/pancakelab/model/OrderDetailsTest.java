@@ -15,7 +15,7 @@ class OrderDetailsTest {
     @Test
     void givenNoDeliveryInfo_whenBuildingOrderDetails_thenThrowException() {
         // Given
-        OrderDetails.Builder builder = new OrderDetails.Builder();
+        final OrderDetails.Builder builder = new OrderDetails.Builder();
         // When & Then
         assertThrows(IllegalArgumentException.class, builder::build, DELIVERY_INFO_REQUIRED);
     }
@@ -23,7 +23,7 @@ class OrderDetailsTest {
     @Test
     void givenNoPancakes_whenBuildingOrderDetails_thenThrowException() {
         // Given
-        OrderDetails.Builder builder = new OrderDetails.Builder();
+        final OrderDetails.Builder builder = new OrderDetails.Builder();
         builder.withDeliveryInfo(mock(DeliveryInfo.class));
         // When & Then
         assertThrows(IllegalArgumentException.class, builder::build, PANCAKES_REQUIRED);
@@ -32,11 +32,11 @@ class OrderDetailsTest {
     @Test
     void givenValidParameters_whenBuildingOrderDetails_thenPancakesAreNotModifiable() {
         // Given
-        OrderDetails.Builder builder = new OrderDetails.Builder();
-        DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);
+        final OrderDetails.Builder builder = new OrderDetails.Builder();
+        final DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);
         builder.withDeliveryInfo(deliveryInfo).withPanCakes(Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 2));
         // When
-        OrderDetails orderDetails = builder.build();
+        final OrderDetails orderDetails = builder.build();
         // Then
         assertNotNull(orderDetails.getPancakes());
         assertNotNull(orderDetails.getDeliveryInfo());

@@ -51,7 +51,7 @@ class OrderServiceTest {
     @Test
     void givenValidDeliveryInformation_then_orderShouldBePlaced() throws PancakeServiceException {
         // Given
-        var deliveryInformation = new DeliveryInfo("1", "2");
+        final var deliveryInformation = new DeliveryInfo("1", "2");
         // When
         final UUID orderId = orderService.createOrder(user, deliveryInformation);
         // Then
@@ -64,7 +64,7 @@ class OrderServiceTest {
     void givenAlreadyCreatedOrder_then_creatingAnotherOrderWithTheSameDeliveryInformationThrowException()
             throws PancakeServiceException {
         // Given
-        var deliveryInformation = new DeliveryInfo("1", "2");
+        final var deliveryInformation = new DeliveryInfo("1", "2");
         // When
         orderService.createOrder(user, deliveryInformation);
         // Then
@@ -78,12 +78,12 @@ class OrderServiceTest {
     @Test
     void givenValidOrder_then_pancakesCanBeIncludedFromTheMenu() throws PancakeServiceException {
         // Given
-        var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        var pancakes1 = Map.of(
+        final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
+        final var pancakes1 = Map.of(
                 Pancakes.DARK_CHOCOLATE_PANCAKE, 1,
                 Pancakes.MILK_CHOCOLATE_PANCAKE, 2
         );
-        var pancakes2 = Map.of(
+        final var pancakes2 = Map.of(
                 Pancakes.MILK_CHOCOLATE_PANCAKE, 1,
                 Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE, 4
         );
@@ -124,8 +124,8 @@ class OrderServiceTest {
     @Test
     void givenValidOrderId_then_completingOrderShouldCompleteAsync() throws PancakeServiceException {
         // Given
-        var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
+        final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
+        final var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
         orderService.addPancakes(user, orderId, pancakes1);
         // When
         orderService.complete(user, orderId);
@@ -137,8 +137,8 @@ class OrderServiceTest {
     @Test
     void givenValidOrderId_then_cancel_shouldRemoveOrder() throws PancakeServiceException {
         // Given
-        var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
+        final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
+        final var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
         orderService.addPancakes(user, orderId, pancakes1);
         // When
         orderService.cancel(user, orderId);
@@ -175,8 +175,8 @@ class OrderServiceTest {
     @Test
     void givenMoreThan10Pancakes_whenAddPancakes_thenThrowException() throws PancakeServiceException {
         // Given
-        var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        var pancakes = Map.of(
+        final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
+        final var pancakes = Map.of(
                 Pancakes.DARK_CHOCOLATE_PANCAKE, 10
         );
         // When
@@ -192,8 +192,8 @@ class OrderServiceTest {
     @Test
     void givenValidOrder_then_creatingAnotherOrderShouldThrowAnException() {
         // Given
-        var user2 = new User("user2", "password2".toCharArray(), privileges);
-        var orderId = UUID.randomUUID();
+        final var user2 = new User("user2", "password2".toCharArray(), privileges);
+        final var orderId = UUID.randomUUID();
         orderStatus.put(orderId, OrderStatus.CREATED);
         orders.put(
                 orderId,
@@ -213,7 +213,7 @@ class OrderServiceTest {
     @Test
     void givenUserHasAnOngoingOrder_then_creatingAnotherOrderShouldThrowAnException() {
         // Given
-        var orderId = UUID.randomUUID();
+        final var orderId = UUID.randomUUID();
         orderStatus.put(orderId, OrderStatus.CREATED);
         orders.put(orderId, new OrderDetails.Builder()
                 .withOrderId(orderId)

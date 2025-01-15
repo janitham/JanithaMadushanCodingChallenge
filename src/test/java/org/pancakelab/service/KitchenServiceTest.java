@@ -38,8 +38,8 @@ class KitchenServiceTest {
     @Test
     void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeInProgress() throws PancakeServiceException {
         // Given
-        UUID orderId = UUID.randomUUID();
-        OrderDetails orderDetails = mock(OrderDetails.class);
+        final UUID orderId = UUID.randomUUID();
+        final OrderDetails orderDetails = mock(OrderDetails.class);
         when(orderDetails.getOrderId()).thenReturn(orderId);
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
@@ -52,8 +52,8 @@ class KitchenServiceTest {
     @Test
     void givenValidOrder_whenNotifyOrderCompletion_thenOrderStatusShouldBeReadyForDeliveryAndAddedToQueue() throws PancakeServiceException {
         // Given
-        UUID orderId = UUID.randomUUID();
-        OrderDetails orderDetails = mock(OrderDetails.class);
+        final UUID orderId = UUID.randomUUID();
+        final OrderDetails orderDetails = mock(OrderDetails.class);
         when(orderDetails.getOrderId()).thenReturn(orderId);
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.IN_PROGRESS);
@@ -66,12 +66,12 @@ class KitchenServiceTest {
     @Test
     void givenOrders_whenViewOrders_thenShouldReturnAllOrders() throws PancakeServiceException {
         // Given
-        UUID orderId1 = UUID.randomUUID();
-        OrderDetails orderDetails1 = mock(OrderDetails.class);
+        final UUID orderId1 = UUID.randomUUID();
+        final OrderDetails orderDetails1 = mock(OrderDetails.class);
         when(orderDetails1.getOrderId()).thenReturn(orderId1);
         orders.put(orderId1, orderDetails1);
 
-        Map<Pancakes, Integer> pancakeItems1 = new ConcurrentHashMap<>() {{
+        final Map<Pancakes, Integer> pancakeItems1 = new ConcurrentHashMap<>() {{
             put(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
             put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
         }};

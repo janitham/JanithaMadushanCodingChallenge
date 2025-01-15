@@ -99,7 +99,7 @@ class AuthorizedOrderServiceTest {
         authorizedOrderService.createOrder(testUser, deliveryInfo);
         // When
         when(orderService.orderSummary(testUser, testOrderId)).thenReturn(testPancakes);
-        var summary = authorizedOrderService.orderSummary(testUser, testOrderId);
+        final var summary = authorizedOrderService.orderSummary(testUser, testOrderId);
         // Then
         verify(authenticationService, times(2)).authenticate(testUser);
         assertNotNull(summary);
@@ -183,7 +183,7 @@ class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
@@ -196,7 +196,7 @@ class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
@@ -209,7 +209,7 @@ class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
@@ -222,7 +222,7 @@ class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,
@@ -235,7 +235,7 @@ class AuthorizedOrderServiceTest {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         assertThrows(AuthorizationFailureException.class,

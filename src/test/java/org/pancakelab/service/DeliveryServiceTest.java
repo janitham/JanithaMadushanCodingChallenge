@@ -35,8 +35,8 @@ class DeliveryServiceTest {
     @Test
     void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeOutForDelivery() throws PancakeServiceException {
         // Given
-        UUID orderId = UUID.randomUUID();
-        OrderDetails orderDetails = mock(OrderDetails.class);
+        final UUID orderId = UUID.randomUUID();
+        final OrderDetails orderDetails = mock(OrderDetails.class);
         when(orderDetails.getOrderId()).thenReturn(orderId);
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
@@ -49,8 +49,8 @@ class DeliveryServiceTest {
     @Test
     void givenValidOrder_whenSendForTheDelivery_thenOrderStatusShouldBeDelivered() throws PancakeServiceException {
         // Given
-        UUID orderId = UUID.randomUUID();
-        OrderDetails orderDetails = mock(OrderDetails.class);
+        final UUID orderId = UUID.randomUUID();
+        final OrderDetails orderDetails = mock(OrderDetails.class);
         when(orderDetails.getOrderId()).thenReturn(orderId);
         orders.put(orderId, orderDetails);
         orderStatus.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
@@ -64,10 +64,10 @@ class DeliveryServiceTest {
     @Test
     void givenValidOrder_whenViewCompletedOrders_thenShouldReturnCompletedOrders() throws InterruptedException {
         // Given
-        UUID orderId1 = UUID.randomUUID();
-        OrderDetails orderDetails1 = mock(OrderDetails.class);
+        final UUID orderId1 = UUID.randomUUID();
+        final OrderDetails orderDetails1 = mock(OrderDetails.class);
+        final DeliveryInfo deliveryInfo1 = mock(DeliveryInfo.class);
         when(orderDetails1.getOrderId()).thenReturn(orderId1);
-        DeliveryInfo deliveryInfo1 = mock(DeliveryInfo.class);
         // When
         when(orderDetails1.getDeliveryInfo()).thenReturn(deliveryInfo1);
         orders.put(orderId1, orderDetails1);

@@ -47,11 +47,11 @@ class AuthorizedDeliveryServiceTest {
     void shouldReturnCompletedOrdersWhenUserIsPrivileged() throws PancakeServiceException {
         // Given
         final UUID randomOrderId = UUID.randomUUID();
-        DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);
-        Map<UUID, DeliveryInfo> orders = Map.of(randomOrderId, deliveryInfo);
+        final DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);
+        final Map<UUID, DeliveryInfo> orders = Map.of(randomOrderId, deliveryInfo);
         when(deliveryService.viewCompletedOrders(privileged)).thenReturn(orders);
         // When
-        Map<UUID, DeliveryInfo> result = authorizedDeliveryService.viewCompletedOrders(privileged);
+        final Map<UUID, DeliveryInfo> result = authorizedDeliveryService.viewCompletedOrders(privileged);
         // Then
         assertEquals(orders, result);
         verify(authenticationService).authenticate(privileged);
@@ -84,7 +84,7 @@ class AuthorizedDeliveryServiceTest {
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
     void whenViewingCompletedOrdersShouldThrowExceptionWhenUserIsNotPrivileged(String userType) {
         // Given
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         PancakeServiceException exception = assertThrows(
@@ -96,7 +96,7 @@ class AuthorizedDeliveryServiceTest {
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
     void whenAcceptingOrderShouldThrowExceptionWhenUserIsNotPrivileged(String userType) {
         // Given
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         PancakeServiceException exception = assertThrows(
@@ -108,7 +108,7 @@ class AuthorizedDeliveryServiceTest {
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
     void whenSendingForDeliveryShouldThrowExceptionWhenUserIsNotPrivileged(String userType) {
         // Given
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         PancakeServiceException exception = assertThrows(

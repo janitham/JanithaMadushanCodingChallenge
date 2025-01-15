@@ -49,10 +49,10 @@ class AuthorizedKitchenServiceTest {
     @Test
     void givenAuthenticatedUser_whenViewOrders_thenReturnsOrders() throws PancakeServiceException {
         // Given
-        Map<UUID, Map<PancakeRecipe, Integer>> orders = new HashMap<>();
+        final Map<UUID, Map<PancakeRecipe, Integer>> orders = new HashMap<>();
         when(kitchenService.viewOrders(privileged)).thenReturn(orders);
         // When
-        Map<UUID, Map<PancakeRecipe, Integer>> result = authorizedKitchenService.viewOrders(privileged);
+        final Map<UUID, Map<PancakeRecipe, Integer>> result = authorizedKitchenService.viewOrders(privileged);
         // Then
         verify(authenticationService).authenticate(privileged);
         verify(kitchenService).viewOrders(privileged);
@@ -98,7 +98,7 @@ class AuthorizedKitchenServiceTest {
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
     void givenUnprivilegedUser_whenViewOrders_thenThrowsException(String userType) {
         // Given
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         PancakeServiceException exception = assertThrows(
@@ -112,7 +112,7 @@ class AuthorizedKitchenServiceTest {
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
     void givenUnprivilegedUser_whenAcceptOrder_thenThrowsException(String userType) {
         // Given
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         PancakeServiceException exception = assertThrows(
@@ -126,7 +126,7 @@ class AuthorizedKitchenServiceTest {
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
     void givenUnprivilegedUser_whenNotifyOrderCompletion_thenThrowsException(String userType) {
         // Given
-        User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
         // Then
         PancakeServiceException exception = assertThrows(

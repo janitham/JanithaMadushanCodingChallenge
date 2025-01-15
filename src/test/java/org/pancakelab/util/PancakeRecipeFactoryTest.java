@@ -11,7 +11,7 @@ class PancakeRecipeFactoryTest {
     @Test
     void whenDarkChocolateWhippedCreamHazelnutsPancake_thenIngredientsAreCorrect() {
         // Given
-        PancakeRecipe pancakeRecipe = PancakeFactory
+        final PancakeRecipe pancakeRecipe = PancakeFactory
                 .get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE);
         // When
         // Then
@@ -23,7 +23,7 @@ class PancakeRecipeFactoryTest {
     @Test
     void whenDarkChocolatePancake_thenIngredientsAreCorrect() {
         // Given
-        PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE);
+        final PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE);
         // When
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.DARK, pancakeRecipe.getChocolate());
@@ -34,7 +34,7 @@ class PancakeRecipeFactoryTest {
     @Test
     void whenDarkChocolateWhippedCreamPancake_thenIngredientsAreCorrect() {
         // Given
-        PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_PANCAKE);
+        final PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_PANCAKE);
         // When
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.DARK, pancakeRecipe.getChocolate());
@@ -45,7 +45,7 @@ class PancakeRecipeFactoryTest {
     @Test
     void whenMilkChocolateHazelnutsPancake_thenIngredientsAreCorrect() {
         // Given
-        PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE);
+        final PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE);
         // When
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.MILK, pancakeRecipe.getChocolate());
@@ -56,7 +56,7 @@ class PancakeRecipeFactoryTest {
     @Test
     void whenMilkChocolatePancake_thenIngredientsAreCorrect() {
         // Given
-        PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
+        final PancakeRecipe pancakeRecipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
         // When
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.MILK, pancakeRecipe.getChocolate());

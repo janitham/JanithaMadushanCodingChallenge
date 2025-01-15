@@ -22,7 +22,7 @@ class DeliveryInformationValidatorTest {
     @Test
     void givenInvalidRoomNumber_then_ThrowsException() {
         // Given
-        DeliveryInfo deliveryInfo = new DeliveryInfo("101", "1001");
+        final DeliveryInfo deliveryInfo = new DeliveryInfo("101", "1001");
         // When
         // Then
         assertThrows(ValidationException.class,
@@ -32,7 +32,7 @@ class DeliveryInformationValidatorTest {
     @Test
     void givenInvalidBuildingNumber_then_ThrowsException() {
         // Given
-        DeliveryInfo deliveryInfo = new DeliveryInfo("101", "101");
+        final DeliveryInfo deliveryInfo = new DeliveryInfo("101", "101");
         // When
         // Then
         assertThrows(ValidationException.class,
@@ -42,7 +42,7 @@ class DeliveryInformationValidatorTest {
     @Test
     void givenValidDeliveryInfo_then_NoException() throws ValidationException {
         // Given
-        DeliveryInfo deliveryInfo = new DeliveryInfo("101", "10");
+        final DeliveryInfo deliveryInfo = new DeliveryInfo("101", "10");
         // When
         // Then
         validator.validate(deliveryInfo);
