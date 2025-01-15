@@ -63,8 +63,8 @@ class KitchenServiceTest {
         Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId)));
     }
 
-    //@Test
-    public void givenOrders_whenViewOrders_thenShouldReturnAllOrders() throws PancakeServiceException {
+    @Test
+    void givenOrders_whenViewOrders_thenShouldReturnAllOrders() throws PancakeServiceException {
         // Given
         UUID orderId1 = UUID.randomUUID();
         OrderDetails orderDetails1 = mock(OrderDetails.class);
