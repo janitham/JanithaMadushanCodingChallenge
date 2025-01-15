@@ -4,15 +4,16 @@ import org.pancakelab.model.AuthenticationFailureException;
 import org.pancakelab.model.User;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    public static String USER_IS_NOT_AUTHENTICATED = "User not authenticated";
-    public static String INVALID_USER = "Invalid user";
+    public static final String USER_IS_NOT_AUTHENTICATED = "User not authenticated";
+    public static final String INVALID_USER = "Invalid user";
 
     private final HashSet<User> authenticatedUsers;
 
-    public AuthenticationServiceImpl(HashSet<User> authenticatedUsers) {
+    public AuthenticationServiceImpl(Set<User> authenticatedUsers) {
         this.authenticatedUsers = new HashSet<>(authenticatedUsers);
     }
 

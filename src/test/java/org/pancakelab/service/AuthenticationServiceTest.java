@@ -35,7 +35,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void givenValidUser_whenAuthenticate_thenNoExceptionThrown() {
+    void givenValidUser_whenAuthenticate_thenNoExceptionThrown() {
         // Given
         User validUser = new User("validUser", "validPassword".toCharArray(), privileges);
         // When
@@ -44,7 +44,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void givenInvalidUser_whenAuthenticate_thenExceptionThrown() {
+    void givenInvalidUser_whenAuthenticate_thenExceptionThrown() {
         // Given
         User invalidUser = new User("invalidUser", "invalidPassword".toCharArray(), privileges);
         // When
@@ -55,7 +55,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void givenNullUser_whenAuthenticate_thenExceptionThrown() {
+    void givenNullUser_whenAuthenticate_thenExceptionThrown() {
         // Given
         // When
         // Then

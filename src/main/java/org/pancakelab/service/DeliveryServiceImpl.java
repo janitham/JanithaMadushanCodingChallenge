@@ -11,15 +11,15 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 public class DeliveryServiceImpl implements DeliveryService {
-    private final ConcurrentHashMap<UUID, OrderDetails> orders;
-    private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
+    private final ConcurrentMap<UUID, OrderDetails> orders;
+    private final ConcurrentMap<UUID, OrderStatus> orderStatus;
     private final ExecutorService executorService;
     private final BlockingDeque<UUID> deliveryQueue;
     private final Map<UUID, DeliveryInfo> localDeliveryMap = new ConcurrentHashMap<>();
 
     public DeliveryServiceImpl(
-            final ConcurrentHashMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus, BlockingDeque<UUID> deliveryQueue,
+            final ConcurrentMap<UUID, OrderDetails> orders,
+            final ConcurrentMap<UUID, OrderStatus> orderStatus, BlockingDeque<UUID> deliveryQueue,
             final Integer internalThreads
     ) {
         this.orders = orders;

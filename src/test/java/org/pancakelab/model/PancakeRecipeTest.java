@@ -6,11 +6,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PancakeRecipeTest {
+class PancakeRecipeTest {
 
     @ParameterizedTest
     @EnumSource(PancakeRecipe.CHOCOLATE.class)
-    public void shouldCreatePancakeWithCorrectIngredientsWhenChocolateIsSpecified(
+    void shouldCreatePancakeWithCorrectIngredientsWhenChocolateIsSpecified(
             PancakeRecipe.CHOCOLATE chocolate
     ) {
         // Given
@@ -26,7 +26,7 @@ public class PancakeRecipeTest {
     }
 
     @Test
-    public void shouldThrowIllegalArgumentExceptionWhenChocolateIsNotSpecified() {
+    void shouldThrowIllegalArgumentExceptionWhenChocolateIsNotSpecified() {
         // Given
         final var pancakeBuilder = new PancakeRecipe.Builder();
         // When
@@ -34,7 +34,7 @@ public class PancakeRecipeTest {
     }
 
     @Test
-    public void shouldIncludeHazelNutsWhenSpecified() {
+    void shouldIncludeHazelNutsWhenSpecified() {
         // Given
         final var pancakeBuilder = new PancakeRecipe.Builder();
         // When
@@ -43,13 +43,13 @@ public class PancakeRecipeTest {
                 .withHazelNuts()
                 .build();
         // Then
-        assertEquals(pancakeRecipe.getChocolate(), PancakeRecipe.CHOCOLATE.MILK);
+        assertEquals(PancakeRecipe.CHOCOLATE.MILK, pancakeRecipe.getChocolate());
         assertTrue(pancakeRecipe.hasHazelNuts());
         assertFalse(pancakeRecipe.hasWhippedCream());
     }
 
     @Test
-    public void shouldIncludeWhippedCreamWhenSpecified() {
+    void shouldIncludeWhippedCreamWhenSpecified() {
         // Given
         final var pancakeBuilder = new PancakeRecipe.Builder();
         // When
@@ -58,7 +58,7 @@ public class PancakeRecipeTest {
                 .withWhippedCream()
                 .build();
         // Then
-        assertEquals(pancakeRecipe.getChocolate(), PancakeRecipe.CHOCOLATE.MILK);
+        assertEquals(PancakeRecipe.CHOCOLATE.MILK, pancakeRecipe.getChocolate());
         assertFalse(pancakeRecipe.hasHazelNuts());
         assertTrue(pancakeRecipe.hasWhippedCream());
     }

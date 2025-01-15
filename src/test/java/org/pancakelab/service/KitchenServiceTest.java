@@ -11,14 +11,12 @@ import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class KitchenServiceTest {
+class KitchenServiceTest {
 
     private ConcurrentHashMap<UUID, OrderDetails> orders;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
@@ -38,7 +36,7 @@ public class KitchenServiceTest {
     }
 
     @Test
-    public void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeInProgress() throws PancakeServiceException {
+    void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeInProgress() throws PancakeServiceException {
         // Given
         UUID orderId = UUID.randomUUID();
         OrderDetails orderDetails = mock(OrderDetails.class);
@@ -52,7 +50,7 @@ public class KitchenServiceTest {
     }
 
     @Test
-    public void givenValidOrder_whenNotifyOrderCompletion_thenOrderStatusShouldBeReadyForDeliveryAndAddedToQueue() throws PancakeServiceException {
+    void givenValidOrder_whenNotifyOrderCompletion_thenOrderStatusShouldBeReadyForDeliveryAndAddedToQueue() throws PancakeServiceException {
         // Given
         UUID orderId = UUID.randomUUID();
         OrderDetails orderDetails = mock(OrderDetails.class);
@@ -87,6 +85,6 @@ public class KitchenServiceTest {
         var pancakesList = kitchenService.viewOrders(null).values().stream()
                 .flatMap(map -> map.keySet().stream())
                 .toList();
-        assertTrue(pancakesList.size() == 2);
+        assertEquals(2, pancakesList.size());
     }
 }

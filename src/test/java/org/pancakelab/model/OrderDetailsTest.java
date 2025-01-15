@@ -10,10 +10,10 @@ import static org.mockito.Mockito.mock;
 import static org.pancakelab.model.OrderDetails.DELIVERY_INFO_REQUIRED;
 import static org.pancakelab.model.OrderDetails.PANCAKES_REQUIRED;
 
-public class OrderDetailsTest {
+class OrderDetailsTest {
 
     @Test
-    public void givenNoDeliveryInfo_whenBuildingOrderDetails_thenThrowException() {
+    void givenNoDeliveryInfo_whenBuildingOrderDetails_thenThrowException() {
         // Given
         OrderDetails.Builder builder = new OrderDetails.Builder();
         // When & Then
@@ -21,7 +21,7 @@ public class OrderDetailsTest {
     }
 
     @Test
-    public void givenNoPancakes_whenBuildingOrderDetails_thenThrowException() {
+    void givenNoPancakes_whenBuildingOrderDetails_thenThrowException() {
         // Given
         OrderDetails.Builder builder = new OrderDetails.Builder();
         builder.withDeliveryInfo(mock(DeliveryInfo.class));
@@ -30,7 +30,7 @@ public class OrderDetailsTest {
     }
 
     @Test
-    public void givenValidParameters_whenBuildingOrderDetails_thenPancakesAreNotModifiable() {
+    void givenValidParameters_whenBuildingOrderDetails_thenPancakesAreNotModifiable() {
         // Given
         OrderDetails.Builder builder = new OrderDetails.Builder();
         DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);

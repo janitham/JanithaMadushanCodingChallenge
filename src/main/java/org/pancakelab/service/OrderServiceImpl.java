@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class OrderServiceImpl implements OrderService {
 
@@ -21,18 +19,17 @@ public class OrderServiceImpl implements OrderService {
     public static final String MAXIMUM_PANCAKES_EXCEEDED = "The maximum number of pancakes that can be ordered is %d".formatted(MAXIMUM_PANCAKES);
     public static final String USER_HAS_AN_ONGOING_ORDER = "The user has an ongoing order";
 
-    private final ConcurrentHashMap<UUID, OrderDetails> orders;
-    private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
+    private final ConcurrentMap<UUID, OrderDetails> orders;
+    private final ConcurrentMap<UUID, OrderStatus> orderStatus;
     private final DeliveryInformationValidator deliveryInformationValidator;
-    private final ConcurrentHashMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, Map<Pancakes, Integer>> orderItems = new ConcurrentHashMap<>();
     private final ExecutorService executorService;
     private final BlockingDeque<UUID> ordersQueue;
-
+    private final ConcurrentMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, Map<Pancakes, Integer>> orderItems = new ConcurrentHashMap<>();
 
     public OrderServiceImpl(
-            final ConcurrentHashMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
+            final ConcurrentMap<UUID, OrderDetails> orders,
+            final ConcurrentMap<UUID, OrderStatus> orderStatus,
             final DeliveryInformationValidator deliveryInformationValidator,
             final BlockingDeque<UUID> ordersQueue,
             final Integer internalThreads

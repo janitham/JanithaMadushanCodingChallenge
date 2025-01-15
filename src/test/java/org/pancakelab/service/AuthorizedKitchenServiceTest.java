@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
 import static org.pancakelab.service.AuthenticationServiceImpl.USER_IS_NOT_AUTHENTICATED;
 import static org.pancakelab.util.PancakeUtils.USER_IS_NOT_AUTHORIZED;
 
-public class AuthorizedKitchenServiceTest {
+class AuthorizedKitchenServiceTest {
     private KitchenService kitchenService;
     private AuthenticationService authenticationService;
     private AuthorizedKitchenService authorizedKitchenService;
@@ -47,7 +47,7 @@ public class AuthorizedKitchenServiceTest {
     }
 
     @Test
-    public void givenAuthenticatedUser_whenViewOrders_thenReturnsOrders() throws PancakeServiceException {
+    void givenAuthenticatedUser_whenViewOrders_thenReturnsOrders() throws PancakeServiceException {
         // Given
         Map<UUID, Map<PancakeRecipe, Integer>> orders = new HashMap<>();
         when(kitchenService.viewOrders(privileged)).thenReturn(orders);
@@ -60,7 +60,7 @@ public class AuthorizedKitchenServiceTest {
     }
 
     @Test
-    public void givenAuthenticatedUser_whenAcceptOrder_thenOrderIsAccepted() throws PancakeServiceException {
+    void givenAuthenticatedUser_whenAcceptOrder_thenOrderIsAccepted() throws PancakeServiceException {
         // Given
         doNothing().when(kitchenService).acceptOrder(privileged, orderId);
         // When
@@ -71,7 +71,7 @@ public class AuthorizedKitchenServiceTest {
     }
 
     @Test
-    public void givenAuthenticatedUser_whenNotifyOrderCompletion_thenOrderIsCompleted() throws PancakeServiceException {
+    void givenAuthenticatedUser_whenNotifyOrderCompletion_thenOrderIsCompleted() throws PancakeServiceException {
         // Given
         doNothing().when(kitchenService).notifyOrderCompletion(privileged, orderId);
         // When
@@ -82,7 +82,7 @@ public class AuthorizedKitchenServiceTest {
     }
 
     @Test
-    public void givenUnauthenticatedUser_whenViewOrders_thenThrowsException() throws AuthenticationFailureException {
+    void givenUnauthenticatedUser_whenViewOrders_thenThrowsException() throws AuthenticationFailureException {
         // Given
         doThrow(new AuthenticationFailureException(USER_IS_NOT_AUTHENTICATED)).when(authenticationService).authenticate(privileged);
         // When
@@ -96,7 +96,7 @@ public class AuthorizedKitchenServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void givenUnprivilegedUser_whenViewOrders_thenThrowsException(String userType) {
+    void givenUnprivilegedUser_whenViewOrders_thenThrowsException(String userType) {
         // Given
         User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
@@ -110,7 +110,7 @@ public class AuthorizedKitchenServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void givenUnprivilegedUser_whenAcceptOrder_thenThrowsException(String userType) {
+    void givenUnprivilegedUser_whenAcceptOrder_thenThrowsException(String userType) {
         // Given
         User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
@@ -124,7 +124,7 @@ public class AuthorizedKitchenServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void givenUnprivilegedUser_whenNotifyOrderCompletion_thenThrowsException(String userType) {
+    void givenUnprivilegedUser_whenNotifyOrderCompletion_thenThrowsException(String userType) {
         // Given
         User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When

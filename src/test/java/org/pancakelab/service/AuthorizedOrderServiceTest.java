@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.pancakelab.service.AuthenticationServiceImpl.USER_IS_NOT_AUTHENTICATED;
 
-public class AuthorizedOrderServiceTest {
+class AuthorizedOrderServiceTest {
 
     private OrderService orderService;
     private AuthenticationService authenticationService;
@@ -55,7 +55,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldAuthenticateUserWhenCreatingOrder() throws PancakeServiceException {
+    void shouldAuthenticateUserWhenCreatingOrder() throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         // When
@@ -66,7 +66,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenUserNotAuthenticatedForCreateOrder() throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthenticatedForCreateOrder() throws PancakeServiceException {
         // Given
         // When
         // Then
@@ -75,7 +75,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldAuthenticateUserWhenAddingPancakes() throws PancakeServiceException {
+    void shouldAuthenticateUserWhenAddingPancakes() throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
@@ -87,7 +87,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenUserNotAuthenticatedForAddPancakes() throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthenticatedForAddPancakes() throws PancakeServiceException {
         // Given
         // When
         // Then
@@ -96,7 +96,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldAuthenticateUserWhenGettingOrderSummary() throws PancakeServiceException {
+    void shouldAuthenticateUserWhenGettingOrderSummary() throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
@@ -109,7 +109,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenUserNotAuthenticatedForOrderSummary() throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthenticatedForOrderSummary() throws PancakeServiceException {
         // Given
         // When
         // Then
@@ -118,7 +118,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldAuthenticateUserWhenGettingOrderStatus() throws PancakeServiceException {
+    void shouldAuthenticateUserWhenGettingOrderStatus() throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
@@ -130,7 +130,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenUserNotAuthenticatedForOrderStatus() throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthenticatedForOrderStatus() throws PancakeServiceException {
         // Given
         // When
         // Then
@@ -139,7 +139,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldAuthenticateUserWhenCompletingOrder() throws PancakeServiceException {
+    void shouldAuthenticateUserWhenCompletingOrder() throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
@@ -151,7 +151,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenUserNotAuthenticatedForCompleteOrder() throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthenticatedForCompleteOrder() throws PancakeServiceException {
         // Given
         // When
         // Then
@@ -160,7 +160,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldAuthenticateUserWhenCancellingOrder() throws PancakeServiceException {
+    void shouldAuthenticateUserWhenCancellingOrder() throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
@@ -172,7 +172,7 @@ public class AuthorizedOrderServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenUserNotAuthenticatedForCancelOrder() throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthenticatedForCancelOrder() throws PancakeServiceException {
         // Given
         // When
         // Then
@@ -182,7 +182,7 @@ public class AuthorizedOrderServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void shouldThrowExceptionWhenUserNotAuthorizedForAddPancakes(String userType) throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthorizedForAddPancakes(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
@@ -195,7 +195,7 @@ public class AuthorizedOrderServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void shouldThrowExceptionWhenUserNotAuthorizedForOrderSummary(String userType) throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthorizedForOrderSummary(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
@@ -208,7 +208,7 @@ public class AuthorizedOrderServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void shouldThrowExceptionWhenUserNotAuthorizedForOrderStatus(String userType) throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthorizedForOrderStatus(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
@@ -221,7 +221,7 @@ public class AuthorizedOrderServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void shouldThrowExceptionWhenUserNotAuthorizedForCompleteOrder(String userType) throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthorizedForCompleteOrder(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);
@@ -234,7 +234,7 @@ public class AuthorizedOrderServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void shouldThrowExceptionWhenUserNotAuthorizedForCancelOrder(String userType) throws PancakeServiceException {
+    void shouldThrowExceptionWhenUserNotAuthorizedForCancelOrder(String userType) throws PancakeServiceException {
         // Given
         when(orderService.createOrder(testUser, deliveryInfo)).thenReturn(testOrderId);
         authorizedOrderService.createOrder(testUser, deliveryInfo);

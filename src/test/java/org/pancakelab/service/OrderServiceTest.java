@@ -13,8 +13,6 @@ import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.pancakelab.service.AuthorizedOrderService.ORDER_NOT_FOUND;
 import static org.pancakelab.service.OrderServiceImpl.ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID;
 
-public class OrderServiceTest {
+class OrderServiceTest {
 
     private ConcurrentHashMap<UUID, OrderDetails> orders;
     private OrderService orderService;
@@ -31,7 +29,6 @@ public class OrderServiceTest {
     private User user;
     private DeliveryInformationValidator deliveryInformationValidator;
     private BlockingDeque<UUID> ordersQueue;
-    ;
 
     private final Map<String, List<Character>> privileges = new HashMap<>() {
         {
@@ -52,19 +49,19 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenValidDeliveryInformation_then_orderShouldBePlaced() throws PancakeServiceException {
+    void givenValidDeliveryInformation_then_orderShouldBePlaced() throws PancakeServiceException {
         // Given
         var deliveryInformation = new DeliveryInfo("1", "2");
         // When
         final UUID orderId = orderService.createOrder(user, deliveryInformation);
         // Then
         assertNotNull(orderId);
-        assertEquals(orderService.status(user, orderId), OrderStatus.CREATED);
+        assertEquals(OrderStatus.CREATED, orderService.status(user, orderId));
         verify(deliveryInformationValidator).validate(any());
     }
 
     @Test
-    public void givenAlreadyCreatedOrder_then_creatingAnotherOrderWithTheSameDeliveryInformationThrowException()
+    void givenAlreadyCreatedOrder_then_creatingAnotherOrderWithTheSameDeliveryInformationThrowException()
             throws PancakeServiceException {
         // Given
         var deliveryInformation = new DeliveryInfo("1", "2");
@@ -79,7 +76,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenValidOrder_then_pancakesCanBeIncludedFromTheMenu() throws PancakeServiceException {
+    void givenValidOrder_then_pancakesCanBeIncludedFromTheMenu() throws PancakeServiceException {
         // Given
         var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes1 = Map.of(
@@ -101,7 +98,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenInvalidOrderId_then_addingItemsShouldThrowException() {
+    void givenInvalidOrderId_then_addingItemsShouldThrowException() {
         // Given
         // When
         // Then
@@ -113,7 +110,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenNullOrderId_then_addingItemsShouldThrowException() {
+    void givenNullOrderId_then_addingItemsShouldThrowException() {
         // Given
         // When
         // Then
@@ -125,7 +122,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenValidOrderId_then_completingOrderShouldCompleteAsync() throws PancakeServiceException {
+    void givenValidOrderId_then_completingOrderShouldCompleteAsync() throws PancakeServiceException {
         // Given
         var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
@@ -138,7 +135,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenValidOrderId_then_cancel_shouldRemoveOrder() throws PancakeServiceException {
+    void givenValidOrderId_then_cancel_shouldRemoveOrder() throws PancakeServiceException {
         // Given
         var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
@@ -152,7 +149,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenNullOrderId_whenComplete_thenThrowException() {
+    void givenNullOrderId_whenComplete_thenThrowException() {
         // Given
         // When
         // Then
@@ -164,7 +161,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenNonExistingOrderId_whenComplete_thenThrowException() {
+    void givenNonExistingOrderId_whenComplete_thenThrowException() {
         // Given
         // When
         // Then
@@ -176,7 +173,7 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenMoreThan10Pancakes_whenAddPancakes_thenThrowException() throws PancakeServiceException {
+    void givenMoreThan10Pancakes_whenAddPancakes_thenThrowException() throws PancakeServiceException {
         // Given
         var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
         var pancakes = Map.of(
@@ -195,9 +192,9 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void givenValidOrder_then_creatingAnotherOrderShouldThrowAnException() {
+    void givenValidOrder_then_creatingAnotherOrderShouldThrowAnException() {
         // Given
-        var user = new User("user2", "password2".toCharArray(), privileges);
+        var user2 = new User("user2", "password2".toCharArray(), privileges);
         var orderId = UUID.randomUUID();
         orderStatus.put(orderId, OrderStatus.CREATED);
         orders.put(
@@ -207,16 +204,16 @@ public class OrderServiceTest {
                                 Pancakes.MILK_CHOCOLATE_PANCAKE, 1
                         )
                 ).withDeliveryInfo(new DeliveryInfo("1", "2")
-                ).withUser(user).build());
+                ).withUser(user2).build());
         // When
         // Then
         Exception exception = assertThrows(PancakeServiceException.class,
-                () -> orderService.createOrder(user, new DeliveryInfo("1", "7")));
+                () -> orderService.createOrder(user2, new DeliveryInfo("1", "7")));
         assertEquals(OrderServiceImpl.USER_HAS_AN_ONGOING_ORDER, exception.getMessage());
     }
 
     @Test
-    public void givenUserHasAnOngoingOrder_then_creatingAnotherOrderShouldThrowAnException() throws PancakeServiceException {
+    void givenUserHasAnOngoingOrder_then_creatingAnotherOrderShouldThrowAnException() {
         // Given
         var orderId = UUID.randomUUID();
         orderStatus.put(orderId, OrderStatus.CREATED);

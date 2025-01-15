@@ -16,7 +16,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class PancakeRecipeOrderSuccessfulProcessingTest {
+class PancakeRecipeOrderSuccessfulProcessingTest {
 
     private static DeliveryService deliveryService;
     private static KitchenService kitchenService;
@@ -63,7 +63,7 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
 
     @Test
     @Order(1)
-    public void whenValidPancakeOrderIsPlaced_thenOrderShouldBePlaced() throws PancakeServiceException {
+    void whenValidPancakeOrderIsPlaced_thenOrderShouldBePlaced() throws PancakeServiceException {
         // Given
         orderId = orderService.createOrder(authorizedUser, deliveryInfo);
         // When
@@ -73,7 +73,7 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
 
     @Test
     @Order(2)
-    public void whenOrderIsUpdatedWithItemsInTheMenu_thenOrderShouldContainTheItems() throws PancakeServiceException {
+    void whenOrderIsUpdatedWithItemsInTheMenu_thenOrderShouldContainTheItems() throws PancakeServiceException {
         // Given
         var pancakes = Map.of(
                 Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
@@ -87,7 +87,7 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
 
     @Test
     @Order(3)
-    public void whenOrderIsCompleted_thenOrderOrderStatusShouldBeChangedToCompleted() throws PancakeServiceException {
+    void whenOrderIsCompleted_thenOrderOrderStatusShouldBeChangedToCompleted() throws PancakeServiceException {
         // Given
         // When
         orderService.complete(authorizedUser, orderId);
@@ -117,7 +117,7 @@ public class PancakeRecipeOrderSuccessfulProcessingTest {
 
     @Test
     @Order(5)
-    public void whenOrderIsReceivedByTheChef_thenOrderShouldBeInProgress() {
+    void whenOrderIsReceivedByTheChef_thenOrderShouldBeInProgress() {
 
     }
 

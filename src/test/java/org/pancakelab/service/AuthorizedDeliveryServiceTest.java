@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.pancakelab.util.PancakeUtils.USER_IS_NOT_AUTHORIZED;
 
-public class AuthorizedDeliveryServiceTest {
+class AuthorizedDeliveryServiceTest {
 
     private DeliveryService deliveryService;
     private AuthenticationService authenticationService;
@@ -44,11 +44,11 @@ public class AuthorizedDeliveryServiceTest {
     }
 
     @Test
-    public void shouldReturnCompletedOrdersWhenUserIsPrivileged() throws PancakeServiceException {
+    void shouldReturnCompletedOrdersWhenUserIsPrivileged() throws PancakeServiceException {
         // Given
-        UUID orderId = UUID.randomUUID();
+        final UUID randomOrderId = UUID.randomUUID();
         DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);
-        Map<UUID, DeliveryInfo> orders = Map.of(orderId, deliveryInfo);
+        Map<UUID, DeliveryInfo> orders = Map.of(randomOrderId, deliveryInfo);
         when(deliveryService.viewCompletedOrders(privileged)).thenReturn(orders);
         // When
         Map<UUID, DeliveryInfo> result = authorizedDeliveryService.viewCompletedOrders(privileged);
@@ -59,7 +59,7 @@ public class AuthorizedDeliveryServiceTest {
     }
 
     @Test
-    public void shouldAcceptOrderWhenUserIsPrivileged() throws PancakeServiceException {
+    void shouldAcceptOrderWhenUserIsPrivileged() throws PancakeServiceException {
         // Given
         doNothing().when(deliveryService).acceptOrder(privileged, orderId);
         // When
@@ -70,7 +70,7 @@ public class AuthorizedDeliveryServiceTest {
     }
 
     @Test
-    public void shouldSendForDeliveryWhenUserIsPrivileged() throws PancakeServiceException {
+    void shouldSendForDeliveryWhenUserIsPrivileged() throws PancakeServiceException {
         // Given
         doNothing().when(deliveryService).sendForTheDelivery(privileged, orderId);
         // When
@@ -82,7 +82,7 @@ public class AuthorizedDeliveryServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void whenViewingCompletedOrdersShouldThrowExceptionWhenUserIsNotPrivileged(String userType) {
+    void whenViewingCompletedOrdersShouldThrowExceptionWhenUserIsNotPrivileged(String userType) {
         // Given
         User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
@@ -94,7 +94,7 @@ public class AuthorizedDeliveryServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void whenAcceptingOrderShouldThrowExceptionWhenUserIsNotPrivileged(String userType) {
+    void whenAcceptingOrderShouldThrowExceptionWhenUserIsNotPrivileged(String userType) {
         // Given
         User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When
@@ -106,7 +106,7 @@ public class AuthorizedDeliveryServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
-    public void whenSendingForDeliveryShouldThrowExceptionWhenUserIsNotPrivileged(String userType) {
+    void whenSendingForDeliveryShouldThrowExceptionWhenUserIsNotPrivileged(String userType) {
         // Given
         User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
         // When

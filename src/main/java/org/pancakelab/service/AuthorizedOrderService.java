@@ -11,8 +11,8 @@ import static org.pancakelab.util.PancakeUtils.authorizeUser;
 public class AuthorizedOrderService implements OrderService {
 
     public static final String SERVICE_NAME = "order";
-    public static String USER_DOES_NOT_HAVE_AUTHORITY_TO_ACCESS_ORDER = "User not authorized to access order";
-    public static String ORDER_NOT_FOUND = "Order not found";
+    public static final String USER_DOES_NOT_HAVE_AUTHORITY_TO_ACCESS_ORDER = "User not authorized to access order";
+    public static final String ORDER_NOT_FOUND = "Order not found";
 
     private final OrderService orderService;
     private final AuthenticationService authenticationService;

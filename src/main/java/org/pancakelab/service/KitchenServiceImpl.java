@@ -12,17 +12,18 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 public class KitchenServiceImpl implements KitchenService {
-    private final ConcurrentHashMap<UUID, OrderDetails> orders;
-    private final ConcurrentHashMap<UUID, OrderStatus> orderStatus;
+    private final ConcurrentMap<UUID, OrderDetails> orders;
+    private final ConcurrentMap<UUID, OrderStatus> orderStatus;
     private final ExecutorService executorService;
     private final BlockingDeque<UUID> orderQueue;
     private final BlockingDeque<UUID> deliveryQueue;
     private final Map<UUID, Map<PancakeRecipe, Integer>> localOrderMap;
 
     public KitchenServiceImpl(
-            final ConcurrentHashMap<UUID, OrderDetails> orders,
-            final ConcurrentHashMap<UUID, OrderStatus> orderStatus,
-            final BlockingDeque<UUID> orderQueue, BlockingDeque<UUID> deliveryQueue,
+            final ConcurrentMap<UUID, OrderDetails> orders,
+            final ConcurrentMap<UUID, OrderStatus> orderStatus,
+            final BlockingDeque<UUID> orderQueue,
+            final BlockingDeque<UUID> deliveryQueue,
             final Integer internalThreads
     ) {
         this.orders = orders;

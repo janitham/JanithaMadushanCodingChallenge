@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class DeliveryServiceTest {
+class DeliveryServiceTest {
 
     private ConcurrentHashMap<UUID, OrderDetails> orders;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
@@ -33,7 +33,7 @@ public class DeliveryServiceTest {
     }
 
     @Test
-    public void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeOutForDelivery() throws PancakeServiceException {
+    void givenValidOrder_whenAcceptOrder_thenOrderStatusShouldBeOutForDelivery() throws PancakeServiceException {
         // Given
         UUID orderId = UUID.randomUUID();
         OrderDetails orderDetails = mock(OrderDetails.class);
@@ -47,7 +47,7 @@ public class DeliveryServiceTest {
     }
 
     @Test
-    public void givenValidOrder_whenSendForTheDelivery_thenOrderStatusShouldBeDelivered() throws PancakeServiceException {
+    void givenValidOrder_whenSendForTheDelivery_thenOrderStatusShouldBeDelivered() throws PancakeServiceException {
         // Given
         UUID orderId = UUID.randomUUID();
         OrderDetails orderDetails = mock(OrderDetails.class);
@@ -62,7 +62,7 @@ public class DeliveryServiceTest {
     }
 
     @Test
-    public void givenValidOrder_whenViewCompletedOrders_thenShouldReturnCompletedOrders() throws PancakeServiceException, InterruptedException {
+    void givenValidOrder_whenViewCompletedOrders_thenShouldReturnCompletedOrders() throws InterruptedException {
         // Given
         UUID orderId1 = UUID.randomUUID();
         OrderDetails orderDetails1 = mock(OrderDetails.class);

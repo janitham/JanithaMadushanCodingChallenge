@@ -6,12 +6,12 @@ import org.pancakelab.model.ValidationException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DeliveryInformationValidatorTest {
+class DeliveryInformationValidatorTest {
 
     private final DeliveryInformationValidator validator = new DeliveryInformationValidator();
 
     @Test
-    public void giveNullDeliveryInfo_then_ThrowsException() {
+    void giveNullDeliveryInfo_then_ThrowsException() {
         // Given
         // When
         // Then
@@ -20,7 +20,7 @@ public class DeliveryInformationValidatorTest {
     }
 
     @Test
-    public void givenInvalidRoomNumber_then_ThrowsException() {
+    void givenInvalidRoomNumber_then_ThrowsException() {
         // Given
         DeliveryInfo deliveryInfo = new DeliveryInfo("101", "1001");
         // When
@@ -30,7 +30,7 @@ public class DeliveryInformationValidatorTest {
     }
 
     @Test
-    public void givenInvalidBuildingNumber_then_ThrowsException() {
+    void givenInvalidBuildingNumber_then_ThrowsException() {
         // Given
         DeliveryInfo deliveryInfo = new DeliveryInfo("101", "101");
         // When
@@ -40,7 +40,7 @@ public class DeliveryInformationValidatorTest {
     }
 
     @Test
-    public void givenValidDeliveryInfo_then_NoException() throws ValidationException {
+    void givenValidDeliveryInfo_then_NoException() throws ValidationException {
         // Given
         DeliveryInfo deliveryInfo = new DeliveryInfo("101", "10");
         // When
