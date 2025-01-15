@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PancakeServiceSteps {
 
-    private static final Map<String, List<Character>> privileges = new HashMap<>() {
+    private static final Map<String, List<Character>> fullPrivileges = new HashMap<>() {
         {
             put("order", List.of('C', 'R', 'U', 'D'));
             put("kitchen", List.of('C', 'R', 'U', 'D'));
@@ -25,12 +25,14 @@ public class PancakeServiceSteps {
     };
     private static final HashMap<String, User> systemUsers = new HashMap<>() {
         {
-            put("user1", new User("user", "password".toCharArray(), privileges));
-            put("user2", new User("user2", "password2".toCharArray(), privileges));
-            put("user3", new User("user3", "password3".toCharArray(), privileges));
-            put("user4", new User("user4", "password4".toCharArray(), privileges));
-            put("user5", new User("user5", "password5".toCharArray(), privileges));
-            put("user6", new User("user5", "password6".toCharArray(), privileges));
+            put("user", new User("user", "password".toCharArray(), fullPrivileges));
+            put("user1", new User("user1", "password1".toCharArray(), fullPrivileges));
+            put("user2", new User("user2", "password2".toCharArray(), fullPrivileges));
+            put("user3", new User("user3", "password3".toCharArray(), fullPrivileges));
+            put("user4", new User("user4", "password4".toCharArray(), fullPrivileges));
+            put("user5", new User("user5", "password5".toCharArray(), fullPrivileges));
+            put("user6", new User("user5", "password6".toCharArray(), fullPrivileges));
+            put("validUser", new User("validUser", "validPassword".toCharArray(), fullPrivileges));
 
             // Kitchen Service
             put("orderUser1", new User("orderUser1", "orderPassword1".toCharArray(), Map.of("order", List.of('C', 'R', 'U', 'D'))));
@@ -45,13 +47,12 @@ public class PancakeServiceSteps {
     private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
     private static final BlockingDeque<UUID> deliveriesQueue = new LinkedBlockingDeque<>();
-    private static User authenticatedUser = new User("validUser", "validPassword".toCharArray(), privileges);
+    private static User authenticatedUser = null;
     private static UUID orderId;
 
     private static final AuthenticationService authenticationService = new AuthenticationServiceImpl(
             new HashSet<>() {
                 {
-                    add(authenticatedUser);
                     addAll(systemUsers.values());
                 }
             }
@@ -70,9 +71,15 @@ public class PancakeServiceSteps {
             authenticationService
     );
 
+    @Given("a disciple creates an order with building {string} and room number {string}")
+    public void a_disciple_creates_an_order_with_building_and_room_number(String building, String roomNumber) throws PancakeServiceException {
+        orderId = orderService.createOrder(authenticatedUser, new DeliveryInfo(roomNumber, building));
+        assertNotNull(orderId);
+    }
+
     @Given("a disciple {string} creates an order with building {string} and room number {string}")
     public void a_disciple_creates_an_order_with_building_and_room_number(String disciple, String building, String roomNumber) throws PancakeServiceException {
-        orderId = orderService.createOrder(systemUsers.get(disciple), new DeliveryInfo(roomNumber, building));
+        orderId = orderService.createOrder(authenticatedUser, new DeliveryInfo(roomNumber, building));
         assertNotNull(orderId);
     }
 
@@ -151,7 +158,7 @@ public class PancakeServiceSteps {
 
     @Given("a username as {string} and a password as {string}")
     public void a_username_as_and_a_password_as(String username, String password) {
-        authenticatedUser = new User(username, password.toCharArray(), privileges);
+        authenticatedUser = new User(username, password.toCharArray(), fullPrivileges);
     }
 
     @When("a disciple creates an order with building {string} and room number {string} and login fails")

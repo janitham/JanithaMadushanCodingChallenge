@@ -16,7 +16,8 @@ Scenario: Dr. Evil tries creating large orders, but fails
   When the disciple adds 100 pancake of type "DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE" and system complains large order
 
 Scenario: Dr. Evil tries to make multiple orders with the login he got, but fails
-  Given a disciple "user1" creates an order with building "1" and room number "108"
+  Given a username as "user1" and a password as "password1"
+  And a disciple creates an order with building "1" and room number "108"
   And the disciple "user1" adds 3 pancake of type "DARK_CHOCOLATE_WHIP_CREAM_PANCAKE"
   And the disciple "user1" completes the order
   Then a disciple "user1" creates an order with building "1" and room number "108" and system complains about ongoing order
