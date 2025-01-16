@@ -141,10 +141,4 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
         // Then
         Awaitility.await().until(() -> OrderStatus.DELIVERED.equals(orderStatusRepository.get(orderId)));
     }
-
-    /*@AfterAll
-    public static void tearDown() {
-        ((DeliveryServiceImpl) deliveryService).shutdown();
-        ((KitchenServiceImpl) kitchenService).shutdown();
-    }*/
 }
