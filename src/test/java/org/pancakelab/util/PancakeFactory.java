@@ -1,7 +1,6 @@
 package org.pancakelab.util;
 
 import org.pancakelab.model.PancakeRecipe;
-import org.pancakelab.model.Pancakes;
 
 public class PancakeFactory {
 

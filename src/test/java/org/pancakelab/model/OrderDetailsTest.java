@@ -2,6 +2,7 @@ package org.pancakelab.model;
 
 import org.junit.jupiter.api.Test;
 import org.pancakelab.util.PancakeFactory;
+import org.pancakelab.util.Pancakes;
 
 import java.util.Map;
 

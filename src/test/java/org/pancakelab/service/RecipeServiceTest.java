@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.PancakeRecipe;
 import org.pancakelab.model.PancakeServiceException;
-import org.pancakelab.model.Pancakes;
+import org.pancakelab.util.Pancakes;
 import org.pancakelab.util.PancakeFactory;
 
 import java.util.concurrent.ConcurrentSkipListSet;

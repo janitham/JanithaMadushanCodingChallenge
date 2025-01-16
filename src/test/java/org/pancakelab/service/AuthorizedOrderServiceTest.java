@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.pancakelab.model.*;
 import org.pancakelab.util.PancakeFactory;
+import org.pancakelab.util.Pancakes;
 
 import java.util.*;
 

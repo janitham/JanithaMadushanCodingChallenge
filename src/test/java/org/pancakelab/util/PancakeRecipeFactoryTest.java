@@ -2,7 +2,6 @@ package org.pancakelab.util;
 
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.PancakeRecipe;
-import org.pancakelab.model.Pancakes;
 
 import static org.junit.jupiter.api.Assertions.*;
 

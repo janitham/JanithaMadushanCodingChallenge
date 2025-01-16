@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
 import org.pancakelab.util.DeliveryInformationValidator;
 import org.pancakelab.util.PancakeFactory;
+import org.pancakelab.util.Pancakes;
 
 import java.util.HashMap;
 import java.util.List;
