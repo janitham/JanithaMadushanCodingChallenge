@@ -15,7 +15,14 @@ test resource called `CucumberTestRunner.java`
 ## Testing
 Unit Tests, Integration Tests and BDD Cucumber Tests were used to test the project.
 
+### Cucumber test results
 ![Cucumber Tests](cucumber-tests.png)
+
+### Cucumber feature files
+![Feature Files](cucumber-feature-files.png)
+
+### Cucumber sample feature file
+![Feature Files](cucumber-feature-file.png)
 
 ## Security
 As the project requirements and the scenarios that the older system was faced, identified
