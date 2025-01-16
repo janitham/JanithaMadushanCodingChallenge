@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Implementation of the OrderService interface.
@@ -31,6 +32,9 @@ public class OrderServiceImpl implements OrderService {
     private final BlockingDeque<UUID> ordersQueue;
     private final ConcurrentMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentMap<UUID, Map<PancakeRecipe, Integer>> orderItemsLocalCache = new ConcurrentHashMap<>();
+    private final ReentrantReadWriteLock orderItemsLock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock.ReadLock orderItemsReadLock = orderItemsLock.readLock();
+    private final ReentrantReadWriteLock.WriteLock orderItemsWriteLock = orderItemsLock.writeLock();
     private final RecipeService recipeService;
 
     /**
@@ -104,19 +108,23 @@ public class OrderServiceImpl implements OrderService {
         if (!recipeService.getRecipes(user).containsAll(pancakes.keySet())) {
             throw new PancakeServiceException("Pancakes not found");
         }
-        synchronized (orderItemsLocalCache) {
+        orderItemsReadLock.lock();
+        try {
             var currentTotal = orderItemsLocalCache.values().stream().mapToInt(item -> item.values().stream().mapToInt(Integer::intValue).sum()).sum();
             var incomingTotal = pancakes.values().stream().mapToInt(Integer::intValue).sum();
             if (currentTotal + incomingTotal > MAXIMUM_PANCAKES) {
                 throw new PancakeServiceException(MAXIMUM_PANCAKES_EXCEEDED);
             }
+        } finally {
+            orderItemsReadLock.unlock();
         }
         synchronized (orderStorage) {
             if (!orderStorage.containsValue(orderId)) {
                 throw new PancakeServiceException(ORDER_NOT_FOUND);
             }
         }
-        synchronized (orderItemsLocalCache) {
+        orderItemsWriteLock.lock();
+        try {
             if (!orderItemsLocalCache.containsKey(orderId)) {
                 orderItemsLocalCache.put(orderId, new ConcurrentHashMap<>(pancakes));
             } else {
@@ -125,6 +133,8 @@ public class OrderServiceImpl implements OrderService {
                     return existing;
                 });
             }
+        } finally {
+            orderItemsWriteLock.unlock();
         }
     }
 
@@ -139,11 +149,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public synchronized Map<PancakeRecipe, Integer> orderSummary(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
-        final Map<PancakeRecipe, Integer> items = orderItemsLocalCache.get(orderId);
-        if (items == null) {
-            throw new PancakeServiceException(ORDER_NOT_FOUND);
+        orderItemsReadLock.lock();
+        try {
+            final Map<PancakeRecipe, Integer> items = orderItemsLocalCache.get(orderId);
+            if (items == null) {
+                throw new PancakeServiceException(ORDER_NOT_FOUND);
+            }
+            return items;
+        } finally {
+            orderItemsReadLock.unlock();
         }
-        return items;
     }
 
     /**
@@ -174,13 +189,16 @@ public class OrderServiceImpl implements OrderService {
         CompletableFuture.runAsync(() -> {
             var deliveryInfo = getDeliveryInfoByOrderId(orderId);
             OrderDetails orderDetails;
-            synchronized (orderItemsLocalCache) {
+            orderItemsReadLock.lock();
+            try {
                 orderDetails = new OrderDetails.Builder()
                         .withDeliveryInfo(deliveryInfo)
                         .withOrderId(orderId)
                         .withUser(user)
                         .withPanCakes(orderItemsLocalCache.get(orderId))
                         .build();
+            } finally {
+                orderItemsReadLock.unlock();
             }
             if (orderDetails != null) {
                 synchronized (ordersRepository) {
@@ -195,7 +213,6 @@ public class OrderServiceImpl implements OrderService {
                 cleanUpOrder(orderId, deliveryInfo);
                 PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
             }
-
         }, executorService);
     }
 
@@ -214,7 +231,7 @@ public class OrderServiceImpl implements OrderService {
         }
         CompletableFuture.runAsync(() -> {
             var deliveryInfo = getDeliveryInfoByOrderId(orderId);
-            if(deliveryInfo != null) {
+            if (deliveryInfo != null) {
                 cleanUpOrder(orderId, deliveryInfo);
                 synchronized (orderStatusRepository) {
                     orderStatusRepository.put(orderId, OrderStatus.CANCELLED);
@@ -258,7 +275,12 @@ public class OrderServiceImpl implements OrderService {
      */
     private synchronized void cleanUpOrder(final UUID orderId, final DeliveryInfo deliveryInfo) {
         orderStorage.remove(deliveryInfo);
-        orderItemsLocalCache.remove(orderId);
+        orderItemsWriteLock.lock();
+        try {
+            orderItemsLocalCache.remove(orderId);
+        } finally {
+            orderItemsWriteLock.unlock();
+        }
     }
 
     /**
