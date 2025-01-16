@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Implementation of the KitchenService interface.
@@ -28,6 +29,9 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
     private final BlockingDeque<UUID> orderQueue;
     private final BlockingDeque<UUID> deliveryQueue;
     private final Map<UUID, Map<PancakeRecipe, Integer>> localOrderMap;
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
+    private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
     /**
      * Constructs a new KitchenServiceImpl.
@@ -81,7 +85,12 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
      */
     @Override
     public Map<UUID, Map<PancakeRecipe, Integer>> viewOrders(User user) {
-        return new ConcurrentHashMap<>(localOrderMap);
+        readLock.lock();
+        try {
+            return new ConcurrentHashMap<>(localOrderMap);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -127,12 +136,16 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
                 synchronized (deliveryQueue) {
                     deliveryQueue.add(orderId);
                 }
-                synchronized (localOrderMap) {
+                writeLock.lock();
+                try {
                     localOrderMap.remove(orderId);
+                } finally {
+                    writeLock.unlock();
                 }
             }
         }, executorService);
     }
+
 
     /**
      * Updates the local order map with the details of the specified order.
@@ -146,8 +159,11 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
         }
         if (orderDetails != null) {
             final Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>(orderDetails.getPancakes());
-            synchronized (localOrderMap) {
+            writeLock.lock();
+            try {
                 localOrderMap.put(orderId, pancakeRecipes);
+            } finally {
+                writeLock.unlock();
             }
         }
     }
