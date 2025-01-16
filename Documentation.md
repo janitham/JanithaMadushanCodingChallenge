@@ -15,6 +15,8 @@ test resource called `CucumberTestRunner.java`
 ## Testing
 Unit Tests, Integration Tests and BDD Cucumber Tests were used to test the project.
 
+![Cucumber Tests](cucumber-tests.png)
+
 ## Security
 As the project requirements and the scenarios that the older system was faced, identified
 project was less secured and `Authentication` required to limit public access to the system required. However,
