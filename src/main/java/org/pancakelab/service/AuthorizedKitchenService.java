@@ -6,6 +6,7 @@ import org.pancakelab.model.Privileges;
 import org.pancakelab.model.User;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.pancakelab.util.PancakeUtils.authorizeUser;
@@ -14,22 +15,22 @@ import static org.pancakelab.util.PancakeUtils.authorizeUser;
  * Service that provides authorized kitchen operations.
  * This decorator class ensures that only authenticated and authorized users can access the kitchen service.
  */
-public class AuthorizedKitchenService implements ChefService {
+public class AuthorizedKitchenService implements ChefService, RecipeService {
     public static final String KITCHEN_RESOURCE_NAME = "kitchen";
-    private final ChefService chefService;
+    private final KitchenServiceImpl chefService;
     private final AuthenticationService authenticationService;
 
     /**
      * Constructs an AuthorizedKitchenService with the specified kitchen and authentication services.
      *
-     * @param chefService the kitchen service to delegate to
+     * @param kitchenService the kitchen service to delegate to
      * @param authenticationService the authentication service to use for user authentication
      */
     public AuthorizedKitchenService(
-            final ChefService chefService,
+            final KitchenServiceImpl kitchenService,
             final AuthenticationService authenticationService
     ) {
-        this.chefService = chefService;
+        this.chefService = kitchenService;
         this.authenticationService = authenticationService;
     }
 
@@ -83,5 +84,31 @@ public class AuthorizedKitchenService implements ChefService {
         authenticateUser(user);
         authorizeUser(user, KITCHEN_RESOURCE_NAME, Privileges.UPDATE.getCode());
         chefService.notifyOrderCompletion(user, orderId);
+    }
+
+
+    @Override
+    public void addRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
+
+    }
+
+    @Override
+    public void removeRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
+
+    }
+
+    @Override
+    public void updateRecipe(User user, String name, PancakeRecipe recipe) throws PancakeServiceException {
+
+    }
+
+    @Override
+    public void exits(User user, PancakeRecipe recipe) throws PancakeServiceException {
+
+    }
+
+    @Override
+    public Set<PancakeRecipe> getRecipes(User user) {
+        return Set.of();
     }
 }

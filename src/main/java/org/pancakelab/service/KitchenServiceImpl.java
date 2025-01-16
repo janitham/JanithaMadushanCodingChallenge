@@ -162,42 +162,42 @@ public class KitchenServiceImpl implements ChefService , RecipeService {
     }
 
     @Override
-    public void addRecipe(PancakeRecipe recipe) throws PancakeServiceException {
-        validate(recipe);
+    public void addRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
+        validate(user, recipe);
         if (!pancakeRecipesRepository.add(recipe)) {
             throw new PancakeServiceException("Recipe already exists.");
         }
     }
 
     @Override
-    public void removeRecipe(PancakeRecipe recipe) throws PancakeServiceException {
+    public void removeRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
         if (!pancakeRecipesRepository.remove(recipe)) {
             throw new PancakeServiceException("Recipe not found.");
         }
     }
 
     @Override
-    public void updateRecipe(String name, PancakeRecipe recipe) throws PancakeServiceException {
-        validate(recipe);
+    public void updateRecipe(User user, String name, PancakeRecipe recipe) throws PancakeServiceException {
+        validate(user, recipe);
         pancakeRecipesRepository.removeIf(r -> r.getName().equals(name));
         pancakeRecipesRepository.add(recipe);
     }
 
     @Override
-    public void exits(PancakeRecipe recipe) throws PancakeServiceException {
+    public void exits(User user, PancakeRecipe recipe) throws PancakeServiceException {
         if (!pancakeRecipesRepository.contains(recipe)) {
             throw new PancakeServiceException("Recipe does not exist.");
         }
     }
 
-    private void validate(PancakeRecipe recipe) throws PancakeServiceException {
+    private void validate(User user, PancakeRecipe recipe) throws PancakeServiceException {
         if (recipe == null) {
             throw new PancakeServiceException("Recipe cannot be null.");
         }
     }
 
     @Override
-    public Set<PancakeRecipe> getRecipes() {
+    public Set<PancakeRecipe> getRecipes(User user) {
         return new HashSet<>(pancakeRecipesRepository);
     }
 }

@@ -7,6 +7,8 @@ import org.pancakelab.util.Pancakes;
 import org.pancakelab.util.PancakeFactory;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,9 +26,18 @@ class RecipeServiceTest {
     private static ConcurrentSkipListSet<PancakeRecipe> recipeRepository;
     private static BlockingDeque<UUID> ordersQueue;
     private static BlockingDeque<UUID> deliveriesQueue;
+    private static User user;
 
     @BeforeAll
     static void setUp() {
+        final Map<String, List<Character>> privileges = new HashMap<>() {
+            {
+                put("order", List.of('C', 'R', 'U', 'D'));
+                put("kitchen", List.of('C', 'R', 'U', 'D'));
+                put("delivery", List.of('C', 'R', 'U', 'D'));
+            }
+        };
+        user = new User("user", "password".toCharArray(), privileges);
         ordersRepository = new ConcurrentHashMap<>();
         orderStatusRepository = new ConcurrentHashMap<>();
         recipeRepository = new ConcurrentSkipListSet<>() {{
@@ -43,9 +54,9 @@ class RecipeServiceTest {
         // Given
         final PancakeRecipe recipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE);
         // When
-        recipeService.addRecipe(recipe);
+        recipeService.addRecipe(user,recipe);
         // Then
-        assertTrue(recipeService.getRecipes().contains(recipe));
+        assertTrue(recipeService.getRecipes(user).contains(recipe));
     }
 
     @Test
@@ -54,8 +65,8 @@ class RecipeServiceTest {
         final PancakeRecipe recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
         // When & Then
         assertThrows(PancakeServiceException.class, () -> {
-                    recipeService.addRecipe(recipe);
-                    recipeService.addRecipe(recipe);
+                    recipeService.addRecipe(user, recipe);
+                    recipeService.addRecipe(user, recipe);
                 }
         );
     }
@@ -65,9 +76,9 @@ class RecipeServiceTest {
         // Given
         final PancakeRecipe recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
         // When
-        recipeService.removeRecipe(recipe);
+        recipeService.removeRecipe(user,recipe);
         // Then
-        assertTrue(recipeService.getRecipes().isEmpty());
+        assertTrue(recipeService.getRecipes(user).isEmpty());
     }
 
     @Test
@@ -75,7 +86,7 @@ class RecipeServiceTest {
         // Given
         final PancakeRecipe recipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE);
         // When
-        assertThrows(PancakeServiceException.class, () -> recipeService.removeRecipe(recipe));
+        assertThrows(PancakeServiceException.class, () -> recipeService.removeRecipe(user, recipe));
     }
 
     @Test
@@ -84,8 +95,8 @@ class RecipeServiceTest {
         final PancakeRecipe recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
         final var updated = new PancakeRecipe.Builder().withName(recipe.getName()).withChocolate(PancakeRecipe.CHOCOLATE.MILK).build();
         // When
-        recipeService.updateRecipe(recipe.getName(), updated);
+        recipeService.updateRecipe(user, recipe.getName(), updated);
         // Then
-        assertTrue(recipeService.getRecipes().contains(updated));
+        assertTrue(recipeService.getRecipes(user).contains(updated));
     }
 }
