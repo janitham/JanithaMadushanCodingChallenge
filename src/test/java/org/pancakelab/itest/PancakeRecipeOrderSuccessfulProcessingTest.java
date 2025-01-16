@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 import org.pancakelab.model.*;
 import org.pancakelab.service.*;
 import org.pancakelab.util.DeliveryInformationValidator;
+import org.pancakelab.util.PancakeFactory;
 
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
@@ -23,7 +24,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
     private static UUID orderId;
     private static DeliveryInfo deliveryInfo;
     public static final ConcurrentHashMap<UUID, OrderDetails> ordersRepository = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository = new ConcurrentHashMap<>();
     private static final Map<String, List<Character>> privileges = new HashMap<>() {
         {
             put("order", List.of('C', 'R', 'U', 'D'));
@@ -66,15 +67,17 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
         // When
         // Then
         assertNotNull(orderId);
-    }
+    /*}
 
     @Test
     @Order(2)
-    void givenOrderWithItemsInTheMenu_whenOrderIsUpdated_thenOrderShouldContainTheItems() throws PancakeServiceException {
+    void givenOrderWithItemsInTheMenu_whenOrderIsUpdated_thenOrderShouldContainTheItems() throws PancakeServiceException {*/
         // Given
         var pancakes = Map.of(
-                Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
-                Pancakes.MILK_CHOCOLATE_PANCAKE, 2
+                //Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1,
+                //Pancakes.MILK_CHOCOLATE_PANCAKE, 2
+                PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE), 1,
+                PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE), 2
         );
         // When
         orderService.addPancakes(authorizedUser, orderId, pancakes);

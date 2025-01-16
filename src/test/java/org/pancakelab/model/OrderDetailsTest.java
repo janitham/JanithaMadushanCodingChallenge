@@ -1,6 +1,7 @@
 package org.pancakelab.model;
 
 import org.junit.jupiter.api.Test;
+import org.pancakelab.util.PancakeFactory;
 
 import java.util.Map;
 
@@ -34,7 +35,10 @@ class OrderDetailsTest {
         // Given
         final OrderDetails.Builder builder = new OrderDetails.Builder();
         final DeliveryInfo deliveryInfo = mock(DeliveryInfo.class);
-        builder.withDeliveryInfo(deliveryInfo).withPanCakes(Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 2));
+        builder.withDeliveryInfo(deliveryInfo).withPanCakes(
+                //Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 2)
+                Map.of(PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1)
+        );
         // When
         final OrderDetails orderDetails = builder.build();
         // Then

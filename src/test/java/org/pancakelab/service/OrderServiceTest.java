@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
 import org.pancakelab.util.DeliveryInformationValidator;
+import org.pancakelab.util.PancakeFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -79,22 +80,33 @@ class OrderServiceTest {
     void givenValidOrder_then_pancakesCanBeIncludedFromTheMenu() throws PancakeServiceException {
         // Given
         final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        final var pancakes1 = Map.of(
+        /*final var pancakes1 = Map.of(
                 Pancakes.DARK_CHOCOLATE_PANCAKE, 1,
                 Pancakes.MILK_CHOCOLATE_PANCAKE, 2
         );
         final var pancakes2 = Map.of(
                 Pancakes.MILK_CHOCOLATE_PANCAKE, 1,
                 Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE, 4
+        );*/
+        final var pancakes1 = Map.of(
+                PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1,
+                PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE), 2
+        );
+        final var pancakes2 = Map.of(
+                PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE), 1,
+                PancakeFactory.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE), 4
         );
         orderService.addPancakes(user, orderId, pancakes1);
         orderService.addPancakes(user, orderId, pancakes2);
         // When
-        final Map<Pancakes, Integer> summary = orderService.orderSummary(user, orderId);
+        final Map<PancakeRecipe, Integer> summary = orderService.orderSummary(user, orderId);
         // Then
-        assertEquals(1, summary.get(Pancakes.DARK_CHOCOLATE_PANCAKE));
-        assertEquals(3, summary.get(Pancakes.MILK_CHOCOLATE_PANCAKE));
-        assertEquals(4, summary.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE));
+        //assertEquals(1, summary.get(Pancakes.DARK_CHOCOLATE_PANCAKE));
+        assertEquals(1, summary.get(PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE)));
+        //assertEquals(3, summary.get(Pancakes.MILK_CHOCOLATE_PANCAKE));
+        assertEquals(3, summary.get(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE)));
+        //assertEquals(4, summary.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE));
+        assertEquals(4, summary.get(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE)));
     }
 
     @Test
@@ -125,7 +137,10 @@ class OrderServiceTest {
     void givenValidOrderId_then_completingOrderShouldCompleteAsync() throws PancakeServiceException {
         // Given
         final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        final var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
+        //final var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
+        final var pancakes1 = Map.of(
+                PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1
+        );
         orderService.addPancakes(user, orderId, pancakes1);
         // When
         orderService.complete(user, orderId);
@@ -138,7 +153,10 @@ class OrderServiceTest {
     void givenValidOrderId_then_cancel_shouldRemoveOrder() throws PancakeServiceException {
         // Given
         final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        final var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
+        //final var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
+        final var pancakes1 = Map.of(
+                PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1
+        );
         orderService.addPancakes(user, orderId, pancakes1);
         // When
         orderService.cancel(user, orderId);
@@ -176,8 +194,11 @@ class OrderServiceTest {
     void givenMoreThan10Pancakes_whenAddPancakes_thenThrowException() throws PancakeServiceException {
         // Given
         final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        final var pancakes = Map.of(
+        /*final var pancakes = Map.of(
                 Pancakes.DARK_CHOCOLATE_PANCAKE, 10
+        );*/
+        final var pancakes = Map.of(
+                PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 10
         );
         // When
         // Then
@@ -198,8 +219,11 @@ class OrderServiceTest {
         ordersRepository.put(
                 orderId,
                 new OrderDetails.Builder().withOrderId(orderId).withPanCakes(
-                        Map.of(
+                        /*Map.of(
                                 Pancakes.MILK_CHOCOLATE_PANCAKE, 1
+                        )*/
+                        Map.of(
+                                PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE), 1
                         )
                 ).withDeliveryInfo(new DeliveryInfo("1", "2")
                 ).withUser(user2).build());
@@ -218,9 +242,14 @@ class OrderServiceTest {
         ordersRepository.put(orderId, new OrderDetails.Builder()
                 .withOrderId(orderId)
                 .withUser(user)
-                .withPanCakes(Map.of(
-                        Pancakes.DARK_CHOCOLATE_PANCAKE, 1
-                ))
+                .withPanCakes(
+                        /*Map.of(
+                                Pancakes.DARK_CHOCOLATE_PANCAKE, 1
+                        )*/
+                        Map.of(
+                                PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1
+                        )
+                )
                 .withDeliveryInfo(new DeliveryInfo("1", "2"))
                 .build());
         // When

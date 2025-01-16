@@ -22,32 +22,32 @@ public class OrderServiceImpl implements OrderService {
     public static final String MAXIMUM_PANCAKES_EXCEEDED = "The maximum number of pancakes that can be ordered is %d".formatted(MAXIMUM_PANCAKES);
     public static final String USER_HAS_AN_ONGOING_ORDER = "The user has an ongoing order";
 
-    private final ConcurrentMap<UUID, OrderDetails> orders;
-    private final ConcurrentMap<UUID, OrderStatus> orderStatus;
+    private final ConcurrentMap<UUID, OrderDetails> ordersRepository;
+    private final ConcurrentMap<UUID, OrderStatus> orderStatusRepository;
     private final DeliveryInformationValidator deliveryInformationValidator;
     private final ExecutorService executorService;
     private final BlockingDeque<UUID> ordersQueue;
     private final ConcurrentMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
-    private final ConcurrentMap<UUID, Map<Pancakes, Integer>> orderItems = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, Map<PancakeRecipe, Integer>> orderItemsLocalCache = new ConcurrentHashMap<>();
 
     /**
      * Constructs a new OrderServiceImpl.
      *
-     * @param orders                       the map of order details
-     * @param orderStatus                  the map of order statuses
+     * @param ordersRepository             the map of order details
+     * @param orderStatusRepository        the map of order statuses
      * @param deliveryInformationValidator the validator for delivery information
      * @param ordersQueue                  the queue of orders to be processed
      * @param internalThreads              the number of internal threads to use
      */
     public OrderServiceImpl(
-            final ConcurrentMap<UUID, OrderDetails> orders,
-            final ConcurrentMap<UUID, OrderStatus> orderStatus,
+            final ConcurrentMap<UUID, OrderDetails> ordersRepository,
+            final ConcurrentMap<UUID, OrderStatus> orderStatusRepository,
             final DeliveryInformationValidator deliveryInformationValidator,
             final BlockingDeque<UUID> ordersQueue,
             final Integer internalThreads
     ) {
-        this.orders = orders;
-        this.orderStatus = orderStatus;
+        this.ordersRepository = ordersRepository;
+        this.orderStatusRepository = orderStatusRepository;
         this.deliveryInformationValidator = deliveryInformationValidator;
         this.ordersQueue = ordersQueue;
         this.executorService = Executors.newFixedThreadPool(internalThreads);
@@ -65,10 +65,10 @@ public class OrderServiceImpl implements OrderService {
     public UUID createOrder(User user, final DeliveryInfo deliveryInformation) throws PancakeServiceException {
         deliveryInformationValidator.validate(deliveryInformation);
         synchronized (this) {
-            if (orders.values().stream().anyMatch(orderDetails ->
-                    orderDetails.getUser().equals(user) && orderStatus.containsKey(orderDetails.getOrderId()) &&
+            if (ordersRepository.values().stream().anyMatch(orderDetails ->
+                    orderDetails.getUser().equals(user) && orderStatusRepository.containsKey(orderDetails.getOrderId()) &&
                             List.of(OrderStatus.CREATED, OrderStatus.READY_FOR_DELIVERY, OrderStatus.COMPLETED, OrderStatus.IN_PROGRESS, OrderStatus.OUT_FOR_DELIVERY)
-                                    .contains(orderStatus.get(orderDetails.getOrderId())))) {
+                                    .contains(orderStatusRepository.get(orderDetails.getOrderId())))) {
                 throw new PancakeServiceException(USER_HAS_AN_ONGOING_ORDER);
             }
         }
@@ -78,8 +78,8 @@ public class OrderServiceImpl implements OrderService {
                 throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);
             }
         }
-        synchronized (orderStatus) {
-            orderStatus.put(orderId, OrderStatus.CREATED);
+        synchronized (orderStatusRepository) {
+            orderStatusRepository.put(orderId, OrderStatus.CREATED);
         }
         PancakeUtils.notifyUser(user, OrderStatus.CREATED);
         return orderId;
@@ -94,10 +94,10 @@ public class OrderServiceImpl implements OrderService {
      * @throws PancakeServiceException if the pancakes cannot be added
      */
     @Override
-    public void addPancakes(User user, final UUID orderId, final Map<Pancakes, Integer> pancakes) throws PancakeServiceException {
+    public void addPancakes(User user, final UUID orderId, final Map<PancakeRecipe, Integer> pancakes) throws PancakeServiceException {
         validateOrderId(orderId);
-        synchronized (orderItems) {
-            var currentTotal = orderItems.values().stream().mapToInt(item -> item.values().stream().mapToInt(Integer::intValue).sum()).sum();
+        synchronized (orderItemsLocalCache) {
+            var currentTotal = orderItemsLocalCache.values().stream().mapToInt(item -> item.values().stream().mapToInt(Integer::intValue).sum()).sum();
             var incomingTotal = pancakes.values().stream().mapToInt(Integer::intValue).sum();
             if (currentTotal + incomingTotal > MAXIMUM_PANCAKES) {
                 throw new PancakeServiceException(MAXIMUM_PANCAKES_EXCEEDED);
@@ -108,11 +108,15 @@ public class OrderServiceImpl implements OrderService {
                 throw new PancakeServiceException(ORDER_NOT_FOUND);
             }
         }
-        synchronized (orderItems) {
-            orderItems.merge(orderId, new EnumMap<>(pancakes), (oldPancakes, newPancakes) -> {
-                newPancakes.forEach((type, count) -> oldPancakes.merge(type, count, Integer::sum));
-                return oldPancakes;
-            });
+        synchronized (orderItemsLocalCache) {
+            if (!orderItemsLocalCache.containsKey(orderId)) {
+                orderItemsLocalCache.put(orderId, new ConcurrentHashMap<>(pancakes));
+            } else {
+                orderItemsLocalCache.merge(orderId, pancakes, (existing, incoming) -> {
+                    incoming.forEach((recipe, count) -> existing.merge(recipe, count, Integer::sum));
+                    return existing;
+                });
+            }
         }
     }
 
@@ -125,13 +129,13 @@ public class OrderServiceImpl implements OrderService {
      * @throws PancakeServiceException if the order cannot be summarized
      */
     @Override
-    public synchronized Map<Pancakes, Integer> orderSummary(User user, final UUID orderId) throws PancakeServiceException {
+    public synchronized Map<PancakeRecipe, Integer> orderSummary(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
-        final Map<Pancakes, Integer> items = orderItems.get(orderId);
+        final Map<PancakeRecipe, Integer> items = orderItemsLocalCache.get(orderId);
         if (items == null) {
             throw new PancakeServiceException(ORDER_NOT_FOUND);
         }
-        return new EnumMap<>(items);
+        return items;
     }
 
     /**
@@ -143,7 +147,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public synchronized OrderStatus status(User user, UUID orderId) {
-        return orderStatus.get(orderId);
+        return orderStatusRepository.get(orderId);
     }
 
     /**
@@ -166,10 +170,10 @@ public class OrderServiceImpl implements OrderService {
                         .withDeliveryInfo(deliveryInfo)
                         .withOrderId(orderId)
                         .withUser(user)
-                        .withPanCakes(orderItems.get(orderId))
+                        .withPanCakes(orderItemsLocalCache.get(orderId))
                         .build();
-                orders.put(orderId, orderDetails);
-                orderStatus.put(orderId, OrderStatus.COMPLETED);
+                ordersRepository.put(orderId, orderDetails);
+                orderStatusRepository.put(orderId, OrderStatus.COMPLETED);
                 ordersQueue.add(orderId);
                 cleanUpOrder(orderId, deliveryInfo);
                 PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
@@ -194,7 +198,7 @@ public class OrderServiceImpl implements OrderService {
             synchronized (this) {
                 var deliveryInfo = getDeliveryInfoByOrderId(orderId);
                 cleanUpOrder(orderId, deliveryInfo);
-                orderStatus.put(orderId, OrderStatus.CANCELLED);
+                orderStatusRepository.put(orderId, OrderStatus.CANCELLED);
             }
             PancakeUtils.notifyUser(user, OrderStatus.CANCELLED);
         }, executorService);
@@ -234,7 +238,7 @@ public class OrderServiceImpl implements OrderService {
      */
     private synchronized void cleanUpOrder(final UUID orderId, final DeliveryInfo deliveryInfo) {
         orderStorage.remove(deliveryInfo);
-        orderItems.remove(orderId);
+        orderItemsLocalCache.remove(orderId);
     }
 
     /**

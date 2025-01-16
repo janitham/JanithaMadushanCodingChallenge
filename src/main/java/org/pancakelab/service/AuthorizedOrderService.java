@@ -107,7 +107,7 @@ public class AuthorizedOrderService implements OrderService {
      * @throws PancakeServiceException if the user cannot be authenticated or authorized
      */
     @Override
-    public void addPancakes(User user, UUID orderId, Map<Pancakes, Integer> pancakes) throws PancakeServiceException {
+    public void addPancakes(User user, UUID orderId, Map<PancakeRecipe, Integer> pancakes) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
         authorizeUser(user, SERVICE_NAME, Privileges.CREATE.getCode());
@@ -123,7 +123,7 @@ public class AuthorizedOrderService implements OrderService {
      * @throws PancakeServiceException if the user cannot be authenticated or authorized
      */
     @Override
-    public Map<Pancakes, Integer> orderSummary(User user, UUID orderId) throws PancakeServiceException {
+    public Map<PancakeRecipe, Integer> orderSummary(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
         authorizeUser(user, SERVICE_NAME, Privileges.READ.getCode());

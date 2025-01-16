@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.pancakelab.model.*;
+import org.pancakelab.util.PancakeFactory;
 
 import java.util.*;
 
@@ -24,10 +25,12 @@ class AuthorizedOrderServiceTest {
     private User inCorrectPermissions;
     private DeliveryInfo deliveryInfo;
     private final UUID testOrderId = UUID.randomUUID();
-    private final Map<Pancakes, Integer> testPancakes = new EnumMap<>(Pancakes.class) {
+    private final Map<PancakeRecipe, Integer> testPancakes = new HashMap<>() {
     {
-        put(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1);
-        put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
+        //put(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1);
+        put(PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE),1);
+        //put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
+        put(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE),2);
     }
 };
     private final Map<String, List<Character>> privileges = new HashMap<>() {

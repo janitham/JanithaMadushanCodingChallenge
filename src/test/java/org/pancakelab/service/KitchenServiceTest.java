@@ -4,6 +4,7 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pancakelab.model.*;
+import org.pancakelab.util.PancakeFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,9 +72,11 @@ class KitchenServiceTest {
         when(orderDetails1.getOrderId()).thenReturn(orderId1);
         ordersRepository.put(orderId1, orderDetails1);
 
-        final Map<Pancakes, Integer> pancakeItems1 = new ConcurrentHashMap<>() {{
-            put(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
-            put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
+        final Map<PancakeRecipe, Integer> pancakeItems1 = new ConcurrentHashMap<>() {{
+            //put(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
+            put(PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE),1);
+            //put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
+            put(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE),2);
         }};
         when(orderDetails1.getPancakes()).thenReturn(pancakeItems1);
 

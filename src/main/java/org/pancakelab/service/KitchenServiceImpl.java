@@ -139,11 +139,7 @@ public class KitchenServiceImpl implements KitchenService {
         synchronized (ordersRepository) {
             OrderDetails orderDetails = ordersRepository.get(orderId);
             if (orderDetails != null) {
-                Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>();
-                orderDetails.getPancakes().forEach((pancake, quantity) -> {
-                    PancakeRecipe recipe = PancakeFactory.get(pancake);
-                    pancakeRecipes.put(recipe, quantity);
-                });
+                Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>(orderDetails.getPancakes());
                 localOrderMap.put(orderId, pancakeRecipes);
             }
         }
