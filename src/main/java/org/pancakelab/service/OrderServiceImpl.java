@@ -100,6 +100,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void addPancakes(User user, final UUID orderId, final Map<PancakeRecipe, Integer> pancakes) throws PancakeServiceException {
         validateOrderId(orderId);
+        if (!recipeService.getRecipes(user).containsAll(pancakes.keySet())) {
+            throw new PancakeServiceException("Pancakes not found");
+        }
         synchronized (orderItemsLocalCache) {
             var currentTotal = orderItemsLocalCache.values().stream().mapToInt(item -> item.values().stream().mapToInt(Integer::intValue).sum()).sum();
             var incomingTotal = pancakes.values().stream().mapToInt(Integer::intValue).sum();

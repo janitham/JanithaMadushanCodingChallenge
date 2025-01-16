@@ -76,6 +76,10 @@ public class PancakeServiceSteps {
             authenticationService
     );
 
+    static {
+        Arrays.stream(Pancakes.values()).forEach(pancake -> recipeRepository.add(PancakeFactory.get(pancake)));
+    }
+
     @Given("a disciple creates an order with building {string} and room number {string}")
     public void a_disciple_creates_an_order_with_building_and_room_number(String building, String roomNumber) throws PancakeServiceException {
         orderId = orderService.createOrder(authenticatedUser, new DeliveryInfo(roomNumber, building));

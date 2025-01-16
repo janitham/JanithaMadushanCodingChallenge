@@ -53,6 +53,9 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
                 new DeliveryServiceImpl(ordersRepository, orderStatusRepository, deliveriesQueue, 2),
                 authenticationService
         );
+
+        Arrays.stream(Pancakes.values()).forEach(pancake -> recipeRepository.add(PancakeFactory.get(pancake)));
+
         var kitchenService = new KitchenServiceImpl(ordersRepository, orderStatusRepository, recipeRepository, ordersQueue, deliveriesQueue, 2);
         chefService = new AuthorizedKitchenService(
                 kitchenService,

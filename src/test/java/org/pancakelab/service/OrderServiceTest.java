@@ -8,18 +8,15 @@ import org.pancakelab.util.DeliveryInformationValidator;
 import org.pancakelab.util.PancakeFactory;
 import org.pancakelab.util.Pancakes;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.pancakelab.service.AuthorizedOrderService.ORDER_NOT_FOUND;
 import static org.pancakelab.service.OrderServiceImpl.ORDER_CANNOT_BE_PROCESSED_WITHOUT_ORDER_ID;
 
@@ -31,6 +28,7 @@ class OrderServiceTest {
     private OrderService orderService;
     private User user;
     private DeliveryInformationValidator deliveryInformationValidator;
+    private RecipeService recipeService;
 
     private final Map<String, List<Character>> privileges = new HashMap<>() {
         {
@@ -46,7 +44,7 @@ class OrderServiceTest {
         orderStatusRepository = new ConcurrentHashMap<>();
         ordersQueue = new LinkedBlockingDeque<>();
         deliveryInformationValidator = mock(DeliveryInformationValidator.class);
-        final var recipeService = mock(RecipeService.class);
+        recipeService = mock(RecipeService.class);
         orderService = new OrderServiceImpl(
                 ordersRepository, orderStatusRepository, deliveryInformationValidator, ordersQueue, 10,
                 recipeService);
@@ -92,6 +90,8 @@ class OrderServiceTest {
                 PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE), 1,
                 PancakeFactory.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE), 4
         );
+        when(recipeService.getRecipes(any())).thenReturn(Arrays.stream(Pancakes.values())
+                .map(PancakeFactory::get).collect(Collectors.toSet()));
         orderService.addPancakes(user, orderId, pancakes1);
         orderService.addPancakes(user, orderId, pancakes2);
         // When
@@ -133,6 +133,8 @@ class OrderServiceTest {
         final var pancakes1 = Map.of(
                 PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1
         );
+        when(recipeService.getRecipes(any())).thenReturn(Arrays.stream(Pancakes.values())
+                .map(PancakeFactory::get).collect(Collectors.toSet()));
         orderService.addPancakes(user, orderId, pancakes1);
         // When
         orderService.complete(user, orderId);
@@ -148,6 +150,8 @@ class OrderServiceTest {
         final var pancakes1 = Map.of(
                 PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1
         );
+        when(recipeService.getRecipes(any())).thenReturn(Arrays.stream(Pancakes.values())
+                .map(PancakeFactory::get).collect(Collectors.toSet()));
         orderService.addPancakes(user, orderId, pancakes1);
         // When
         orderService.cancel(user, orderId);
@@ -190,6 +194,8 @@ class OrderServiceTest {
         );
         // When
         // Then
+        when(recipeService.getRecipes(any())).thenReturn(Arrays.stream(Pancakes.values())
+                .map(PancakeFactory::get).collect(Collectors.toSet()));
         orderService.addPancakes(user, orderId, pancakes);
         Exception exception = assertThrows(
                 PancakeServiceException.class,
