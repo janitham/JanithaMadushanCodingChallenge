@@ -11,5 +11,5 @@ public interface RecipeService {
     void removeRecipe(User user, PancakeRecipe recipe)throws PancakeServiceException;
     void updateRecipe(User user, String name, PancakeRecipe recipe)throws PancakeServiceException;
     void exits(User user, PancakeRecipe recipe) throws PancakeServiceException;
-    Set<PancakeRecipe> getRecipes(User user);
+    Set<PancakeRecipe> getRecipes(User user) throws PancakeServiceException;
 }

@@ -17,13 +17,14 @@ import static org.pancakelab.util.PancakeUtils.authorizeUser;
  */
 public class AuthorizedKitchenService implements ChefService, RecipeService {
     public static final String KITCHEN_RESOURCE_NAME = "kitchen";
+    private static final String RECIPE_RESOURCE_NAME = "recipe";
     private final KitchenServiceImpl chefService;
     private final AuthenticationService authenticationService;
 
     /**
      * Constructs an AuthorizedKitchenService with the specified kitchen and authentication services.
      *
-     * @param kitchenService the kitchen service to delegate to
+     * @param kitchenService        the kitchen service to delegate to
      * @param authenticationService the authentication service to use for user authentication
      */
     public AuthorizedKitchenService(
@@ -61,7 +62,7 @@ public class AuthorizedKitchenService implements ChefService, RecipeService {
     /**
      * Accepts the specified order for the specified user.
      *
-     * @param user the user accepting the order
+     * @param user    the user accepting the order
      * @param orderId the ID of the order to accept
      * @throws PancakeServiceException if the user cannot be authenticated or authorized
      */
@@ -75,7 +76,7 @@ public class AuthorizedKitchenService implements ChefService, RecipeService {
     /**
      * Notifies the completion of the specified order for the specified user.
      *
-     * @param user the user notifying the order completion
+     * @param user    the user notifying the order completion
      * @param orderId the ID of the order to notify completion
      * @throws PancakeServiceException if the user cannot be authenticated or authorized
      */
@@ -89,26 +90,36 @@ public class AuthorizedKitchenService implements ChefService, RecipeService {
 
     @Override
     public void addRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
-
+        authenticateUser(user);
+        authorizeUser(user, RECIPE_RESOURCE_NAME, Privileges.CREATE.getCode());
+        chefService.addRecipe(user, recipe);
     }
 
     @Override
     public void removeRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
-
+        authenticateUser(user);
+        authorizeUser(user, RECIPE_RESOURCE_NAME, Privileges.DELETE.getCode());
+        chefService.removeRecipe(user, recipe);
     }
 
     @Override
     public void updateRecipe(User user, String name, PancakeRecipe recipe) throws PancakeServiceException {
-
+        authenticateUser(user);
+        authorizeUser(user, RECIPE_RESOURCE_NAME, Privileges.UPDATE.getCode());
+        chefService.updateRecipe(user, name, recipe);
     }
 
     @Override
     public void exits(User user, PancakeRecipe recipe) throws PancakeServiceException {
-
+        authenticateUser(user);
+        authorizeUser(user, RECIPE_RESOURCE_NAME, Privileges.READ.getCode());
+        chefService.exits(user, recipe);
     }
 
     @Override
-    public Set<PancakeRecipe> getRecipes(User user) {
-        return Set.of();
+    public Set<PancakeRecipe> getRecipes(User user) throws PancakeServiceException {
+        authenticateUser(user);
+        authorizeUser(user, RECIPE_RESOURCE_NAME, Privileges.READ.getCode());
+        return chefService.getRecipes(user);
     }
 }
