@@ -16,8 +16,8 @@ class PancakeRecipeFactoryTest {
         // When
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.DARK, pancakeRecipe.getChocolate());
-        assertTrue(pancakeRecipe.isHazelNuts());
-        assertTrue(pancakeRecipe.isWhippedCream());
+        assertTrue(pancakeRecipe.hasHazelNuts());
+        assertTrue(pancakeRecipe.hasWhippedCream());
     }
 
     @Test
@@ -27,8 +27,8 @@ class PancakeRecipeFactoryTest {
         // When
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.DARK, pancakeRecipe.getChocolate());
-        assertFalse(pancakeRecipe.isHazelNuts());
-        assertFalse(pancakeRecipe.isWhippedCream());
+        assertFalse(pancakeRecipe.hasHazelNuts());
+        assertFalse(pancakeRecipe.hasWhippedCream());
     }
 
     @Test
@@ -38,8 +38,8 @@ class PancakeRecipeFactoryTest {
         // When
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.DARK, pancakeRecipe.getChocolate());
-        assertFalse(pancakeRecipe.isHazelNuts());
-        assertTrue(pancakeRecipe.isWhippedCream());
+        assertFalse(pancakeRecipe.hasHazelNuts());
+        assertTrue(pancakeRecipe.hasWhippedCream());
     }
 
     @Test
@@ -49,8 +49,8 @@ class PancakeRecipeFactoryTest {
         // When
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.MILK, pancakeRecipe.getChocolate());
-        assertTrue(pancakeRecipe.isHazelNuts());
-        assertFalse(pancakeRecipe.isWhippedCream());
+        assertTrue(pancakeRecipe.hasHazelNuts());
+        assertFalse(pancakeRecipe.hasWhippedCream());
     }
 
     @Test
@@ -60,7 +60,7 @@ class PancakeRecipeFactoryTest {
         // When
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.MILK, pancakeRecipe.getChocolate());
-        assertFalse(pancakeRecipe.isHazelNuts());
-        assertFalse(pancakeRecipe.isWhippedCream());
+        assertFalse(pancakeRecipe.hasHazelNuts());
+        assertFalse(pancakeRecipe.hasWhippedCream());
     }
 }

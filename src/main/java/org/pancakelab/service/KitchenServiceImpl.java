@@ -4,7 +4,6 @@ import org.pancakelab.model.OrderDetails;
 import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.PancakeRecipe;
 import org.pancakelab.model.User;
-import org.pancakelab.util.PancakeFactory;
 import org.pancakelab.util.PancakeUtils;
 
 import java.util.Map;
@@ -17,7 +16,7 @@ import java.util.concurrent.*;
  * updating their status, and notifying users upon completion.
  * It uses a separate thread to update the local order map and manages order and delivery queues.
  */
-public class KitchenServiceImpl implements KitchenService {
+public class KitchenServiceImpl implements ChefService {//, RecipeService {
     private final ConcurrentMap<UUID, OrderDetails> ordersRepository;
     private final ConcurrentMap<UUID, OrderStatus> orderStatusRepository;
     private final ExecutorService executorService;

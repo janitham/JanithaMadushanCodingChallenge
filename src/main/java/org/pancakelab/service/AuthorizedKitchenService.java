@@ -14,22 +14,22 @@ import static org.pancakelab.util.PancakeUtils.authorizeUser;
  * Service that provides authorized kitchen operations.
  * This decorator class ensures that only authenticated and authorized users can access the kitchen service.
  */
-public class AuthorizedKitchenService implements KitchenService {
+public class AuthorizedKitchenService implements ChefService {
     public static final String SERVICE_NAME = "kitchen";
-    private final KitchenService kitchenService;
+    private final ChefService chefService;
     private final AuthenticationService authenticationService;
 
     /**
      * Constructs an AuthorizedKitchenService with the specified kitchen and authentication services.
      *
-     * @param kitchenService the kitchen service to delegate to
+     * @param chefService the kitchen service to delegate to
      * @param authenticationService the authentication service to use for user authentication
      */
     public AuthorizedKitchenService(
-            final KitchenService kitchenService,
+            final ChefService chefService,
             final AuthenticationService authenticationService
     ) {
-        this.kitchenService = kitchenService;
+        this.chefService = chefService;
         this.authenticationService = authenticationService;
     }
 
@@ -54,7 +54,7 @@ public class AuthorizedKitchenService implements KitchenService {
     public Map<UUID, Map<PancakeRecipe, Integer>> viewOrders(User user) throws PancakeServiceException {
         authenticateUser(user);
         authorizeUser(user, SERVICE_NAME, Privileges.READ.getCode());
-        return kitchenService.viewOrders(user);
+        return chefService.viewOrders(user);
     }
 
     /**
@@ -68,7 +68,7 @@ public class AuthorizedKitchenService implements KitchenService {
     public void acceptOrder(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeUser(user, SERVICE_NAME, Privileges.CREATE.getCode());
-        kitchenService.acceptOrder(user, orderId);
+        chefService.acceptOrder(user, orderId);
     }
 
     /**
@@ -82,6 +82,6 @@ public class AuthorizedKitchenService implements KitchenService {
     public void notifyOrderCompletion(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeUser(user, SERVICE_NAME, Privileges.UPDATE.getCode());
-        kitchenService.notifyOrderCompletion(user, orderId);
+        chefService.notifyOrderCompletion(user, orderId);
     }
 }

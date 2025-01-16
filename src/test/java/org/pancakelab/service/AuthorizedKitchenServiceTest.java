@@ -18,7 +18,7 @@ import static org.pancakelab.service.AuthenticationServiceImpl.USER_IS_NOT_AUTHE
 import static org.pancakelab.util.PancakeUtils.USER_IS_NOT_AUTHORIZED;
 
 class AuthorizedKitchenServiceTest {
-    private KitchenService kitchenService;
+    private ChefService chefService;
     private AuthenticationService authenticationService;
     private AuthorizedKitchenService authorizedKitchenService;
     private User privileged;
@@ -35,9 +35,9 @@ class AuthorizedKitchenServiceTest {
                 put("delivery", List.of('C', 'R', 'U', 'D'));
             }
         };
-        kitchenService = mock(KitchenService.class);
+        chefService = mock(ChefService.class);
         authenticationService = mock(AuthenticationService.class);
-        authorizedKitchenService = new AuthorizedKitchenService(kitchenService, authenticationService);
+        authorizedKitchenService = new AuthorizedKitchenService(chefService, authenticationService);
         privileged = new User("testUser", "password".toCharArray(), privileges);
         unPrivileged = new User("testUser", "password".toCharArray(), new HashMap<>());
         inCorrectPermissions = new User("testUser", "password".toCharArray(), new HashMap<>() {{
@@ -50,35 +50,35 @@ class AuthorizedKitchenServiceTest {
     void givenAuthenticatedUser_whenViewOrders_thenReturnsOrders() throws PancakeServiceException {
         // Given
         final Map<UUID, Map<PancakeRecipe, Integer>> orders = new HashMap<>();
-        when(kitchenService.viewOrders(privileged)).thenReturn(orders);
+        when(chefService.viewOrders(privileged)).thenReturn(orders);
         // When
         final Map<UUID, Map<PancakeRecipe, Integer>> result = authorizedKitchenService.viewOrders(privileged);
         // Then
         verify(authenticationService).authenticate(privileged);
-        verify(kitchenService).viewOrders(privileged);
+        verify(chefService).viewOrders(privileged);
         assertEquals(orders, result);
     }
 
     @Test
     void givenAuthenticatedUser_whenAcceptOrder_thenOrderIsAccepted() throws PancakeServiceException {
         // Given
-        doNothing().when(kitchenService).acceptOrder(privileged, orderId);
+        doNothing().when(chefService).acceptOrder(privileged, orderId);
         // When
         authorizedKitchenService.acceptOrder(privileged, orderId);
         // Then
         verify(authenticationService).authenticate(privileged);
-        verify(kitchenService).acceptOrder(privileged, orderId);
+        verify(chefService).acceptOrder(privileged, orderId);
     }
 
     @Test
     void givenAuthenticatedUser_whenNotifyOrderCompletion_thenOrderIsCompleted() throws PancakeServiceException {
         // Given
-        doNothing().when(kitchenService).notifyOrderCompletion(privileged, orderId);
+        doNothing().when(chefService).notifyOrderCompletion(privileged, orderId);
         // When
         authorizedKitchenService.notifyOrderCompletion(privileged, orderId);
         // Then
         verify(authenticationService).authenticate(privileged);
-        verify(kitchenService).notifyOrderCompletion(privileged, orderId);
+        verify(chefService).notifyOrderCompletion(privileged, orderId);
     }
 
     @Test

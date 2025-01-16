@@ -57,7 +57,7 @@ public class PancakeServiceSteps {
                 }
             }
     );
-    private static final KitchenService kitchenService = new AuthorizedKitchenService(
+    private static final ChefService chefService = new AuthorizedKitchenService(
             new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2),
             authenticationService
     );
@@ -113,7 +113,7 @@ public class PancakeServiceSteps {
 
     @When("the chef {string} accepts the order")
     public void the_chef_accepts_the_order(String user) throws PancakeServiceException {
-        kitchenService.acceptOrder(systemUsers.get(user), orderId);
+        chefService.acceptOrder(systemUsers.get(user), orderId);
     }
 
     @Given("a disciple {string} has a created order")
@@ -128,7 +128,7 @@ public class PancakeServiceSteps {
 
     @When("the chef {string} completes the order")
     public void the_chef_completes_the_order(String user) throws PancakeServiceException {
-        kitchenService.notifyOrderCompletion(systemUsers.get(user), orderId);
+        chefService.notifyOrderCompletion(systemUsers.get(user), orderId);
     }
 
     @Given("a disciple {string} has an order ready for delivery")
@@ -228,25 +228,25 @@ public class PancakeServiceSteps {
     @When("accepts an order then authentication fails")
     public void accepts_an_order_then_authentication_fails() {
         assertThrows(AuthenticationFailureException.class,
-                () -> kitchenService.acceptOrder(authenticatedUser, UUID.randomUUID()));
+                () -> chefService.acceptOrder(authenticatedUser, UUID.randomUUID()));
     }
 
     @When("notifies an order then authentication fails")
     public void notifies_an_order_then_authentication_fails() {
         assertThrows(AuthenticationFailureException.class,
-                () -> kitchenService.notifyOrderCompletion(authenticatedUser, UUID.randomUUID()));
+                () -> chefService.notifyOrderCompletion(authenticatedUser, UUID.randomUUID()));
     }
 
     @When("accepts an order then authorization fails")
     public void accepts_an_order_then_authorization_fails() {
         assertThrows(AuthorizationFailureException.class,
-                () -> kitchenService.acceptOrder(authenticatedUser, UUID.randomUUID()));
+                () -> chefService.acceptOrder(authenticatedUser, UUID.randomUUID()));
     }
 
     @When("notifies an order then authorization fails")
     public void notifies_an_order_then_authorization_fails() {
         assertThrows(AuthorizationFailureException.class,
-                () -> kitchenService.notifyOrderCompletion(authenticatedUser, UUID.randomUUID()));
+                () -> chefService.notifyOrderCompletion(authenticatedUser, UUID.randomUUID()));
     }
 
     @When("accepts a delivery then authentication fails")

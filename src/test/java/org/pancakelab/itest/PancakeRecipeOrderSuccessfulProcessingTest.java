@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class PancakeRecipeOrderSuccessfulProcessingTest {
 
     private static DeliveryService deliveryService;
-    private static KitchenService kitchenService;
+    private static ChefService chefService;
     private static OrderService orderService;
     private static UUID orderId;
     private static DeliveryInfo deliveryInfo;
@@ -48,7 +48,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
                 new DeliveryServiceImpl(ordersRepository, orderStatusRepository, deliveriesQueue, 2),
                 authenticationService
         );
-        kitchenService = new AuthorizedKitchenService(
+        chefService = new AuthorizedKitchenService(
                 new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2),
                 authenticationService
         );
@@ -99,7 +99,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
     @Order(5)
     void givenOrder_whenOrderIsReceivedByTheChef_thenOrderStatusShouldBeInProgress() throws PancakeServiceException {
         // Given
-        kitchenService.acceptOrder(authorizedUser, orderId);
+        chefService.acceptOrder(authorizedUser, orderId);
         // When
         // Then
         Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatusRepository.get(orderId)));
@@ -109,7 +109,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
     @Order(6)
     void givenOrder_whenOrderIsCompletedByTheChef_thenOrderStatusShouldBeReadyForDelivery() throws PancakeServiceException {
         // Given
-        kitchenService.notifyOrderCompletion(authorizedUser, orderId);
+        chefService.notifyOrderCompletion(authorizedUser, orderId);
         // When
         // Then
         Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatusRepository.get(orderId)));

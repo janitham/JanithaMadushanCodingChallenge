@@ -21,7 +21,7 @@ class KitchenServiceTest {
 
     private ConcurrentHashMap<UUID, OrderDetails> ordersRepository;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository;
-    private KitchenService kitchenService;
+    private ChefService chefService;
     private BlockingDeque<UUID> ordersQueue;
     private BlockingDeque<UUID> deliveriesQueue;
     private User user;
@@ -32,7 +32,7 @@ class KitchenServiceTest {
         orderStatusRepository = new ConcurrentHashMap<>();
         ordersQueue = new LinkedBlockingDeque<>();
         deliveriesQueue = new LinkedBlockingDeque<>();
-        kitchenService = new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2);
+        chefService = new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2);
         user = new User("user", "password".toCharArray(), new HashMap<>());
     }
 
@@ -45,7 +45,7 @@ class KitchenServiceTest {
         ordersRepository.put(orderId, orderDetails);
         orderStatusRepository.put(orderId, OrderStatus.READY_FOR_DELIVERY);
         // When
-        kitchenService.acceptOrder(user, orderId);
+        chefService.acceptOrder(user, orderId);
         // Then
         Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatusRepository.get(orderId)));
     }
@@ -59,7 +59,7 @@ class KitchenServiceTest {
         ordersRepository.put(orderId, orderDetails);
         orderStatusRepository.put(orderId, OrderStatus.IN_PROGRESS);
         // When
-        kitchenService.notifyOrderCompletion(user, orderId);
+        chefService.notifyOrderCompletion(user, orderId);
         // Then
         Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatusRepository.get(orderId)));
     }
@@ -84,8 +84,8 @@ class KitchenServiceTest {
         ordersQueue.add(orderId1);
 
         // Then
-        Awaitility.await().until(() -> kitchenService.viewOrders(user).size() == 1);
-        var pancakesList = kitchenService.viewOrders(null).values().stream()
+        Awaitility.await().until(() -> chefService.viewOrders(user).size() == 1);
+        var pancakesList = chefService.viewOrders(null).values().stream()
                 .flatMap(map -> map.keySet().stream())
                 .toList();
         assertEquals(2, pancakesList.size());
