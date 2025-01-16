@@ -64,9 +64,7 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
             while (true) {
                 try {
                     UUID orderId = orderQueue.take();
-                    synchronized (localOrderMap) {
-                        updateLocalOrderMap(orderId);
-                    }
+                    updateLocalOrderMap(orderId);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
