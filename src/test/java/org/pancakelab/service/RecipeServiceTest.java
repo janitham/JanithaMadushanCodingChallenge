@@ -93,7 +93,8 @@ class RecipeServiceTest {
     void givenValidRecipe_whenUpdateRecipe_thenRecipeShouldBeUpdated() throws PancakeServiceException {
         // Given
         final PancakeRecipe recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
-        final var updated = new PancakeRecipe.Builder().withName(recipe.getName()).withChocolate(PancakeRecipe.CHOCOLATE.MILK).build();
+        final var updated = new PancakeRecipe.Builder().withName(recipe.getName())
+                .withChocolate(PancakeRecipe.CHOCOLATE.MILK).build();
         // When
         recipeService.updateRecipe(user, recipe.getName(), updated);
         // Then

@@ -15,7 +15,12 @@ import java.util.concurrent.*;
  * updating their status, and notifying users upon completion.
  * It uses a separate thread to update the local order map and manages order and delivery queues.
  */
-public class KitchenServiceImpl implements ChefService , RecipeService {
+public class KitchenServiceImpl implements ChefService, RecipeService {
+
+    public static final String RECIPE_ALREADY_EXISTS = "Recipe already exists.";
+    public static final String RECIPE_DOES_NOT_EXIST = "Recipe does not exist.";
+    public static final String RECIPE_CANNOT_BE_NULL = "Recipe cannot be null.";
+
     private final ConcurrentMap<UUID, OrderDetails> ordersRepository;
     private final ConcurrentMap<UUID, OrderStatus> orderStatusRepository;
     private final ConcurrentSkipListSet<PancakeRecipe> pancakeRecipesRepository;
@@ -27,11 +32,11 @@ public class KitchenServiceImpl implements ChefService , RecipeService {
     /**
      * Constructs a new KitchenServiceImpl.
      *
-     * @param ordersRepository          the map of order details
-     * @param orderStatusRepository     the map of order statuses
-     * @param orderQueue      the queue of orders to be processed
-     * @param deliveryQueue   the queue of orders ready for delivery
-     * @param internalThreads the number of internal threads to use
+     * @param ordersRepository      the map of order details
+     * @param orderStatusRepository the map of order statuses
+     * @param orderQueue            the queue of orders to be processed
+     * @param deliveryQueue         the queue of orders ready for delivery
+     * @param internalThreads       the number of internal threads to use
      */
     public KitchenServiceImpl(
             final ConcurrentMap<UUID, OrderDetails> ordersRepository,
@@ -146,6 +151,88 @@ public class KitchenServiceImpl implements ChefService , RecipeService {
         }
     }
 
+
+    /**
+     * Adds a new pancake recipe to the repository.
+     *
+     * @param user   the user adding the recipe
+     * @param recipe the pancake recipe to be added
+     * @throws PancakeServiceException if the recipe already exists or is null
+     */
+    @Override
+    public void addRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
+        validate(recipe);
+        if (!pancakeRecipesRepository.add(recipe)) {
+            throw new PancakeServiceException(RECIPE_ALREADY_EXISTS);
+        }
+    }
+
+    /**
+     * Removes a pancake recipe from the repository.
+     *
+     * @param user   the user removing the recipe
+     * @param recipe the pancake recipe to be removed
+     * @throws PancakeServiceException if the recipe does not exist
+     */
+    @Override
+    public void removeRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
+        if (!pancakeRecipesRepository.remove(recipe)) {
+            throw new PancakeServiceException(RECIPE_DOES_NOT_EXIST);
+        }
+    }
+
+    /**
+     * Updates an existing pancake recipe in the repository.
+     *
+     * @param user   the user updating the recipe
+     * @param name   the name of the recipe to be updated
+     * @param recipe the new pancake recipe
+     * @throws PancakeServiceException if the recipe is null
+     */
+    @Override
+    public void updateRecipe(User user, String name, PancakeRecipe recipe) throws PancakeServiceException {
+        validate(recipe);
+        pancakeRecipesRepository.removeIf(r -> r.getName().equals(name));
+        pancakeRecipesRepository.add(recipe);
+    }
+
+    /**
+     * Checks if a pancake recipe exists in the repository.
+     *
+     * @param user   the user checking the recipe
+     * @param recipe the pancake recipe to check
+     * @throws PancakeServiceException if the recipe does not exist
+     */
+    @Override
+    public void exits(User user, PancakeRecipe recipe) throws PancakeServiceException {
+        if (!pancakeRecipesRepository.contains(recipe)) {
+            throw new PancakeServiceException(RECIPE_DOES_NOT_EXIST);
+        }
+    }
+
+    /**
+     * Retrieves all pancake recipes from the repository.
+     *
+     * @param user the user requesting the recipes
+     * @return a set of all pancake recipes
+     */
+    @Override
+    public Set<PancakeRecipe> getRecipes(User user) {
+        return new HashSet<>(pancakeRecipesRepository);
+    }
+
+    /**
+     * Validates the given pancake recipe.
+     *
+     * @param recipe the pancake recipe to validate
+     * @throws PancakeServiceException if the recipe is null
+     */
+    private void validate(PancakeRecipe recipe) throws PancakeServiceException {
+        if (recipe == null) {
+            throw new PancakeServiceException(RECIPE_CANNOT_BE_NULL);
+        }
+    }
+
     /**
      * Shuts down the executor service, waiting for tasks to complete or forcing shutdown if necessary.
      */
@@ -159,45 +246,5 @@ public class KitchenServiceImpl implements ChefService , RecipeService {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
-    }
-
-    @Override
-    public void addRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
-        validate(user, recipe);
-        if (!pancakeRecipesRepository.add(recipe)) {
-            throw new PancakeServiceException("Recipe already exists.");
-        }
-    }
-
-    @Override
-    public void removeRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
-        if (!pancakeRecipesRepository.remove(recipe)) {
-            throw new PancakeServiceException("Recipe not found.");
-        }
-    }
-
-    @Override
-    public void updateRecipe(User user, String name, PancakeRecipe recipe) throws PancakeServiceException {
-        validate(user, recipe);
-        pancakeRecipesRepository.removeIf(r -> r.getName().equals(name));
-        pancakeRecipesRepository.add(recipe);
-    }
-
-    @Override
-    public void exits(User user, PancakeRecipe recipe) throws PancakeServiceException {
-        if (!pancakeRecipesRepository.contains(recipe)) {
-            throw new PancakeServiceException("Recipe does not exist.");
-        }
-    }
-
-    private void validate(User user, PancakeRecipe recipe) throws PancakeServiceException {
-        if (recipe == null) {
-            throw new PancakeServiceException("Recipe cannot be null.");
-        }
-    }
-
-    @Override
-    public Set<PancakeRecipe> getRecipes(User user) {
-        return new HashSet<>(pancakeRecipesRepository);
     }
 }
