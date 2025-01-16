@@ -18,6 +18,7 @@ class PancakeRecipeTest {
         // When
         final PancakeRecipe pancakeRecipe = pancakeBuilder
                 .withChocolate(chocolate)
+                .withName("Test Pancake")
                 .build();
         // Then
         assertEquals(pancakeRecipe.getChocolate(), chocolate);
@@ -41,6 +42,7 @@ class PancakeRecipeTest {
         final PancakeRecipe pancakeRecipe = pancakeBuilder
                 .withChocolate(PancakeRecipe.CHOCOLATE.MILK)
                 .withHazelNuts()
+                .withName("Test Pancake")
                 .build();
         // Then
         assertEquals(PancakeRecipe.CHOCOLATE.MILK, pancakeRecipe.getChocolate());
@@ -55,6 +57,7 @@ class PancakeRecipeTest {
         // When
         final PancakeRecipe pancakeRecipe = pancakeBuilder
                 .withChocolate(PancakeRecipe.CHOCOLATE.MILK)
+                .withName("Test Pancake")
                 .withWhippedCream()
                 .build();
         // Then

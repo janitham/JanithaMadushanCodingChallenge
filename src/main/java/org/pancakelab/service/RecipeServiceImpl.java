@@ -29,10 +29,9 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public void updateRecipe(PancakeRecipe recipe) throws PancakeServiceException {
+    public void updateRecipe(String name, PancakeRecipe recipe) throws PancakeServiceException {
         validate(recipe);
-        exits(recipe);
-        pancakeRecipesRepository.remove(recipe);
+        pancakeRecipesRepository.removeIf(r -> r.getName().equals(name));
         pancakeRecipesRepository.add(recipe);
     }
 
