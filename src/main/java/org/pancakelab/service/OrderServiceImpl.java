@@ -64,26 +64,23 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public UUID createOrder(User user, final DeliveryInfo deliveryInformation) throws PancakeServiceException {
         deliveryInformationValidator.validate(deliveryInformation);
-
-        boolean hasOngoingOrder = orders.values().stream()
-                .anyMatch(order -> order.getUser().equals(user) &&
-                        List.of(OrderStatus.CREATED, OrderStatus.READY_FOR_DELIVERY, OrderStatus.COMPLETED, OrderStatus.IN_PROGRESS, OrderStatus.OUT_FOR_DELIVERY)
-                                .contains(orderStatus.get(order.getOrderId())));
-        if (hasOngoingOrder) {
-            throw new PancakeServiceException(USER_HAS_AN_ONGOING_ORDER);
+        synchronized (this) {
+            if (orders.values().stream().anyMatch(orderDetails ->
+                    orderDetails.getUser().equals(user) && orderStatus.containsKey(orderDetails.getOrderId()) &&
+                            List.of(OrderStatus.CREATED, OrderStatus.READY_FOR_DELIVERY, OrderStatus.COMPLETED, OrderStatus.IN_PROGRESS, OrderStatus.OUT_FOR_DELIVERY)
+                                    .contains(orderStatus.get(orderDetails.getOrderId())))) {
+                throw new PancakeServiceException(USER_HAS_AN_ONGOING_ORDER);
+            }
         }
-
-        var orderId = UUID.randomUUID();
-        if (orderStorage.putIfAbsent(deliveryInformation, orderId) != null) {
-            throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);
+        final var orderId = UUID.randomUUID();
+        synchronized (orderStorage) {
+            if (orderStorage.putIfAbsent(deliveryInformation, orderId) != null) {
+                throw new PancakeServiceException(DUPLICATE_ORDERS_CANNOT_BE_PLACED);
+            }
         }
-        if (orders.values().stream().anyMatch(orderDetails ->
-                orderDetails.getUser().equals(user) && orderStatus.containsKey(orderDetails.getOrderId()) &&
-                        List.of(OrderStatus.CREATED, OrderStatus.READY_FOR_DELIVERY)
-                                .contains(orderStatus.get(orderDetails.getOrderId())))) {
-            throw new PancakeServiceException(USER_HAS_AN_ONGOING_ORDER);
+        synchronized (orderStatus) {
+            orderStatus.put(orderId, OrderStatus.CREATED);
         }
-        orderStatus.put(orderId, OrderStatus.CREATED);
         PancakeUtils.notifyUser(user, OrderStatus.CREATED);
         return orderId;
     }
@@ -99,18 +96,24 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void addPancakes(User user, final UUID orderId, final Map<Pancakes, Integer> pancakes) throws PancakeServiceException {
         validateOrderId(orderId);
-        var currentTotal = orderItems.values().stream().mapToInt(item -> item.values().stream().mapToInt(Integer::intValue).sum()).sum();
-        var incomingTotal = pancakes.values().stream().mapToInt(Integer::intValue).sum();
-        if (currentTotal + incomingTotal > MAXIMUM_PANCAKES) {
-            throw new PancakeServiceException(MAXIMUM_PANCAKES_EXCEEDED);
+        synchronized (orderItems) {
+            var currentTotal = orderItems.values().stream().mapToInt(item -> item.values().stream().mapToInt(Integer::intValue).sum()).sum();
+            var incomingTotal = pancakes.values().stream().mapToInt(Integer::intValue).sum();
+            if (currentTotal + incomingTotal > MAXIMUM_PANCAKES) {
+                throw new PancakeServiceException(MAXIMUM_PANCAKES_EXCEEDED);
+            }
         }
-        if (!orderStorage.containsValue(orderId)) {
-            throw new PancakeServiceException(ORDER_NOT_FOUND);
+        synchronized (orderStorage) {
+            if (!orderStorage.containsValue(orderId)) {
+                throw new PancakeServiceException(ORDER_NOT_FOUND);
+            }
         }
-        orderItems.merge(orderId, new EnumMap<>(pancakes), (oldPancakes, newPancakes) -> {
-            newPancakes.forEach((type, count) -> oldPancakes.merge(type, count, Integer::sum));
-            return oldPancakes;
-        });
+        synchronized (orderItems) {
+            orderItems.merge(orderId, new EnumMap<>(pancakes), (oldPancakes, newPancakes) -> {
+                newPancakes.forEach((type, count) -> oldPancakes.merge(type, count, Integer::sum));
+                return oldPancakes;
+            });
+        }
     }
 
     /**
@@ -122,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
      * @throws PancakeServiceException if the order cannot be summarized
      */
     @Override
-    public Map<Pancakes, Integer> orderSummary(User user, final UUID orderId) throws PancakeServiceException {
+    public synchronized Map<Pancakes, Integer> orderSummary(User user, final UUID orderId) throws PancakeServiceException {
         validateOrderId(orderId);
         final Map<Pancakes, Integer> items = orderItems.get(orderId);
         if (items == null) {
