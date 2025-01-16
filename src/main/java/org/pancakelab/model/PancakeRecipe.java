@@ -16,14 +16,12 @@ public class PancakeRecipe implements Comparable<PancakeRecipe> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PancakeRecipe that = (PancakeRecipe) o;
-        return hazelNuts == that.hazelNuts && whippedCream == that.whippedCream
-                && chocolate == that.chocolate && Objects.equals(otherIngredients, that.otherIngredients)
-                && Objects.equals(name, that.name);
+        return name.equals(that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(chocolate, hazelNuts, whippedCream, otherIngredients, name);
+        return Objects.hash(name);
     }
 
     private PancakeRecipe(Builder builder) {
@@ -52,11 +50,7 @@ public class PancakeRecipe implements Comparable<PancakeRecipe> {
 
     @Override
     public int compareTo(PancakeRecipe o) {
-        return Comparator.comparing(PancakeRecipe::getChocolate)
-                .thenComparing(PancakeRecipe::hasWhippedCream)
-                .thenComparing(PancakeRecipe::hasHazelNuts)
-                .thenComparing(PancakeRecipe::getOtherIngredients, Comparator.comparing(Set::toString))
-                .thenComparing(PancakeRecipe::getName)
+        return Comparator.comparing(PancakeRecipe::getName)
                 .compare(this, o);
     }
 
