@@ -142,10 +142,13 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
      * @param orderId the ID of the order to be updated
      */
     private void updateLocalOrderMap(UUID orderId) {
+        final OrderDetails orderDetails;
         synchronized (ordersRepository) {
-            OrderDetails orderDetails = ordersRepository.get(orderId);
-            if (orderDetails != null) {
-                Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>(orderDetails.getPancakes());
+            orderDetails = ordersRepository.get(orderId);
+        }
+        if (orderDetails != null) {
+            final Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>(orderDetails.getPancakes());
+            synchronized (localOrderMap) {
                 localOrderMap.put(orderId, pancakeRecipes);
             }
         }
@@ -160,7 +163,7 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
      * @throws PancakeServiceException if the recipe already exists or is null
      */
     @Override
-    public void addRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
+    public synchronized void addRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
         validate(recipe);
         if (!pancakeRecipesRepository.add(recipe)) {
             throw new PancakeServiceException(RECIPE_ALREADY_EXISTS);
@@ -175,7 +178,7 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
      * @throws PancakeServiceException if the recipe does not exist
      */
     @Override
-    public void removeRecipe(User user, String recipe) throws PancakeServiceException {
+    public synchronized void removeRecipe(User user, String recipe) throws PancakeServiceException {
         if (!pancakeRecipesRepository.removeIf(r -> r.getName().equals(recipe))) {
             throw new PancakeServiceException(RECIPE_DOES_NOT_EXIST);
         }
@@ -190,7 +193,7 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
      * @throws PancakeServiceException if the recipe is null
      */
     @Override
-    public void updateRecipe(User user, String name, PancakeRecipe recipe) throws PancakeServiceException {
+    public synchronized void updateRecipe(User user, String name, PancakeRecipe recipe) throws PancakeServiceException {
         validate(recipe);
         pancakeRecipesRepository.removeIf(r -> r.getName().equals(name));
         pancakeRecipesRepository.add(recipe);

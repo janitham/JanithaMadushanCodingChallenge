@@ -26,10 +26,10 @@ public class DeliveryServiceImpl implements DeliveryService {
     /**
      * Constructs a new DeliveryServiceImpl.
      *
-     * @param ordersRepository          the map of order details
-     * @param orderStatusRepository     the map of order statuses
-     * @param deliveryQueue   the queue of orders ready for delivery
-     * @param internalThreads the number of internal threads to use
+     * @param ordersRepository      the map of order details
+     * @param orderStatusRepository the map of order statuses
+     * @param deliveryQueue         the queue of orders ready for delivery
+     * @param internalThreads       the number of internal threads to use
      */
     public DeliveryServiceImpl(
             final ConcurrentMap<UUID, OrderDetails> ordersRepository,
@@ -66,7 +66,10 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public void acceptOrder(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
-            final OrderDetails orderDetails = ordersRepository.get(orderId);
+            OrderDetails orderDetails;
+            synchronized (ordersRepository) {
+                orderDetails = ordersRepository.get(orderId);
+            }
             if (orderDetails != null) {
                 synchronized (orderStatusRepository) {
                     if (orderStatusRepository.get(orderId) == OrderStatus.READY_FOR_DELIVERY) {

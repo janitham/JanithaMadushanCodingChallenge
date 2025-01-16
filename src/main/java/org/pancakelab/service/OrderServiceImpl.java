@@ -4,7 +4,9 @@ import org.pancakelab.model.*;
 import org.pancakelab.util.DeliveryInformationValidator;
 import org.pancakelab.util.PancakeUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 /**
@@ -67,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public UUID createOrder(User user, final DeliveryInfo deliveryInformation) throws PancakeServiceException {
         deliveryInformationValidator.validate(deliveryInformation);
-        synchronized (this) {
+        synchronized (ordersRepository) {
             if (ordersRepository.values().stream().anyMatch(orderDetails ->
                     orderDetails.getUser().equals(user) && orderStatusRepository.containsKey(orderDetails.getOrderId()) &&
                             List.of(OrderStatus.CREATED, OrderStatus.READY_FOR_DELIVERY, OrderStatus.COMPLETED, OrderStatus.IN_PROGRESS, OrderStatus.OUT_FOR_DELIVERY)
@@ -170,20 +172,30 @@ public class OrderServiceImpl implements OrderService {
             throw new PancakeServiceException(ORDER_NOT_FOUND);
         }
         CompletableFuture.runAsync(() -> {
-            synchronized (this) {
-                var deliveryInfo = getDeliveryInfoByOrderId(orderId);
-                var orderDetails = new OrderDetails.Builder()
+            var deliveryInfo = getDeliveryInfoByOrderId(orderId);
+            OrderDetails orderDetails;
+            synchronized (orderItemsLocalCache) {
+                orderDetails = new OrderDetails.Builder()
                         .withDeliveryInfo(deliveryInfo)
                         .withOrderId(orderId)
                         .withUser(user)
                         .withPanCakes(orderItemsLocalCache.get(orderId))
                         .build();
-                ordersRepository.put(orderId, orderDetails);
-                orderStatusRepository.put(orderId, OrderStatus.COMPLETED);
-                ordersQueue.add(orderId);
+            }
+            if (orderDetails != null) {
+                synchronized (ordersRepository) {
+                    ordersRepository.put(orderId, orderDetails);
+                }
+                synchronized (orderStatusRepository) {
+                    orderStatusRepository.put(orderId, OrderStatus.COMPLETED);
+                }
+                synchronized (ordersQueue) {
+                    ordersQueue.add(orderId);
+                }
                 cleanUpOrder(orderId, deliveryInfo);
                 PancakeUtils.notifyUser(user, OrderStatus.COMPLETED);
             }
+
         }, executorService);
     }
 
@@ -201,12 +213,14 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException(ORDER_NOT_FOUND);
         }
         CompletableFuture.runAsync(() -> {
-            synchronized (this) {
-                var deliveryInfo = getDeliveryInfoByOrderId(orderId);
+            var deliveryInfo = getDeliveryInfoByOrderId(orderId);
+            if(deliveryInfo != null) {
                 cleanUpOrder(orderId, deliveryInfo);
-                orderStatusRepository.put(orderId, OrderStatus.CANCELLED);
+                synchronized (orderStatusRepository) {
+                    orderStatusRepository.put(orderId, OrderStatus.CANCELLED);
+                }
+                PancakeUtils.notifyUser(user, OrderStatus.CANCELLED);
             }
-            PancakeUtils.notifyUser(user, OrderStatus.CANCELLED);
         }, executorService);
     }
 
@@ -228,7 +242,7 @@ public class OrderServiceImpl implements OrderService {
      * @param orderId the ID of the order
      * @return the delivery information
      */
-    private DeliveryInfo getDeliveryInfoByOrderId(final UUID orderId) {
+    private synchronized DeliveryInfo getDeliveryInfoByOrderId(final UUID orderId) {
         return orderStorage.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(orderId))
                 .findFirst()
