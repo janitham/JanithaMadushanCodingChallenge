@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +23,7 @@ class KitchenServiceTest {
 
     private ConcurrentHashMap<UUID, OrderDetails> ordersRepository;
     private ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository;
+    private ConcurrentSkipListSet<PancakeRecipe> recipeRepository;
     private ChefService chefService;
     private BlockingDeque<UUID> ordersQueue;
     private BlockingDeque<UUID> deliveriesQueue;
@@ -31,9 +33,13 @@ class KitchenServiceTest {
     public void setUp() {
         ordersRepository = new ConcurrentHashMap<>();
         orderStatusRepository = new ConcurrentHashMap<>();
+        recipeRepository = new ConcurrentSkipListSet<>() {{
+            add(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE));
+        }};
         ordersQueue = new LinkedBlockingDeque<>();
         deliveriesQueue = new LinkedBlockingDeque<>();
-        chefService = new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2);
+        chefService = new KitchenServiceImpl(
+                ordersRepository, orderStatusRepository, recipeRepository, ordersQueue, deliveriesQueue, 2);
         user = new User("user", "password".toCharArray(), new HashMap<>());
     }
 

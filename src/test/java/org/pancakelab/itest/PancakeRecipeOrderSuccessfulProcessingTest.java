@@ -11,6 +11,7 @@ import org.pancakelab.util.Pancakes;
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,6 +27,9 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
     private static DeliveryInfo deliveryInfo;
     public static final ConcurrentHashMap<UUID, OrderDetails> ordersRepository = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository = new ConcurrentHashMap<>();
+    private static final ConcurrentSkipListSet<PancakeRecipe> recipeRepository = new ConcurrentSkipListSet<>() {{
+        add(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE));
+    }};
     private static final Map<String, List<Character>> privileges = new HashMap<>() {
         {
             put("order", List.of('C', 'R', 'U', 'D'));
@@ -50,7 +54,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
                 authenticationService
         );
         chefService = new AuthorizedKitchenService(
-                new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2),
+                new KitchenServiceImpl(ordersRepository, orderStatusRepository, recipeRepository, ordersQueue, deliveriesQueue, 2),
                 authenticationService
         );
         orderService = new AuthorizedOrderService(

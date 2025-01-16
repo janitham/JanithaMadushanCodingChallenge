@@ -2,12 +2,16 @@ package org.pancakelab.service;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.pancakelab.model.PancakeRecipe;
-import org.pancakelab.model.PancakeServiceException;
+import org.pancakelab.model.*;
 import org.pancakelab.util.Pancakes;
 import org.pancakelab.util.PancakeFactory;
 
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,13 +19,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RecipeServiceTest {
 
     private static RecipeService recipeService;
+    private static ConcurrentHashMap<UUID, OrderDetails> ordersRepository;
+    private static ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository;
+    private static ConcurrentSkipListSet<PancakeRecipe> recipeRepository;
+    private static BlockingDeque<UUID> ordersQueue;
+    private static BlockingDeque<UUID> deliveriesQueue;
 
     @BeforeAll
     static void setUp() {
-        final ConcurrentSkipListSet<PancakeRecipe> repository = new ConcurrentSkipListSet<>() {{
+        ordersRepository = new ConcurrentHashMap<>();
+        orderStatusRepository = new ConcurrentHashMap<>();
+        recipeRepository = new ConcurrentSkipListSet<>() {{
             add(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE));
         }};
-        recipeService = new RecipeServiceImpl(repository);
+        ordersQueue = new LinkedBlockingDeque<>();
+        deliveriesQueue = new LinkedBlockingDeque<>();
+        recipeService = new KitchenServiceImpl(
+                ordersRepository, orderStatusRepository, recipeRepository, ordersQueue, deliveriesQueue, 2);
     }
 
     @Test

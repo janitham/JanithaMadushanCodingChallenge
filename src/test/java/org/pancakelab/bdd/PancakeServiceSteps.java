@@ -58,8 +58,11 @@ public class PancakeServiceSteps {
                 }
             }
     );
+    private static final ConcurrentSkipListSet<PancakeRecipe> recipeRepository = new ConcurrentSkipListSet<>() {{
+        add(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE));
+    }};
     private static final ChefService chefService = new AuthorizedKitchenService(
-            new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2),
+            new KitchenServiceImpl(ordersRepository, orderStatusRepository,recipeRepository, ordersQueue, deliveriesQueue, 2),
             authenticationService
     );
     private static final DeliveryService deliveryService = new AuthorizedDeliveryService(

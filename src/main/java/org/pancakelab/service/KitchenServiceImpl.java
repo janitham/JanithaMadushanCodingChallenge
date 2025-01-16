@@ -1,12 +1,11 @@
 package org.pancakelab.service;
 
-import org.pancakelab.model.OrderDetails;
-import org.pancakelab.model.OrderStatus;
-import org.pancakelab.model.PancakeRecipe;
-import org.pancakelab.model.User;
+import org.pancakelab.model.*;
 import org.pancakelab.util.PancakeUtils;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -16,9 +15,10 @@ import java.util.concurrent.*;
  * updating their status, and notifying users upon completion.
  * It uses a separate thread to update the local order map and manages order and delivery queues.
  */
-public class KitchenServiceImpl implements ChefService {//, RecipeService {
+public class KitchenServiceImpl implements ChefService , RecipeService {
     private final ConcurrentMap<UUID, OrderDetails> ordersRepository;
     private final ConcurrentMap<UUID, OrderStatus> orderStatusRepository;
+    private final ConcurrentSkipListSet<PancakeRecipe> pancakeRecipesRepository;
     private final ExecutorService executorService;
     private final BlockingDeque<UUID> orderQueue;
     private final BlockingDeque<UUID> deliveryQueue;
@@ -36,12 +36,14 @@ public class KitchenServiceImpl implements ChefService {//, RecipeService {
     public KitchenServiceImpl(
             final ConcurrentMap<UUID, OrderDetails> ordersRepository,
             final ConcurrentMap<UUID, OrderStatus> orderStatusRepository,
+            final ConcurrentSkipListSet<PancakeRecipe> pancakeRecipesRepository,
             final BlockingDeque<UUID> orderQueue,
             final BlockingDeque<UUID> deliveryQueue,
             final Integer internalThreads
     ) {
         this.ordersRepository = ordersRepository;
         this.orderStatusRepository = orderStatusRepository;
+        this.pancakeRecipesRepository = pancakeRecipesRepository;
         this.orderQueue = orderQueue;
         this.deliveryQueue = deliveryQueue;
         this.executorService = Executors.newFixedThreadPool(internalThreads);
@@ -157,5 +159,45 @@ public class KitchenServiceImpl implements ChefService {//, RecipeService {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
+    }
+
+    @Override
+    public void addRecipe(PancakeRecipe recipe) throws PancakeServiceException {
+        validate(recipe);
+        if (!pancakeRecipesRepository.add(recipe)) {
+            throw new PancakeServiceException("Recipe already exists.");
+        }
+    }
+
+    @Override
+    public void removeRecipe(PancakeRecipe recipe) throws PancakeServiceException {
+        if (!pancakeRecipesRepository.remove(recipe)) {
+            throw new PancakeServiceException("Recipe not found.");
+        }
+    }
+
+    @Override
+    public void updateRecipe(String name, PancakeRecipe recipe) throws PancakeServiceException {
+        validate(recipe);
+        pancakeRecipesRepository.removeIf(r -> r.getName().equals(name));
+        pancakeRecipesRepository.add(recipe);
+    }
+
+    @Override
+    public void exits(PancakeRecipe recipe) throws PancakeServiceException {
+        if (!pancakeRecipesRepository.contains(recipe)) {
+            throw new PancakeServiceException("Recipe does not exist.");
+        }
+    }
+
+    private void validate(PancakeRecipe recipe) throws PancakeServiceException {
+        if (recipe == null) {
+            throw new PancakeServiceException("Recipe cannot be null.");
+        }
+    }
+
+    @Override
+    public Set<PancakeRecipe> getRecipes() {
+        return new HashSet<>(pancakeRecipesRepository);
     }
 }
