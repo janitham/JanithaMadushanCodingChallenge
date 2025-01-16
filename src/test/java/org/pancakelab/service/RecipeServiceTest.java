@@ -74,7 +74,7 @@ class RecipeServiceTest {
     @Test
     void givenValidRecipe_whenRemoveRecipe_thenRecipeShouldBeRemoved() throws PancakeServiceException {
         // Given
-        final PancakeRecipe recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
+        final String recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE).getName();
         // When
         recipeService.removeRecipe(user,recipe);
         // Then
@@ -84,7 +84,7 @@ class RecipeServiceTest {
     @Test
     void givenNonExistingRecipe_whenRemoveRecipe_thenShouldThrowPancakeServiceException() {
         // Given
-        final PancakeRecipe recipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE);
+        final String recipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE).getName();
         // When
         assertThrows(PancakeServiceException.class, () -> recipeService.removeRecipe(user, recipe));
     }

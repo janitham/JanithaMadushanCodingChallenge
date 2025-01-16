@@ -154,7 +154,7 @@ class AuthorizedKitchenServiceTest {
     @Test
     void givenAuthenticatedUser_whenRemoveRecipe_thenRecipeIsRemoved() throws PancakeServiceException {
         // Given
-        final PancakeRecipe recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
+        final String recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE).getName();
         doNothing().when(kitchenService).removeRecipe(privileged, recipe);
         // When
         authorizedKitchenService.removeRecipe(privileged, recipe);

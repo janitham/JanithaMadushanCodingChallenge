@@ -110,7 +110,7 @@ public class AuthorizedKitchenService implements ChefService, RecipeService {
      * @throws PancakeServiceException if the user cannot be authenticated or authorized
      */
     @Override
-    public void removeRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
+    public void removeRecipe(User user, String recipe) throws PancakeServiceException {
         authenticateUser(user);
         authorizeUser(user, RECIPE_RESOURCE_NAME, Privileges.DELETE.getCode());
         chefService.removeRecipe(user, recipe);

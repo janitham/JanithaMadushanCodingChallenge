@@ -175,8 +175,8 @@ public class KitchenServiceImpl implements ChefService, RecipeService {
      * @throws PancakeServiceException if the recipe does not exist
      */
     @Override
-    public void removeRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
-        if (!pancakeRecipesRepository.remove(recipe)) {
+    public void removeRecipe(User user, String recipe) throws PancakeServiceException {
+        if (!pancakeRecipesRepository.removeIf(r -> r.getName().equals(recipe))) {
             throw new PancakeServiceException(RECIPE_DOES_NOT_EXIST);
         }
     }
