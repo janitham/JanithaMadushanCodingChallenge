@@ -80,9 +80,7 @@ class KitchenServiceTest {
         ordersRepository.put(orderId1, orderDetails1);
 
         final Map<PancakeRecipe, Integer> pancakeItems1 = new ConcurrentHashMap<>() {{
-            //put(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
             put(PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE),1);
-            //put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
             put(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE),2);
         }};
         when(orderDetails1.getPancakes()).thenReturn(pancakeItems1);

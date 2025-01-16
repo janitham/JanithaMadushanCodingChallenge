@@ -28,9 +28,7 @@ class AuthorizedOrderServiceTest {
     private final UUID testOrderId = UUID.randomUUID();
     private final Map<PancakeRecipe, Integer> testPancakes = new HashMap<>() {
     {
-        //put(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE, 1);
         put(PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE),1);
-        //put(Pancakes.MILK_CHOCOLATE_PANCAKE, 2);
         put(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE),2);
     }
 };

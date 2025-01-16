@@ -81,14 +81,6 @@ class OrderServiceTest {
     void givenValidOrder_then_pancakesCanBeIncludedFromTheMenu() throws PancakeServiceException {
         // Given
         final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        /*final var pancakes1 = Map.of(
-                Pancakes.DARK_CHOCOLATE_PANCAKE, 1,
-                Pancakes.MILK_CHOCOLATE_PANCAKE, 2
-        );
-        final var pancakes2 = Map.of(
-                Pancakes.MILK_CHOCOLATE_PANCAKE, 1,
-                Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE, 4
-        );*/
         final var pancakes1 = Map.of(
                 PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1,
                 PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE), 2
@@ -102,11 +94,8 @@ class OrderServiceTest {
         // When
         final Map<PancakeRecipe, Integer> summary = orderService.orderSummary(user, orderId);
         // Then
-        //assertEquals(1, summary.get(Pancakes.DARK_CHOCOLATE_PANCAKE));
         assertEquals(1, summary.get(PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE)));
-        //assertEquals(3, summary.get(Pancakes.MILK_CHOCOLATE_PANCAKE));
         assertEquals(3, summary.get(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE)));
-        //assertEquals(4, summary.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE));
         assertEquals(4, summary.get(PancakeFactory.get(Pancakes.MILK_CHOCOLATE_HAZELNUTS_PANCAKE)));
     }
 
@@ -138,7 +127,6 @@ class OrderServiceTest {
     void givenValidOrderId_then_completingOrderShouldCompleteAsync() throws PancakeServiceException {
         // Given
         final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        //final var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
         final var pancakes1 = Map.of(
                 PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1
         );
@@ -154,7 +142,6 @@ class OrderServiceTest {
     void givenValidOrderId_then_cancel_shouldRemoveOrder() throws PancakeServiceException {
         // Given
         final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        //final var pancakes1 = Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
         final var pancakes1 = Map.of(
                 PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1
         );
@@ -195,9 +182,6 @@ class OrderServiceTest {
     void givenMoreThan10Pancakes_whenAddPancakes_thenThrowException() throws PancakeServiceException {
         // Given
         final var orderId = orderService.createOrder(user, new DeliveryInfo("1", "2"));
-        /*final var pancakes = Map.of(
-                Pancakes.DARK_CHOCOLATE_PANCAKE, 10
-        );*/
         final var pancakes = Map.of(
                 PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 10
         );
@@ -220,9 +204,6 @@ class OrderServiceTest {
         ordersRepository.put(
                 orderId,
                 new OrderDetails.Builder().withOrderId(orderId).withPanCakes(
-                        /*Map.of(
-                                Pancakes.MILK_CHOCOLATE_PANCAKE, 1
-                        )*/
                         Map.of(
                                 PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE), 1
                         )
@@ -244,9 +225,6 @@ class OrderServiceTest {
                 .withOrderId(orderId)
                 .withUser(user)
                 .withPanCakes(
-                        /*Map.of(
-                                Pancakes.DARK_CHOCOLATE_PANCAKE, 1
-                        )*/
                         Map.of(
                                 PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE), 1
                         )
