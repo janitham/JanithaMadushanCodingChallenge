@@ -6,9 +6,11 @@ import org.pancakelab.model.OrderStatus;
 import org.pancakelab.model.User;
 import org.pancakelab.util.PancakeUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Delivery service API can be used to accept and deliver orders.
@@ -22,6 +24,9 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final ExecutorService executorService;
     private final BlockingDeque<UUID> deliveryQueue;
     private final Map<UUID, DeliveryInfo> localDeliveryMap = new ConcurrentHashMap<>();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
+    private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
     /**
      * Constructs a new DeliveryServiceImpl.
@@ -53,7 +58,12 @@ public class DeliveryServiceImpl implements DeliveryService {
      */
     @Override
     public synchronized Map<UUID, DeliveryInfo> viewCompletedOrders(User user) {
-        return localDeliveryMap;
+        readLock.lock();
+        try {
+            return new HashMap<>(localDeliveryMap);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -101,8 +111,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                         orderStatusRepository.put(orderId, OrderStatus.DELIVERED);
                     }
                 }
-                synchronized (localDeliveryMap) {
+                writeLock.lock();
+                try {
                     localDeliveryMap.remove(orderId);
+                } finally {
+                    writeLock.unlock();
                 }
                 synchronized (ordersRepository) {
                     ordersRepository.remove(orderId);
@@ -125,8 +138,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                         orderDetails = ordersRepository.get(orderId);
                     }
                     if (orderDetails != null) {
-                        synchronized (localDeliveryMap) {
+                        writeLock.lock();
+                        try {
                             localDeliveryMap.put(orderId, orderDetails.getDeliveryInfo());
+                        } finally {
+                            writeLock.unlock();
                         }
                     }
                 } catch (InterruptedException e) {
