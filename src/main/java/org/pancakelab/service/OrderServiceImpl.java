@@ -4,6 +4,7 @@ import org.pancakelab.model.*;
 import org.pancakelab.util.DeliveryInformationValidator;
 import org.pancakelab.util.PancakeUtils;
 
+import javax.sound.midi.Receiver;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -29,6 +30,7 @@ public class OrderServiceImpl implements OrderService {
     private final BlockingDeque<UUID> ordersQueue;
     private final ConcurrentMap<DeliveryInfo, UUID> orderStorage = new ConcurrentHashMap<>();
     private final ConcurrentMap<UUID, Map<PancakeRecipe, Integer>> orderItemsLocalCache = new ConcurrentHashMap<>();
+    private final RecipeService recipeService;
 
     /**
      * Constructs a new OrderServiceImpl.
@@ -44,13 +46,15 @@ public class OrderServiceImpl implements OrderService {
             final ConcurrentMap<UUID, OrderStatus> orderStatusRepository,
             final DeliveryInformationValidator deliveryInformationValidator,
             final BlockingDeque<UUID> ordersQueue,
-            final Integer internalThreads
+            final Integer internalThreads,
+            final RecipeService recipeService
     ) {
         this.ordersRepository = ordersRepository;
         this.orderStatusRepository = orderStatusRepository;
         this.deliveryInformationValidator = deliveryInformationValidator;
         this.ordersQueue = ordersQueue;
         this.executorService = Executors.newFixedThreadPool(internalThreads);
+        this.recipeService = recipeService;
     }
 
     /**

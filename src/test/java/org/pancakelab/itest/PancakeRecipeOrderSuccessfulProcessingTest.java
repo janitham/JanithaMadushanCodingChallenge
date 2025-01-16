@@ -53,14 +53,15 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
                 new DeliveryServiceImpl(ordersRepository, orderStatusRepository, deliveriesQueue, 2),
                 authenticationService
         );
+        var kitchenService = new KitchenServiceImpl(ordersRepository, orderStatusRepository, recipeRepository, ordersQueue, deliveriesQueue, 2);
         chefService = new AuthorizedKitchenService(
-                new KitchenServiceImpl(ordersRepository, orderStatusRepository, recipeRepository, ordersQueue, deliveriesQueue, 2),
+                kitchenService,
                 authenticationService
         );
         orderService = new AuthorizedOrderService(
                 new OrderServiceImpl(
                         ordersRepository, orderStatusRepository,
-                        new DeliveryInformationValidator(), ordersQueue, 2),
+                        new DeliveryInformationValidator(), ordersQueue, 2, kitchenService),
                 authenticationService);
     }
 
