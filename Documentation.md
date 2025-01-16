@@ -24,6 +24,16 @@ used to wrap the original service to wrap with security of the services.
 Usually, authorization is designed using JWT security claims using OAuth2, but for the simplicity the `User` class was
 provided with the necessary permissions and the system is validating the claim.
 
+Also, it is important that each system-user should not have the ability to see the all the information of the order. For
+instant, the `KitchenService` user only see the Pancakes in the order and the `DeliveryService` user only see the delivery
+information and the order ID.
+
+## Performance
+
+Then code is using `ExecutorService` in each service component to handle concurrency. Also, the most of the operations were
+done in non-blocking manner even thought the system is not using `Reactive` programming. Events are passed through the
+queues between services where the necessary pre-processing is done to minimize the latency as well.
+
 ### The Security claim pattern follows, following pattern
 
 `Resource.Permissions` for example `order.CRUD` where it specifies the claim was given `order` resource access
