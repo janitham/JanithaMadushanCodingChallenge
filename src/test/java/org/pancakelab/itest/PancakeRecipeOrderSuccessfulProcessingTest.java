@@ -23,7 +23,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
     private static UUID orderId;
     private static DeliveryInfo deliveryInfo;
     public static final ConcurrentHashMap<UUID, OrderDetails> ordersRepository = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository = new ConcurrentHashMap<>();;
+    private static ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository = new ConcurrentHashMap<>();
     private static final Map<String, List<Character>> privileges = new HashMap<>() {
         {
             put("order", List.of('C', 'R', 'U', 'D'));
