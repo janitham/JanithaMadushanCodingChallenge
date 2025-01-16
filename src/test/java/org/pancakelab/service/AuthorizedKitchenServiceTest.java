@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pancakelab.model.*;
+import org.pancakelab.util.PancakeFactory;
+import org.pancakelab.util.Pancakes;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +35,7 @@ class AuthorizedKitchenServiceTest {
                 put("order", List.of('C', 'R', 'U', 'D'));
                 put("kitchen", List.of('C', 'R', 'U', 'D'));
                 put("delivery", List.of('C', 'R', 'U', 'D'));
+                put("recipe", List.of('C', 'R', 'U', 'D'));
             }
         };
         kitchenService = mock(KitchenServiceImpl.class);
@@ -132,6 +135,72 @@ class AuthorizedKitchenServiceTest {
         PancakeServiceException exception = assertThrows(
                 PancakeServiceException.class,
                 () -> authorizedKitchenService.notifyOrderCompletion(user, orderId)
+        );
+        assertEquals(USER_IS_NOT_AUTHORIZED, exception.getMessage());
+    }
+
+    @Test
+    void givenAuthenticatedUser_whenAddRecipe_thenRecipeIsAdded() throws PancakeServiceException {
+        // Given
+        final PancakeRecipe recipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE);
+        doNothing().when(kitchenService).addRecipe(privileged, recipe);
+        // When
+        authorizedKitchenService.addRecipe(privileged, recipe);
+        // Then
+        verify(authenticationService).authenticate(privileged);
+        verify(kitchenService).addRecipe(privileged, recipe);
+    }
+
+    @Test
+    void givenAuthenticatedUser_whenRemoveRecipe_thenRecipeIsRemoved() throws PancakeServiceException {
+        // Given
+        final PancakeRecipe recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
+        doNothing().when(kitchenService).removeRecipe(privileged, recipe);
+        // When
+        authorizedKitchenService.removeRecipe(privileged, recipe);
+        // Then
+        verify(authenticationService).authenticate(privileged);
+        verify(kitchenService).removeRecipe(privileged, recipe);
+    }
+
+    @Test
+    void givenAuthenticatedUser_whenUpdateRecipe_thenRecipeIsUpdated() throws PancakeServiceException {
+        // Given
+        final PancakeRecipe recipe = PancakeFactory.get(Pancakes.MILK_CHOCOLATE_PANCAKE);
+        final var updated = new PancakeRecipe.Builder().withName(recipe.getName()).withChocolate(PancakeRecipe.CHOCOLATE.MILK).build();
+        doNothing().when(kitchenService).updateRecipe(privileged, recipe.getName(), updated);
+        // When
+        authorizedKitchenService.updateRecipe(privileged, recipe.getName(), updated);
+        // Then
+        verify(authenticationService).authenticate(privileged);
+        verify(kitchenService).updateRecipe(privileged, recipe.getName(), updated);
+    }
+
+    @Test
+    void givenUnauthenticatedUser_whenAddRecipe_thenThrowsException() throws AuthenticationFailureException {
+        // Given
+        final PancakeRecipe recipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE);
+        doThrow(new AuthenticationFailureException(USER_IS_NOT_AUTHENTICATED)).when(authenticationService).authenticate(privileged);
+        // When
+        // Then
+        PancakeServiceException exception = assertThrows(
+                PancakeServiceException.class,
+                () -> authorizedKitchenService.addRecipe(privileged, recipe)
+        );
+        assertEquals(USER_IS_NOT_AUTHENTICATED, exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"inCorrectPermissions", "unPrivileged"})
+    void givenUnprivilegedUser_whenAddRecipe_thenThrowsException(String userType) {
+        // Given
+        final User user = userType.equals("inCorrectPermissions") ? inCorrectPermissions : unPrivileged;
+        final PancakeRecipe recipe = PancakeFactory.get(Pancakes.DARK_CHOCOLATE_PANCAKE);
+        // When
+        // Then
+        PancakeServiceException exception = assertThrows(
+                PancakeServiceException.class,
+                () -> authorizedKitchenService.addRecipe(user, recipe)
         );
         assertEquals(USER_IS_NOT_AUTHORIZED, exception.getMessage());
     }

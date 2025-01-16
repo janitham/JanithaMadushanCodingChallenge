@@ -88,6 +88,13 @@ public class AuthorizedKitchenService implements ChefService, RecipeService {
     }
 
 
+    /**
+     * Adds a new recipe for the specified user.
+     *
+     * @param user   the user adding the recipe
+     * @param recipe the recipe to add
+     * @throws PancakeServiceException if the user cannot be authenticated or authorized
+     */
     @Override
     public void addRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
         authenticateUser(user);
@@ -95,6 +102,13 @@ public class AuthorizedKitchenService implements ChefService, RecipeService {
         chefService.addRecipe(user, recipe);
     }
 
+    /**
+     * Removes the specified recipe for the specified user.
+     *
+     * @param user   the user removing the recipe
+     * @param recipe the recipe to remove
+     * @throws PancakeServiceException if the user cannot be authenticated or authorized
+     */
     @Override
     public void removeRecipe(User user, PancakeRecipe recipe) throws PancakeServiceException {
         authenticateUser(user);
@@ -102,6 +116,14 @@ public class AuthorizedKitchenService implements ChefService, RecipeService {
         chefService.removeRecipe(user, recipe);
     }
 
+    /**
+     * Updates the specified recipe for the specified user.
+     *
+     * @param user   the user updating the recipe
+     * @param name   the name of the recipe to update
+     * @param recipe the updated recipe
+     * @throws PancakeServiceException if the user cannot be authenticated or authorized
+     */
     @Override
     public void updateRecipe(User user, String name, PancakeRecipe recipe) throws PancakeServiceException {
         authenticateUser(user);
@@ -109,6 +131,13 @@ public class AuthorizedKitchenService implements ChefService, RecipeService {
         chefService.updateRecipe(user, name, recipe);
     }
 
+    /**
+     * Checks if the specified recipe exists for the specified user.
+     *
+     * @param user   the user checking the recipe
+     * @param recipe the recipe to check
+     * @throws PancakeServiceException if the user cannot be authenticated or authorized
+     */
     @Override
     public void exits(User user, PancakeRecipe recipe) throws PancakeServiceException {
         authenticateUser(user);
@@ -116,6 +145,13 @@ public class AuthorizedKitchenService implements ChefService, RecipeService {
         chefService.exits(user, recipe);
     }
 
+    /**
+     * Returns a set of recipes for the specified user.
+     *
+     * @param user the user whose recipes are to be retrieved
+     * @return a set of recipes
+     * @throws PancakeServiceException if the user cannot be authenticated or authorized
+     */
     @Override
     public Set<PancakeRecipe> getRecipes(User user) throws PancakeServiceException {
         authenticateUser(user);
