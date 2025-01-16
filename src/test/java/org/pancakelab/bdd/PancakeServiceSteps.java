@@ -95,7 +95,6 @@ public class PancakeServiceSteps {
     @When("the disciple {string} adds {int} pancake of type {string}")
     public void the_disciple_adds_pancakes_of_type(String disciple, Integer count, String type) throws PancakeServiceException {
         orderService.addPancakes(systemUsers.get(disciple), orderId,
-                //Map.of(Pancakes.valueOf(type.toUpperCase()), count)
                 Map.of(PancakeFactory.get(Pancakes.valueOf(type.toUpperCase())), count)
         );
     }
@@ -183,7 +182,6 @@ public class PancakeServiceSteps {
     public void the_disciple_adds_pancake_of_type_and_attempt_fails(Integer count, String type) {
         assertThrows(AuthorizationFailureException.class,
                 () -> orderService.addPancakes(authenticatedUser, orderId,
-                        //Map.of(Pancakes.valueOf(type.toUpperCase()), count)
                         Map.of(PancakeFactory.get(Pancakes.valueOf(type.toUpperCase())), count)
                 ));
     }
@@ -192,7 +190,6 @@ public class PancakeServiceSteps {
     public void the_disciple_adds_pancake_of_type_and_system_complains_large_order(Integer count, String type) {
         assertThrows(PancakeServiceException.class,
                 () -> orderService.addPancakes(authenticatedUser, orderId,
-                        //Map.of(Pancakes.valueOf(type.toUpperCase()), count)
                         Map.of(PancakeFactory.get(Pancakes.valueOf(type.toUpperCase())), count)
                 ));
     }

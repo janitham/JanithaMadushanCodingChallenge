@@ -76,11 +76,11 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
         // When
         // Then
         assertNotNull(orderId);
-    /*}
+    }
 
     @Test
     @Order(2)
-    void givenOrderWithItemsInTheMenu_whenOrderIsUpdated_thenOrderShouldContainTheItems() throws PancakeServiceException {*/
+    void givenOrderWithItemsInTheMenu_whenOrderIsUpdated_thenOrderShouldContainTheItems() throws PancakeServiceException {
         // Given
         var pancakes = Map.of(
                 PancakeFactory.get(Pancakes.DARK_CHOCOLATE_WHIP_CREAM_HAZELNUTS_PANCAKE), 1,
