@@ -17,18 +17,18 @@ import static org.mockito.Mockito.when;
 
 class DeliveryServiceTest {
 
-    private ConcurrentHashMap<UUID, OrderDetails> orders;
-    private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
+    private ConcurrentHashMap<UUID, OrderDetails> ordersRepository;
+    private ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository;
     private DeliveryService deliveryService;
     private BlockingDeque<UUID> deliveriesQueue;
     private User user;
 
     @BeforeEach
     public void setUp() {
-        orders = new ConcurrentHashMap<>();
-        orderStatus = new ConcurrentHashMap<>();
+        ordersRepository = new ConcurrentHashMap<>();
+        orderStatusRepository = new ConcurrentHashMap<>();
         deliveriesQueue = new LinkedBlockingDeque<>();
-        deliveryService = new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue, 2);
+        deliveryService = new DeliveryServiceImpl(ordersRepository, orderStatusRepository, deliveriesQueue, 2);
         user = new User("user", "password".toCharArray(), new HashMap<>());
     }
 
@@ -38,12 +38,12 @@ class DeliveryServiceTest {
         final UUID orderId = UUID.randomUUID();
         final OrderDetails orderDetails = mock(OrderDetails.class);
         when(orderDetails.getOrderId()).thenReturn(orderId);
-        orders.put(orderId, orderDetails);
-        orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
+        ordersRepository.put(orderId, orderDetails);
+        orderStatusRepository.put(orderId, OrderStatus.READY_FOR_DELIVERY);
         // When
         deliveryService.acceptOrder(user, orderId);
         // Then
-        Awaitility.await().until(() -> OrderStatus.OUT_FOR_DELIVERY.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.OUT_FOR_DELIVERY.equals(orderStatusRepository.get(orderId)));
     }
 
     @Test
@@ -52,13 +52,13 @@ class DeliveryServiceTest {
         final UUID orderId = UUID.randomUUID();
         final OrderDetails orderDetails = mock(OrderDetails.class);
         when(orderDetails.getOrderId()).thenReturn(orderId);
-        orders.put(orderId, orderDetails);
-        orderStatus.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
+        ordersRepository.put(orderId, orderDetails);
+        orderStatusRepository.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
         // When
         deliveryService.sendForTheDelivery(user, orderId);
         // Then
-        Awaitility.await().until(() -> OrderStatus.DELIVERED.equals(orderStatus.get(orderId)));
-        assertFalse(orders.containsKey(orderId));
+        Awaitility.await().until(() -> OrderStatus.DELIVERED.equals(orderStatusRepository.get(orderId)));
+        assertFalse(ordersRepository.containsKey(orderId));
     }
 
     @Test
@@ -70,8 +70,8 @@ class DeliveryServiceTest {
         when(orderDetails1.getOrderId()).thenReturn(orderId1);
         // When
         when(orderDetails1.getDeliveryInfo()).thenReturn(deliveryInfo1);
-        orders.put(orderId1, orderDetails1);
-        orderStatus.put(orderId1, OrderStatus.READY_FOR_DELIVERY);
+        ordersRepository.put(orderId1, orderDetails1);
+        orderStatusRepository.put(orderId1, OrderStatus.READY_FOR_DELIVERY);
         deliveriesQueue.put(orderId1);
         // Then
         Awaitility.await().until(() ->

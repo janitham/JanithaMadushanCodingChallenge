@@ -33,11 +33,11 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Constructs a new OrderServiceImpl.
      *
-     * @param orders the map of order details
-     * @param orderStatus the map of order statuses
+     * @param orders                       the map of order details
+     * @param orderStatus                  the map of order statuses
      * @param deliveryInformationValidator the validator for delivery information
-     * @param ordersQueue the queue of orders to be processed
-     * @param internalThreads the number of internal threads to use
+     * @param ordersQueue                  the queue of orders to be processed
+     * @param internalThreads              the number of internal threads to use
      */
     public OrderServiceImpl(
             final ConcurrentMap<UUID, OrderDetails> orders,
@@ -56,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Creates a new order.
      *
-     * @param user the user creating the order
+     * @param user                the user creating the order
      * @param deliveryInformation the delivery information for the order
      * @return the UUID of the created order
      * @throws PancakeServiceException if the order cannot be created
@@ -88,8 +88,8 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Adds pancakes to an existing order.
      *
-     * @param user the user adding pancakes
-     * @param orderId the ID of the order to add pancakes to
+     * @param user     the user adding pancakes
+     * @param orderId  the ID of the order to add pancakes to
      * @param pancakes the pancakes to add
      * @throws PancakeServiceException if the pancakes cannot be added
      */
@@ -119,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Provides a summary of an order.
      *
-     * @param user the user requesting the summary
+     * @param user    the user requesting the summary
      * @param orderId the ID of the order to summarize
      * @return a map of pancakes and their quantities
      * @throws PancakeServiceException if the order cannot be summarized
@@ -137,7 +137,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Gets the status of an order.
      *
-     * @param user the user requesting the status
+     * @param user    the user requesting the status
      * @param orderId the ID of the order to get the status of
      * @return the status of the order
      */
@@ -149,7 +149,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Completes an order.
      *
-     * @param user the user completing the order
+     * @param user    the user completing the order
      * @param orderId the ID of the order to complete
      * @throws PancakeServiceException if the order cannot be completed
      */
@@ -180,7 +180,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Cancels an order.
      *
-     * @param user the user canceling the order
+     * @param user    the user canceling the order
      * @param orderId the ID of the order to cancel
      * @throws PancakeServiceException if the order cannot be canceled
      */
@@ -229,7 +229,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Cleans up the order.
      *
-     * @param orderId the ID of the order to clean up
+     * @param orderId      the ID of the order to clean up
      * @param deliveryInfo the delivery information of the order
      */
     private synchronized void cleanUpOrder(final UUID orderId, final DeliveryInfo deliveryInfo) {

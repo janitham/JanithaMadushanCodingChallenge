@@ -23,12 +23,12 @@ import static org.pancakelab.service.OrderServiceImpl.ORDER_CANNOT_BE_PROCESSED_
 
 class OrderServiceTest {
 
-    private ConcurrentHashMap<UUID, OrderDetails> orders;
+    private ConcurrentHashMap<UUID, OrderDetails> ordersRepository;
+    private ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository;
+    private BlockingDeque<UUID> ordersQueue;
     private OrderService orderService;
-    private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
     private User user;
     private DeliveryInformationValidator deliveryInformationValidator;
-    private BlockingDeque<UUID> ordersQueue;
 
     private final Map<String, List<Character>> privileges = new HashMap<>() {
         {
@@ -40,11 +40,11 @@ class OrderServiceTest {
 
     @BeforeEach
     public void setUp() {
-        orders = new ConcurrentHashMap<>();
-        orderStatus = new ConcurrentHashMap<>();
+        ordersRepository = new ConcurrentHashMap<>();
+        orderStatusRepository = new ConcurrentHashMap<>();
         ordersQueue = new LinkedBlockingDeque<>();
         deliveryInformationValidator = mock(DeliveryInformationValidator.class);
-        orderService = new OrderServiceImpl(orders, orderStatus, deliveryInformationValidator, ordersQueue, 10);
+        orderService = new OrderServiceImpl(ordersRepository, orderStatusRepository, deliveryInformationValidator, ordersQueue, 10);
         user = new User("user", "password".toCharArray(), privileges);
     }
 
@@ -130,7 +130,7 @@ class OrderServiceTest {
         // When
         orderService.complete(user, orderId);
         // Then
-        Awaitility.await().until(() -> orders.get(orderId) != null);
+        Awaitility.await().until(() -> ordersRepository.get(orderId) != null);
         Awaitility.await().until(() -> ordersQueue.contains(orderId));
     }
 
@@ -143,9 +143,9 @@ class OrderServiceTest {
         // When
         orderService.cancel(user, orderId);
         // Then
-        Awaitility.await().until(() -> !orders.containsKey(orderId));
+        Awaitility.await().until(() -> !ordersRepository.containsKey(orderId));
         Awaitility.await().until(() -> !ordersQueue.contains(orderId));
-        assertEquals(OrderStatus.CANCELLED, orderStatus.get(orderId));
+        assertEquals(OrderStatus.CANCELLED, orderStatusRepository.get(orderId));
     }
 
     @Test
@@ -194,8 +194,8 @@ class OrderServiceTest {
         // Given
         final var user2 = new User("user2", "password2".toCharArray(), privileges);
         final var orderId = UUID.randomUUID();
-        orderStatus.put(orderId, OrderStatus.CREATED);
-        orders.put(
+        orderStatusRepository.put(orderId, OrderStatus.CREATED);
+        ordersRepository.put(
                 orderId,
                 new OrderDetails.Builder().withOrderId(orderId).withPanCakes(
                         Map.of(
@@ -214,8 +214,8 @@ class OrderServiceTest {
     void givenUserHasAnOngoingOrder_then_creatingAnotherOrderShouldThrowAnException() {
         // Given
         final var orderId = UUID.randomUUID();
-        orderStatus.put(orderId, OrderStatus.CREATED);
-        orders.put(orderId, new OrderDetails.Builder()
+        orderStatusRepository.put(orderId, OrderStatus.CREATED);
+        ordersRepository.put(orderId, new OrderDetails.Builder()
                 .withOrderId(orderId)
                 .withUser(user)
                 .withPanCakes(Map.of(

@@ -42,8 +42,8 @@ public class PancakeServiceSteps {
             put("hackedRider1", new User("hackedRider1", "hackedPassword1".toCharArray(), Map.of("delivery", List.of())));
         }
     };
-    private static final ConcurrentHashMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<UUID, OrderStatus> orderStatus = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, OrderDetails> ordersRepository = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository = new ConcurrentHashMap<>();
     private static final BlockingDeque<UUID> ordersQueue = new LinkedBlockingDeque<>();
     private static final BlockingDeque<UUID> deliveriesQueue = new LinkedBlockingDeque<>();
     private static User authenticatedUser = null;
@@ -57,16 +57,16 @@ public class PancakeServiceSteps {
             }
     );
     private static final KitchenService kitchenService = new AuthorizedKitchenService(
-            new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue, 2),
+            new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2),
             authenticationService
     );
     private static final DeliveryService deliveryService = new AuthorizedDeliveryService(
-            new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue, 2),
+            new DeliveryServiceImpl(ordersRepository, orderStatusRepository, deliveriesQueue, 2),
             authenticationService
     );
 
     private static final OrderService orderService = new AuthorizedOrderService(
-            new OrderServiceImpl(orders, orderStatus, new DeliveryInformationValidator(), ordersQueue, 2),
+            new OrderServiceImpl(ordersRepository, orderStatusRepository, new DeliveryInformationValidator(), ordersQueue, 2),
             authenticationService
     );
 
@@ -99,7 +99,7 @@ public class PancakeServiceSteps {
 
     @Then("the order status should be {string}")
     public void the_order_status_should_be(String string) {
-        Awaitility.await().until(() -> orderStatus.get(orderId) == OrderStatus.valueOf(string));
+        Awaitility.await().until(() -> orderStatusRepository.get(orderId) == OrderStatus.valueOf(string));
     }
 
     @Then("the order should be removed from the database")
@@ -193,7 +193,7 @@ public class PancakeServiceSteps {
 
     @Then("the system should reject the orderId")
     public void the_system_should_reject_the_order_id() {
-        Awaitility.await().until(() -> orderStatus.get(orderId) == OrderStatus.ERROR);
+        Awaitility.await().until(() -> orderStatusRepository.get(orderId) == OrderStatus.ERROR);
     }
 
     @Then("a disciple {string} creates an order with building {string} and room number {string} and system complains about ongoing order")
@@ -265,7 +265,7 @@ public class PancakeServiceSteps {
 
     private void addOrderToTheSystem(String user, OrderStatus status) {
         orderId = UUID.randomUUID();
-        orders.put(
+        ordersRepository.put(
                 orderId,
                 new OrderDetails.Builder()
                         .withOrderId(orderId)
@@ -273,6 +273,6 @@ public class PancakeServiceSteps {
                         .withDeliveryInfo(new DeliveryInfo("1", "2")).withPanCakes(
                                 Map.of(Pancakes.DARK_CHOCOLATE_PANCAKE, 1)
                         ).build());
-        orderStatus.put(orderId, status);
+        orderStatusRepository.put(orderId, status);
     }
 }

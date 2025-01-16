@@ -18,8 +18,8 @@ import java.util.concurrent.*;
  * It uses a separate thread to update the local order map and manages order and delivery queues.
  */
 public class KitchenServiceImpl implements KitchenService {
-    private final ConcurrentMap<UUID, OrderDetails> orders;
-    private final ConcurrentMap<UUID, OrderStatus> orderStatus;
+    private final ConcurrentMap<UUID, OrderDetails> ordersRepository;
+    private final ConcurrentMap<UUID, OrderStatus> orderStatusRepository;
     private final ExecutorService executorService;
     private final BlockingDeque<UUID> orderQueue;
     private final BlockingDeque<UUID> deliveryQueue;
@@ -28,21 +28,21 @@ public class KitchenServiceImpl implements KitchenService {
     /**
      * Constructs a new KitchenServiceImpl.
      *
-     * @param orders          the map of order details
-     * @param orderStatus     the map of order statuses
+     * @param ordersRepository          the map of order details
+     * @param orderStatusRepository     the map of order statuses
      * @param orderQueue      the queue of orders to be processed
      * @param deliveryQueue   the queue of orders ready for delivery
      * @param internalThreads the number of internal threads to use
      */
     public KitchenServiceImpl(
-            final ConcurrentMap<UUID, OrderDetails> orders,
-            final ConcurrentMap<UUID, OrderStatus> orderStatus,
+            final ConcurrentMap<UUID, OrderDetails> ordersRepository,
+            final ConcurrentMap<UUID, OrderStatus> orderStatusRepository,
             final BlockingDeque<UUID> orderQueue,
             final BlockingDeque<UUID> deliveryQueue,
             final Integer internalThreads
     ) {
-        this.orders = orders;
-        this.orderStatus = orderStatus;
+        this.ordersRepository = ordersRepository;
+        this.orderStatusRepository = orderStatusRepository;
         this.orderQueue = orderQueue;
         this.deliveryQueue = deliveryQueue;
         this.executorService = Executors.newFixedThreadPool(internalThreads);
@@ -90,12 +90,12 @@ public class KitchenServiceImpl implements KitchenService {
     public void acceptOrder(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
             OrderDetails orderDetails;
-            synchronized (orders) {
-                orderDetails = orders.get(orderId);
+            synchronized (ordersRepository) {
+                orderDetails = ordersRepository.get(orderId);
             }
             if (orderDetails != null) {
-                synchronized (orderStatus) {
-                    orderStatus.put(orderId, OrderStatus.IN_PROGRESS);
+                synchronized (orderStatusRepository) {
+                    orderStatusRepository.put(orderId, OrderStatus.IN_PROGRESS);
                 }
                 PancakeUtils.notifyUser(user, OrderStatus.IN_PROGRESS);
             }
@@ -112,12 +112,12 @@ public class KitchenServiceImpl implements KitchenService {
     public void notifyOrderCompletion(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
             OrderDetails orderDetails;
-            synchronized (orders) {
-                orderDetails = orders.get(orderId);
+            synchronized (ordersRepository) {
+                orderDetails = ordersRepository.get(orderId);
             }
             if (orderDetails != null) {
-                synchronized (orderStatus) {
-                    orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
+                synchronized (orderStatusRepository) {
+                    orderStatusRepository.put(orderId, OrderStatus.READY_FOR_DELIVERY);
                 }
                 PancakeUtils.notifyUser(user, OrderStatus.READY_FOR_DELIVERY);
                 synchronized (deliveryQueue) {
@@ -136,8 +136,8 @@ public class KitchenServiceImpl implements KitchenService {
      * @param orderId the ID of the order to be updated
      */
     private void updateLocalOrderMap(UUID orderId) {
-        synchronized (orders) {
-            OrderDetails orderDetails = orders.get(orderId);
+        synchronized (ordersRepository) {
+            OrderDetails orderDetails = ordersRepository.get(orderId);
             if (orderDetails != null) {
                 Map<PancakeRecipe, Integer> pancakeRecipes = new ConcurrentHashMap<>();
                 orderDetails.getPancakes().forEach((pancake, quantity) -> {

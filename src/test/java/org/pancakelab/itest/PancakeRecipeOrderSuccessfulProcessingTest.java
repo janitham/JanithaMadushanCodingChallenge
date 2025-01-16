@@ -22,7 +22,8 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
     private static OrderService orderService;
     private static UUID orderId;
     private static DeliveryInfo deliveryInfo;
-    private static ConcurrentHashMap<UUID, OrderStatus> orderStatus;
+    public static final ConcurrentHashMap<UUID, OrderDetails> ordersRepository = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository = new ConcurrentHashMap<>();;
     private static final Map<String, List<Character>> privileges = new HashMap<>() {
         {
             put("order", List.of('C', 'R', 'U', 'D'));
@@ -37,24 +38,22 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
     @BeforeAll
     public static void init() {
         deliveryInfo = new DeliveryInfo("1", "2");
-        orderStatus = new ConcurrentHashMap<>();
-        ConcurrentHashMap<UUID, OrderDetails> orders = new ConcurrentHashMap<>();
         AuthenticationService authenticationService = new AuthenticationServiceImpl(new HashSet<>() {
             {
                 add(authorizedUser);
             }
         });
         deliveryService = new AuthorizedDeliveryService(
-                new DeliveryServiceImpl(orders, orderStatus, deliveriesQueue, 2),
+                new DeliveryServiceImpl(ordersRepository, orderStatusRepository, deliveriesQueue, 2),
                 authenticationService
         );
         kitchenService = new AuthorizedKitchenService(
-                new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue, 2),
+                new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2),
                 authenticationService
         );
         orderService = new AuthorizedOrderService(
                 new OrderServiceImpl(
-                        orders, orderStatus,
+                        ordersRepository, orderStatusRepository,
                         new DeliveryInformationValidator(), ordersQueue, 2),
                 authenticationService);
     }
@@ -90,7 +89,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
         // When
         orderService.complete(authorizedUser, orderId);
         // Then
-        Awaitility.await().until(() -> orderStatus.get(orderId).equals(OrderStatus.COMPLETED));
+        Awaitility.await().until(() -> orderStatusRepository.get(orderId).equals(OrderStatus.COMPLETED));
     }
 
     @Test
@@ -100,7 +99,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
         kitchenService.acceptOrder(authorizedUser, orderId);
         // When
         // Then
-        Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatusRepository.get(orderId)));
     }
 
     @Test
@@ -110,7 +109,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
         kitchenService.notifyOrderCompletion(authorizedUser, orderId);
         // When
         // Then
-        Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatusRepository.get(orderId)));
     }
 
     @Test
@@ -120,7 +119,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
         deliveryService.acceptOrder(authorizedUser, orderId);
         // When
         // Then
-        Awaitility.await().until(() -> OrderStatus.OUT_FOR_DELIVERY.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.OUT_FOR_DELIVERY.equals(orderStatusRepository.get(orderId)));
     }
 
     @Test
@@ -130,7 +129,7 @@ class PancakeRecipeOrderSuccessfulProcessingTest {
         deliveryService.sendForTheDelivery(authorizedUser, orderId);
         // When
         // Then
-        Awaitility.await().until(() -> OrderStatus.DELIVERED.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.DELIVERED.equals(orderStatusRepository.get(orderId)));
     }
 
     /*@AfterAll

@@ -17,8 +17,8 @@ import java.util.concurrent.*;
  * This service tries to only show the delivery information and order id to the user for security reasons.
  */
 public class DeliveryServiceImpl implements DeliveryService {
-    private final ConcurrentMap<UUID, OrderDetails> orders;
-    private final ConcurrentMap<UUID, OrderStatus> orderStatus;
+    private final ConcurrentMap<UUID, OrderDetails> ordersRepository;
+    private final ConcurrentMap<UUID, OrderStatus> orderStatusRepository;
     private final ExecutorService executorService;
     private final BlockingDeque<UUID> deliveryQueue;
     private final Map<UUID, DeliveryInfo> localDeliveryMap = new ConcurrentHashMap<>();
@@ -26,18 +26,19 @@ public class DeliveryServiceImpl implements DeliveryService {
     /**
      * Constructs a new DeliveryServiceImpl.
      *
-     * @param orders          the map of order details
-     * @param orderStatus     the map of order statuses
+     * @param ordersRepository          the map of order details
+     * @param orderStatusRepository     the map of order statuses
      * @param deliveryQueue   the queue of orders ready for delivery
      * @param internalThreads the number of internal threads to use
      */
     public DeliveryServiceImpl(
-            final ConcurrentMap<UUID, OrderDetails> orders,
-            final ConcurrentMap<UUID, OrderStatus> orderStatus, BlockingDeque<UUID> deliveryQueue,
+            final ConcurrentMap<UUID, OrderDetails> ordersRepository,
+            final ConcurrentMap<UUID, OrderStatus> orderStatusRepository,
+            final BlockingDeque<UUID> deliveryQueue,
             final Integer internalThreads
     ) {
-        this.orders = orders;
-        this.orderStatus = orderStatus;
+        this.ordersRepository = ordersRepository;
+        this.orderStatusRepository = orderStatusRepository;
         this.deliveryQueue = deliveryQueue;
         this.executorService = Executors.newFixedThreadPool(internalThreads);
         startOrderUpdateThread();
@@ -65,11 +66,11 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public void acceptOrder(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
-            final OrderDetails orderDetails = orders.get(orderId);
+            final OrderDetails orderDetails = ordersRepository.get(orderId);
             if (orderDetails != null) {
-                synchronized (orderStatus) {
-                    if (orderStatus.get(orderId) == OrderStatus.READY_FOR_DELIVERY) {
-                        orderStatus.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
+                synchronized (orderStatusRepository) {
+                    if (orderStatusRepository.get(orderId) == OrderStatus.READY_FOR_DELIVERY) {
+                        orderStatusRepository.put(orderId, OrderStatus.OUT_FOR_DELIVERY);
                         PancakeUtils.notifyUser(user, OrderStatus.OUT_FOR_DELIVERY);
                     }
                 }
@@ -88,20 +89,20 @@ public class DeliveryServiceImpl implements DeliveryService {
     public void sendForTheDelivery(User user, UUID orderId) {
         CompletableFuture.runAsync(() -> {
             OrderDetails orderDetails;
-            synchronized (orders) {
-                orderDetails = orders.get(orderId);
+            synchronized (ordersRepository) {
+                orderDetails = ordersRepository.get(orderId);
             }
             if (orderDetails != null) {
-                synchronized (orderStatus) {
-                    if (orderStatus.get(orderId) == OrderStatus.OUT_FOR_DELIVERY) {
-                        orderStatus.put(orderId, OrderStatus.DELIVERED);
+                synchronized (orderStatusRepository) {
+                    if (orderStatusRepository.get(orderId) == OrderStatus.OUT_FOR_DELIVERY) {
+                        orderStatusRepository.put(orderId, OrderStatus.DELIVERED);
                     }
                 }
                 synchronized (localDeliveryMap) {
                     localDeliveryMap.remove(orderId);
                 }
-                synchronized (orders) {
-                    orders.remove(orderId);
+                synchronized (ordersRepository) {
+                    ordersRepository.remove(orderId);
                 }
             }
             PancakeUtils.notifyUser(user, OrderStatus.DELIVERED);
@@ -117,8 +118,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 try {
                     final UUID orderId = deliveryQueue.take();
                     OrderDetails orderDetails;
-                    synchronized (orders) {
-                        orderDetails = orders.get(orderId);
+                    synchronized (ordersRepository) {
+                        orderDetails = ordersRepository.get(orderId);
                     }
                     if (orderDetails != null) {
                         synchronized (localDeliveryMap) {

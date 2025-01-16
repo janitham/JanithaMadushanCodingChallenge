@@ -18,8 +18,8 @@ import static org.mockito.Mockito.when;
 
 class KitchenServiceTest {
 
-    private ConcurrentHashMap<UUID, OrderDetails> orders;
-    private ConcurrentHashMap<UUID, OrderStatus> orderStatus;
+    private ConcurrentHashMap<UUID, OrderDetails> ordersRepository;
+    private ConcurrentHashMap<UUID, OrderStatus> orderStatusRepository;
     private KitchenService kitchenService;
     private BlockingDeque<UUID> ordersQueue;
     private BlockingDeque<UUID> deliveriesQueue;
@@ -27,11 +27,11 @@ class KitchenServiceTest {
 
     @BeforeEach
     public void setUp() {
-        orders = new ConcurrentHashMap<>();
-        orderStatus = new ConcurrentHashMap<>();
+        ordersRepository = new ConcurrentHashMap<>();
+        orderStatusRepository = new ConcurrentHashMap<>();
         ordersQueue = new LinkedBlockingDeque<>();
         deliveriesQueue = new LinkedBlockingDeque<>();
-        kitchenService = new KitchenServiceImpl(orders, orderStatus, ordersQueue, deliveriesQueue, 2);
+        kitchenService = new KitchenServiceImpl(ordersRepository, orderStatusRepository, ordersQueue, deliveriesQueue, 2);
         user = new User("user", "password".toCharArray(), new HashMap<>());
     }
 
@@ -41,12 +41,12 @@ class KitchenServiceTest {
         final UUID orderId = UUID.randomUUID();
         final OrderDetails orderDetails = mock(OrderDetails.class);
         when(orderDetails.getOrderId()).thenReturn(orderId);
-        orders.put(orderId, orderDetails);
-        orderStatus.put(orderId, OrderStatus.READY_FOR_DELIVERY);
+        ordersRepository.put(orderId, orderDetails);
+        orderStatusRepository.put(orderId, OrderStatus.READY_FOR_DELIVERY);
         // When
         kitchenService.acceptOrder(user, orderId);
         // Then
-        Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.IN_PROGRESS.equals(orderStatusRepository.get(orderId)));
     }
 
     @Test
@@ -55,12 +55,12 @@ class KitchenServiceTest {
         final UUID orderId = UUID.randomUUID();
         final OrderDetails orderDetails = mock(OrderDetails.class);
         when(orderDetails.getOrderId()).thenReturn(orderId);
-        orders.put(orderId, orderDetails);
-        orderStatus.put(orderId, OrderStatus.IN_PROGRESS);
+        ordersRepository.put(orderId, orderDetails);
+        orderStatusRepository.put(orderId, OrderStatus.IN_PROGRESS);
         // When
         kitchenService.notifyOrderCompletion(user, orderId);
         // Then
-        Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatus.get(orderId)));
+        Awaitility.await().until(() -> OrderStatus.READY_FOR_DELIVERY.equals(orderStatusRepository.get(orderId)));
     }
 
     @Test
@@ -69,7 +69,7 @@ class KitchenServiceTest {
         final UUID orderId1 = UUID.randomUUID();
         final OrderDetails orderDetails1 = mock(OrderDetails.class);
         when(orderDetails1.getOrderId()).thenReturn(orderId1);
-        orders.put(orderId1, orderDetails1);
+        ordersRepository.put(orderId1, orderDetails1);
 
         final Map<Pancakes, Integer> pancakeItems1 = new ConcurrentHashMap<>() {{
             put(Pancakes.DARK_CHOCOLATE_PANCAKE, 1);
