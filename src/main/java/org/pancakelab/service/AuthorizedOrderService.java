@@ -14,7 +14,7 @@ import static org.pancakelab.util.PancakeUtils.authorizeUser;
  */
 public class AuthorizedOrderService implements OrderService {
 
-    public static final String SERVICE_NAME = "order";
+    public static final String ORDER_RESOURCE_NAME = "order";
     public static final String USER_DOES_NOT_HAVE_AUTHORITY_TO_ACCESS_ORDER = "User not authorized to access order";
     public static final String ORDER_NOT_FOUND = "Order not found";
 
@@ -92,7 +92,7 @@ public class AuthorizedOrderService implements OrderService {
     @Override
     public UUID createOrder(User user, DeliveryInfo deliveryInformation) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeUser(user, SERVICE_NAME, Privileges.CREATE.getCode());
+        authorizeUser(user, ORDER_RESOURCE_NAME, Privileges.CREATE.getCode());
         var orderId = orderService.createOrder(user, deliveryInformation);
         assignOrderToUser(orderId, user);
         return orderId;
@@ -110,7 +110,7 @@ public class AuthorizedOrderService implements OrderService {
     public void addPancakes(User user, UUID orderId, Map<PancakeRecipe, Integer> pancakes) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        authorizeUser(user, SERVICE_NAME, Privileges.CREATE.getCode());
+        authorizeUser(user, ORDER_RESOURCE_NAME, Privileges.CREATE.getCode());
         orderService.addPancakes(user, orderId, pancakes);
     }
 
@@ -126,7 +126,7 @@ public class AuthorizedOrderService implements OrderService {
     public Map<PancakeRecipe, Integer> orderSummary(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        authorizeUser(user, SERVICE_NAME, Privileges.READ.getCode());
+        authorizeUser(user, ORDER_RESOURCE_NAME, Privileges.READ.getCode());
         return orderService.orderSummary(user, orderId);
     }
 
@@ -142,7 +142,7 @@ public class AuthorizedOrderService implements OrderService {
     public OrderStatus status(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        authorizeUser(user, SERVICE_NAME, Privileges.READ.getCode());
+        authorizeUser(user, ORDER_RESOURCE_NAME, Privileges.READ.getCode());
         return orderService.status(user, orderId);
     }
 
@@ -157,7 +157,7 @@ public class AuthorizedOrderService implements OrderService {
     public void complete(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        authorizeUser(user, SERVICE_NAME, Privileges.CREATE.getCode());
+        authorizeUser(user, ORDER_RESOURCE_NAME, Privileges.CREATE.getCode());
         orderService.complete(user, orderId);
         unAssignOrderFromUser(orderId);
     }
@@ -173,7 +173,7 @@ public class AuthorizedOrderService implements OrderService {
     public void cancel(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
         authorizeOrderAccess(user, orderId);
-        authorizeUser(user, SERVICE_NAME, Privileges.UPDATE.getCode());
+        authorizeUser(user, ORDER_RESOURCE_NAME, Privileges.UPDATE.getCode());
         orderService.cancel(user, orderId);
         unAssignOrderFromUser(orderId);
     }

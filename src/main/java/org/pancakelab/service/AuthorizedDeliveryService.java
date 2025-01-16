@@ -16,7 +16,7 @@ import static org.pancakelab.util.PancakeUtils.authorizeUser;
  */
 public class AuthorizedDeliveryService implements DeliveryService {
 
-    private static final String SERVICE_NAME = "delivery";
+    private static final String DELIVERY_RESOURCE_NAME = "delivery";
     private final DeliveryService deliveryService;
     private final AuthenticationService authenticationService;
 
@@ -54,7 +54,7 @@ public class AuthorizedDeliveryService implements DeliveryService {
     @Override
     public Map<UUID, DeliveryInfo> viewCompletedOrders(User user) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeUser(user, SERVICE_NAME, Privileges.READ.getCode());
+        authorizeUser(user, DELIVERY_RESOURCE_NAME, Privileges.READ.getCode());
         return deliveryService.viewCompletedOrders(user);
     }
 
@@ -68,7 +68,7 @@ public class AuthorizedDeliveryService implements DeliveryService {
     @Override
     public void acceptOrder(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeUser(user, SERVICE_NAME, Privileges.CREATE.getCode());
+        authorizeUser(user, DELIVERY_RESOURCE_NAME, Privileges.CREATE.getCode());
         deliveryService.acceptOrder(user, orderId);
     }
 
@@ -82,7 +82,7 @@ public class AuthorizedDeliveryService implements DeliveryService {
     @Override
     public void sendForTheDelivery(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeUser(user, SERVICE_NAME, Privileges.UPDATE.getCode());
+        authorizeUser(user, DELIVERY_RESOURCE_NAME, Privileges.UPDATE.getCode());
         deliveryService.sendForTheDelivery(user, orderId);
     }
 }

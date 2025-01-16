@@ -15,7 +15,7 @@ import static org.pancakelab.util.PancakeUtils.authorizeUser;
  * This decorator class ensures that only authenticated and authorized users can access the kitchen service.
  */
 public class AuthorizedKitchenService implements ChefService {
-    public static final String SERVICE_NAME = "kitchen";
+    public static final String KITCHEN_RESOURCE_NAME = "kitchen";
     private final ChefService chefService;
     private final AuthenticationService authenticationService;
 
@@ -53,7 +53,7 @@ public class AuthorizedKitchenService implements ChefService {
     @Override
     public Map<UUID, Map<PancakeRecipe, Integer>> viewOrders(User user) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeUser(user, SERVICE_NAME, Privileges.READ.getCode());
+        authorizeUser(user, KITCHEN_RESOURCE_NAME, Privileges.READ.getCode());
         return chefService.viewOrders(user);
     }
 
@@ -67,7 +67,7 @@ public class AuthorizedKitchenService implements ChefService {
     @Override
     public void acceptOrder(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeUser(user, SERVICE_NAME, Privileges.CREATE.getCode());
+        authorizeUser(user, KITCHEN_RESOURCE_NAME, Privileges.CREATE.getCode());
         chefService.acceptOrder(user, orderId);
     }
 
@@ -81,7 +81,7 @@ public class AuthorizedKitchenService implements ChefService {
     @Override
     public void notifyOrderCompletion(User user, UUID orderId) throws PancakeServiceException {
         authenticateUser(user);
-        authorizeUser(user, SERVICE_NAME, Privileges.UPDATE.getCode());
+        authorizeUser(user, KITCHEN_RESOURCE_NAME, Privileges.UPDATE.getCode());
         chefService.notifyOrderCompletion(user, orderId);
     }
 }
